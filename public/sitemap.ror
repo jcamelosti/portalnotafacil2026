@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:ror="http://rorweb.com/0.1/">
+  <channel>
+    <title>Portal Nota Fácil - Emissor de Notas Fiscais</title>
+    <link>https://portalnotafacil.com.br/</link>
+    <description>ROR sitemap feed : https://portalnotafacil.com.br/</description>
+    <lastBuildDate>Wed, 14 Dec 2022 09:29:59 GMT</lastBuildDate>
+    <generator>A1 Sitemap Generator</generator>
+    <ror:about>sitemap</ror:about>
+    <ror:type>SiteMap</ror:type>
+  </channel>
+</rss>

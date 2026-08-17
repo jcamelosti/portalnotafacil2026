@@ -1,0 +1,603 @@
+<?php
+
+namespace App\Http\Controllers\Empresas;
+
+use App\Http\Controllers\Controller;
+use App\Models\Cliente;
+use App\Models\CreditoUser;
+use App\Models\Empresa;
+use App\Models\Fatura;
+use App\Models\FaturaItem;
+use App\Models\HistoricoCredito;
+use App\Models\License;
+use App\Models\PlanoVariacao;
+use App\Models\Servico;
+use App\Utilitarios\Utilitarios;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Session;
+use function PHPUnit\Framework\isNull;
+
+use function PHPSTORM_META\map;
+
+class LicencasController extends Controller
+{
+    private $empresaModel;
+    private $variacaoPlanoModel;
+    private $faturaModel;
+    private $faturaItemModel;
+    private $licenseModel;
+    
+    public function __construct(
+        Empresa $empresaModel,
+        License $licenseModel,
+        PlanoVariacao $planoVariacao,
+        Fatura $faturaModel,
+        FaturaItem $faturaItemModel
+    )
+    {
+        $this->empresaModel = $empresaModel;
+        $this->licenseModel = $licenseModel;
+        $this->variacaoPlanoModel = $planoVariacao;
+        $this->faturaModel = $faturaModel;
+        $this->faturaItemModel = $faturaItemModel;
+    }
+
+    public function renovacao($id){
+        $empresaValidar = $this->empresaModel
+            ->find($id);
+
+        /*$qtdEmpresasUser = $this->empresaModel->where('user_id', Auth::user()->id)->count();
+        $credito = CreditoUser::where('user_id', Auth::user()->id)->first();
+        
+        if($qtdEmpresasUser > 1 && (int)auth()->user()->can_insert_credit == 1){
+            if(!is_null($credito) && ($credito->credito <= 0.01) ){
+                session()->flash('danger', 'Usuários com mais de uma empresa cadastrada em sua conta, deve utilizar a opção de "Inserir Crédito" presente no menu Lateral Esquerdo e Renovar a Licença da Empresa utilizando os Créditos.');
+                return redirect()->route('empresas.index');     
+            }
+        }*/
+        
+        if($empresaValidar->user_id != Auth::user()->id){
+            session()->flash('danger', 'Somente o Administrador da Empresa poderá renovar a licença. Se a empresa foi compartilhada com você, não é possível a renovação.');
+            return redirect()->route('empresas.index');
+        }        
+
+        $empresa = $this->empresaModel
+            ->where('user_id', Auth::user()->id)
+            ->find($id);
+
+        Session::put('empresa-renovar-licenca', $id);
+
+        $plano = $empresa->plano()->first();
+
+        $variacaoPlanos = $this->variacaoPlanoModel
+            ->where('exibir_site', 1)
+            ->where('plano_id', $empresa->plano_id)
+            ->orderBy('fator_vigencia', 'ASC')
+            ->get();
+
+        $cores = [
+            0 => 'indigo',
+            1 => 'green',
+            2 => 'orange',
+            3 => 'blue',
+            4 => 'red',
+            5 => 'yellow'
+        ];
+
+        shuffle($cores);
+
+        return view('licenciamento.listar_variacao_plano', [
+            'empresa' => $empresa,
+            'plano' => $plano,
+            'variacaoPlanos' => $variacaoPlanos,
+            'cores' => $cores
+        ]);
+    }
+
+    public function gerarOrdemPagamento($planoId)
+    {
+        $planoId = base64_decode($planoId);    
+        $empresaId = Session::get('empresa-renovar-licenca');
+       
+        $credito = CreditoUser::where('user_id', Auth::user()->id)->first();
+
+        if(!is_null($credito) && ($credito->credito > 0.0) ){
+            $valorPlano = $this->variacaoPlanoModel->find($planoId);
+            $empresa = $this->empresaModel->find($empresaId);
+            $l = $this->licenseModel
+                ->where('empresa_id', $empresaId)
+                ->orderBy('id', 'DESC')
+                ->first();
+            
+            if ((float)$credito->credito >= (float)$valorPlano->valor) {
+                $estaVencido = Carbon::parse($l->validate)->isPast();
+        
+                if ($estaVencido) {
+                    $dataRenovacao = Carbon::now()->format('Y-m-d');
+                    $dataVencimento = Carbon::createFromFormat('Y-m-d', $dataRenovacao)
+                        ->addDay($valorPlano->fator_vigencia)//->subDay(1)
+                        ->format('Y-m-d');
+                    Utilitarios::sendMessage('Liberação Com Crédito - Vencida - Licença da empresa: ' . $empresa->razao_social . ' Plano '. $valorPlano->descricao  .' foi de ' . $l->validate_pt_br . ' para ' . $dataVencimento);
+                } else {
+                    $dataRenovacao = $l->validate;
+                    $dataVencimento = Carbon::createFromFormat('Y-m-d', $dataRenovacao)
+                        ->addDay($valorPlano->fator_vigencia)//->subDay(1)
+                        ->format('Y-m-d');
+
+                    Utilitarios::sendMessage('Liberação com Crédito - Não Vencida - Licença da empresa: ' . $empresa->razao_social . ' Plano '. $valorPlano->descricao  .' foi de ' . $l->validate_pt_br . ' para ' . $dataVencimento);
+                }     
+
+                $l->validate = $dataVencimento;
+                $l->save();
+
+                $credito->credito -= $valorPlano->valor;
+                HistoricoCredito::create([
+                    'user_id' => $credito->user_id,
+                    'valor' => $valorPlano->valor,
+                    'operacao' => 'S' //SUBTRAÇÃO DE CRÉDITO
+                ]);
+
+                Utilitarios::sendMessage('Usuário ' . Auth::user()->name . ' tem saldo disponível de  R$ '. number_format(($credito->credito), 2, ',', '.'));
+
+                $credito->save();
+
+                session()->flash('message', 'Licença Renovada com Sucesso.');
+                return redirect()->route('empresas.index', ['empresa_id' => $empresa->id]);
+            }else{
+                session()->flash('danger', 'Nâo foi possível renovar a licença pois o saldo insuficiente.');
+                return redirect()->back();
+            }
+        }else{    
+            $valorPlano = $this->variacaoPlanoModel->find($planoId);
+            $empresa = $this->empresaModel->find($empresaId);
+            $qtdEmpresasUser = $this->empresaModel->where('user_id', Auth::user()->id)->count();
+
+            if($qtdEmpresasUser > 1 && (int)auth()->user()->can_insert_credit == 1){
+                session()->flash('danger', 'Usuários com mais de uma empresa cadastrada em sua conta, deve utilizar a opção de "Inserir Crédito" presente no menu Lateral Esquerdo e Renovar a Licença da Empresa utilizando os Créditos.');
+                return redirect()->back();               
+            }         
+                       
+            //Gerando fatura e item da fatura
+            $verificarSeHaFatura = $this->faturaModel
+                ->where('empresa_id', $empresa->id)
+                ->where('fatura_status_id', 1)
+                ->where('total', $valorPlano->valor)
+                ->orderBy('id', 'DESC')
+                ->first();
+
+            $cores = [
+                0 => 'indigo',
+                1 => 'green',
+                2 => 'orange',
+                3 => 'blue',
+                4 => 'red',
+                5 => 'yellow'
+            ];
+
+            shuffle($cores);
+
+            if(!is_null($verificarSeHaFatura)){
+                return view('licenciamento.payment_method')->with([
+                    'fatura' => $verificarSeHaFatura,
+                    'cores' => $cores
+                ]);
+            }else{
+                $fatura = $this->faturaModel->create([
+                    'user_id' => $empresa->user_id,
+                    'empresa_id' => $empresa->id,
+                    'fatura_status_id' => 1,
+                    'total' => $valorPlano->valor,
+                    'num_doc' => $this->faturaModel->getNumDoc(),
+                ]);
+
+                $faturaItem = $this->faturaItemModel->create([
+                    'plano_id' => $valorPlano->plano_id,
+                    'variacao_plano_id' => $valorPlano->id,
+                    'fatura_id' => $fatura->id,
+                    'valor' => $valorPlano->valor,
+                    'qtd' => 1
+                ]);
+
+                //gerando servico para emitir nota fiscal nacional mei
+                //não emita para contabilidade, depois emito manualmente para não gerar confusão de notas fiscais de serviço com a contabilidade
+                try{
+                    if (!collect([56,78,79,86])->contains(auth()->id())) {
+                        Servico::create([
+                            'empresa_id' => 1, //id da minha empresa 24685881000190
+                            'fatura_id' => $fatura->id,
+                            'empresa_cliente_id' => $empresa->id,
+                            'local_prestacao' => 5201108, //Anápolis por Default
+                            'cod_trib_nacional_id' => 111,
+                            'nbs_id' => 916,
+                            'valor_servico' => $valorPlano->valor,
+                            'descricao' => 'Ref. Licença de Uso Sistema Emissor Notas Fiscais - Período Liberação: ' . $valorPlano->descricao
+                        ]);
+                    }
+                }catch(Exception $e){
+                    //
+                }
+                
+                if ($fatura->id == null && $faturaItem == null) {
+                    session()->flash('danger', 'Houve erro na Operação. Tente Novamente.');
+                    return redirect()->back();
+                }
+
+                return view('licenciamento.payment_method')->with([
+                    'fatura' => $fatura,
+                    'cores' => $cores
+                ]);
+            }
+        }
+    }
+
+    /* Versão gerar Pix com Safe2Pay - Abandonada pois há taxas de 1% - adotado mercado pago em 26-12-2022 */
+    /*public function gerarPix($faturaId){
+        try{
+            $fatura = $this->faturaModel
+                ->find(base64_decode($faturaId));
+
+            $plano = $fatura->items()
+                ->first()
+                ->plano()
+                ->first();
+
+            $varPlano = $fatura->items()
+                ->first()
+                ->variacaoPlano()
+                ->first();
+
+            $empresa = $fatura->empresa()->first();
+            $cliente = $empresa
+                ->responsavel()
+                ->first()
+                ->cliente()
+                ->first();
+
+            if(is_null($cliente)){
+                $cliente = new Cliente();
+                $cliente->cpf_cnpj = $empresa->cpf_cnpj;
+                $cliente->telefone1 = $empresa->telefone1;
+                $cliente->cep = $empresa->cep;
+                $cliente->endereco = $empresa->logradouro;
+                $cliente->numero = $empresa->numero;
+                $cliente->complemento = $empresa->complemento;
+                $cliente->bairro = $empresa->bairro;
+                $cliente->cidade_id = $empresa->cidade_id;
+            }
+
+            set_time_limit(20000);
+            ini_set("max_execution_time", 20000);
+
+            //PIX DINAMICO
+            $sendData = [
+                'IsSandbox' => false,
+                'Application' => 'Portal Nota Fácil',
+                'Vendor' => 'Portal Nota Fácil',
+                'PaymentMethod' => '6',
+                "Reference"     => $fatura->num_doc,
+                "CallbackUrl"   => 'https://emissor.portalnotafacil.com.br/retorno/safe2pay',
+                'Customer' => [
+                    'Name' => ucwords(strtolower(Auth::user()->name)),
+                    'Identity' => preg_replace('/[^0-9]/', '', $cliente->cpf_cnpj),
+                    'Phone' => preg_replace('/[^0-9]/', '', $cliente->telefone1),
+                    'Email' => Auth::user()->email,
+                    'Address' =>
+                        [
+                            'ZipCode' => preg_replace('/[^0-9]/', '', $cliente->cep),
+                            'Street' => $cliente->endereco,
+                            'Number' => $cliente->numero,
+                            'Complement' => $cliente->complemento,
+                            'District' => $cliente->bairro,
+                            'CityName' => $cliente->cidade()->first()->municipio,
+                            'StateInitials' => $cliente->cidade()->first()->estado()->first()->sigla,
+                            'CountryName' => 'Brasil',//Fixo
+                        ],
+                ],
+                'Products' => [
+                    [
+                        'Code' => '001',
+                        'Description' => 'PLANO: ' . $plano->plano_nome . '| VARIAÇÃO: ' . $varPlano->descricao,
+                        'UnitPrice' => number_format($fatura->total,2),
+                        'Quantity' => 1,
+                    ],
+                ],
+            ];
+            
+            $pix = json_encode($sendData);
+            
+            $opts = array(
+                'http'=>array(
+                    'method'=>"POST",
+                    'header'=>"X-API-KEY: 81A153D2CF054DB3B67906F533A1BC58\r\n" .
+                        "Content-type: application/json\r\n",
+                    'content'=> $pix
+                )
+            );
+            $context = stream_context_create($opts);
+            $result = file_get_contents('https://payment.safe2pay.com.br/v2/Payment', false, $context);
+
+            if ($result === FALSE) {
+                session()->flash('danger', 'Não foi possível Gerar o PIX.');
+                return redirect()->route('area-cliente');
+            }
+            $retorno = json_decode($result);
+
+            if(isset($retorno->HasError) && $retorno->HasError){
+                session()->flash('danger', $retorno->Error);
+                return redirect()->route('area-cliente');
+            }
+            
+            $fatura->transacao_id = $retorno->ResponseDetail->IdTransaction;
+            $fatura->safe2pay_pix_data = json_encode($retorno);
+            $fatura->save();
+
+            //Utilitarios::sendMessage('Cliente Portal Nota Fácil ' . $empresa->razao_social . ' Solicitou Renovação de Licença ' . $varPlano->descricao);
+        
+            return view('licenciamento.chave_pix', compact([
+                'retorno',
+                'fatura'
+            ]));
+        }catch(Exception $e){
+            session()->flash('danger', 'Não foi possível gerar a Chave PIX. Tente Novamente');
+            return redirect()->route('area-cliente');
+        }
+    }*/
+
+    /* Gerando Pagamento Via Mercado Pago */
+    public function gerarPix($faturaId){
+        try{
+            $fatura = $this->faturaModel
+                ->find(base64_decode($faturaId));
+
+            $plano = $fatura->items()
+                ->first()
+                ->plano()
+                ->first();
+
+            $varPlano = $fatura->items()
+                ->first()
+                ->variacaoPlano()
+                ->first();
+
+            $empresa = $fatura->empresa()->first();
+            
+            $cliente = $empresa
+                ->responsavel()
+                ->first()
+                ->cliente()
+                ->first();
+
+            $qtdEmpresasUser = $this->empresaModel->where('user_id', Auth::user()->id)->count();
+            if($qtdEmpresasUser > 1 && (int)auth()->user()->can_insert_credit == 0){
+                $cliente = null;
+            }
+
+            if(is_null($cliente)){
+                $cliente = new Cliente();
+                $cliente->razao_social = $empresa->razao_social;
+                $cliente->cpf_cnpj = $empresa->cpf_cnpj;
+                $cliente->telefone1 = $empresa->telefone1;
+                $cliente->cep = $empresa->cep;
+                $cliente->endereco = $empresa->logradouro;
+                $cliente->numero = $empresa->numero;
+                $cliente->complemento = $empresa->complemento;
+                $cliente->bairro = $empresa->bairro;
+                $cliente->cidade_id = $empresa->cidade_id;
+            }
+            
+            $dados = [
+                'Customer' => [
+                    'Name' => ucwords(strtolower($cliente->razao_social)),
+                    'Identity' => preg_replace('/[^0-9]/', '', $cliente->cpf_cnpj),
+                    'Phone' => preg_replace('/[^0-9]/', '', $cliente->telefone1),
+                    'Email' => Auth::user()->email,
+                    'Address' =>
+                        [
+                            'ZipCode' => preg_replace('/[^0-9]/', '', $cliente->cep),
+                            'Street' => $cliente->endereco,
+                            'Number' => isNull($cliente->numero) ? '0' : $cliente->numero,
+                            'Complement' => $cliente->complemento,
+                            'District' => $cliente->bairro,
+                            'CityName' => $cliente->cidade()->first()->municipio,
+                            'StateInitials' => $cliente->cidade()->first()->estado()->first()->sigla,
+                            'CountryName' => 'Brasil',//Fixo
+                        ],
+                ],
+                'produto' => [
+                    'descricao' => 'PLANO: ' . $plano->plano_nome . '| VARIAÇÃO: ' . $varPlano->descricao . ' Empresa ID: ' . $empresa->id,
+                    'valor_unitario' => number_format($fatura->total,2),
+                ],
+            ];
+            
+            if(empty($fatura->qrcode_digitavel)){
+                $retorno = $this->cobrarViaPixMercadoPago($dados);
+
+                if($retorno['success']){
+                    $ret = $retorno;
+                    $retorno = $retorno['data'];
+    
+                    $fatura->transacao_id = $ret['referencia'];
+                    $fatura->safe2pay_pix_data = '-';
+                    $fatura->qrcode_digitavel = $retorno->point_of_interaction->transaction_data->qr_code;
+                    $fatura->qrcode_base64 = $retorno->point_of_interaction->transaction_data->qr_code_base64;
+                    $fatura->save();    
+                    
+                    return view('licenciamento.chave_pix', compact([
+                        'fatura'
+                    ]));
+                }else{
+                    session()->flash('info', 'O seu pedido não pode ser processado. Confira as informações do pedido.');
+                    return redirect()->route('area-cliente');
+                }
+            }else{
+                return view('licenciamento.chave_pix', compact([
+                    'fatura'
+                ]));
+            }           
+        }catch(Exception $e){
+            session()->flash('danger', 'Não foi possível gerar a Chave PIX. Tente Novamente');
+            return redirect()->route('area-cliente');
+        }
+    }
+
+
+    /*
+        Cobrança via PIX MercadoPago
+    */
+    private function cobrarViaPixMercadoPago($dados)
+    {
+        $retorno = null;
+
+        $nome = $dados['Customer']['Name'];
+        $nomeArr = explode(' ', ucwords(strtolower($nome)));
+        $nome = $nomeArr[0];
+        unset($nomeArr[0]);
+
+        $payment = [
+            "notification_url"=> "https://nfse.portalnotafacil.com.br/retorno/mercadopago",
+            "transaction_amount" => (float)number_format($dados['produto']['valor_unitario'],2),
+            "description" => $dados['produto']['descricao'],
+            "payment_method_id" => "pix",
+            "payer" => [
+                "email" => $dados['Customer']['Email'],
+                "first_name" => $nome,
+                "last_name" => implode(' ', $nomeArr),
+                "identification" => [
+                    "type" => strlen(preg_replace('/[^0-9]/', '', $dados['Customer']['Identity'])) == 14 ? "CNPJ": "CPF",
+                    "number" => preg_replace('/[^0-9]/', '', $dados['Customer']['Identity'])
+                ],
+                "address" => [
+                    "zip_code" => preg_replace('/[^0-9]/', '', $dados['Customer']['Address']['ZipCode']),
+                    "street_name" => $dados['Customer']['Address']['Street'],
+                    "street_number" => $dados['Customer']['Address']['Number'],
+                    "neighborhood" =>  $dados['Customer']['Address']['District'],
+                    "city" => $dados['Customer']['Address']['CityName'],
+                    "federal_unit" => $dados['Customer']['Address']['StateInitials'],
+                ]
+            ]
+        ];
+
+        //Log::info($payment);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://api.mercadopago.com/v1/payments');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payment));
+
+        $headers = array();
+        $headers[] = 'Accept: application/json';
+        $headers[] = 'Content-Type: application/json';
+        $headers[] = 'Authorization: Bearer '. getenv('MERCADOPAGO_ACCESS_TOKEN');
+        
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        $result = curl_exec($ch);
+        if (curl_errno($ch)) {
+            echo 'Error:' . curl_error($ch);
+        }
+        //curl_close($ch);
+
+        $result= json_decode($result);
+
+        if(isset($result->id)){
+            $retorno =  [
+                'success' => TRUE,
+                'data' => $result,
+                'referencia' => $result->id
+            ];
+        }else{
+            $retorno =  [
+                'success' => FALSE,
+                'data' => $result,
+                'referencia' => null
+            ];
+        }
+
+        return $retorno;
+    }
+
+    /* Gerando Cobrança Via InfinitePay via PIX */
+    /*public function gerarPix($faturaId){
+        $faturaId = base64_decode($faturaId);
+
+        $fatura = $this->faturaModel
+                ->find($faturaId);
+
+        $plano = $fatura->items()
+            ->first()
+            ->plano()
+            ->first();
+
+        $varPlano = $fatura->items()
+            ->first()
+            ->variacaoPlano()
+            ->first();
+
+        $empresa = $fatura->empresa()->first();
+
+        $cliente = $empresa
+            ->responsavel()
+            ->first()
+            ->cliente()
+            ->first();
+
+        $qtdEmpresasUser = $this->empresaModel->where('user_id', Auth::user()->id)->count();
+        if($qtdEmpresasUser > 1 && (int)auth()->user()->can_insert_credit == 0){
+            $cliente = null;
+        }
+
+        if(is_null($cliente)){
+            $cliente = new Cliente();
+            $cliente->razao_social = $empresa->razao_social;
+            $cliente->cpf_cnpj = $empresa->cpf_cnpj;
+            $cliente->telefone1 = $empresa->telefone1;
+            $cliente->cep = $empresa->cep;
+            $cliente->endereco = $empresa->logradouro;
+            $cliente->numero = $empresa->numero;
+            $cliente->complemento = $empresa->complemento;
+            $cliente->bairro = $empresa->bairro;
+            $cliente->cidade_id = $empresa->cidade_id;
+        }
+
+        $centavos = (int) round($fatura->total * 100);
+
+        $url = 'https://api.infinitepay.io/invoices/public/checkout/links';
+        $dados =  [
+            "handle" => "josue-24685881-9n8",
+            "items" => [
+                [
+                    "quantity" => 1,
+                    "price" => $centavos, //em centavos
+                    "description" => 'RENOVAÇÃO LICENÇA: ' . $varPlano->descricao,
+                ]
+            ],
+            'customer' => [
+                'name' => $cliente->razao_social,
+                'email' => auth()->user()->email,
+                'phone_number' => '+55'. $cliente->telefone1
+            ],
+            'redirect_url' => "https://nfse.portalnotafacil.com.br/c/pagamento-realizado",
+            'webhook_url'=> 'https://nfse.portalnotafacil.com.br/webhook/infinitepay/capture',
+            'address' => [
+                "cep" => $cliente->cep,
+                "street"=> $cliente->endereco,
+                "neighborhood"=> $cliente->bairro,
+                "number"=> $cliente->numero,
+                "complement"=> $cliente->complemento. ' - ' . $empresa->cidade()->first()->municipio .  '/' . $empresa->cidade()->first()->estado->sigla,
+            ],
+            "order_nsu" => $fatura->num_doc,
+        ];
+
+        $response = Http::asJson()->post($url, $dados);
+        $result = $response->json();
+
+        return redirect()->away($result['url']);
+    }*/
+}
