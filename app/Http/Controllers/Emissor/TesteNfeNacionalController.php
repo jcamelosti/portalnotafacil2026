@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Emissor;
 
 use App\Http\Controllers\Controller;
 use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
+use JCamelo\NfseNacionalLib\Factories\DPSFactory;
 use JCamelo\NfseNacionalLib\Services\NFSeService;
 
 class TesteNfeNacionalController extends Controller
@@ -22,12 +23,12 @@ class TesteNfeNacionalController extends Controller
         */
         
         //Cloud Fender
-        $consultarDadosCadastraisDTO = $this->nfse->consultarDadosCadastrais(
+        /*$consultarDadosCadastraisDTO = $this->nfse->consultarDadosCadastrais(
             'issnet',
             361, // 🔥 empresa dinâmica - referencia para buscar certificado digital,
             '22645177000188', // 🔥 cnpj dinâmico
             '4048539' // 🔥 inscrição municipal dinâmica
-        );
+        );*/
 
         //Terceirize
         /*$consultarDadosCadastraisDTO = $this->nfse->consultarDadosCadastrais(
@@ -47,7 +48,7 @@ class TesteNfeNacionalController extends Controller
         //dd($consultarDadosCadastraisDTO);
         
         //gerando xml DPS
-        /*$dataSN = new DPSDataDTO(
+        $dataSN = new DPSDataDTO(
             cnpjPrestador: '22645177000188',
             imPrestador: '4048539',
 
@@ -64,16 +65,18 @@ class TesteNfeNacionalController extends Controller
             opSimpNac: 3,
             regApTribSN: 1,
             numDps: 6
-        );*/
+        );
 
         //$simplesNacionalDPS = DPSFactory::make($dataSN);
 
         //funcionando normalmente
-        /*$response = $this->nfse->gerarNfse(
+        $response = $this->nfse->gerarNfse(
             'issnet',
             $dataSN,
             361 // empresaId
-        );*/
+        );
+
+        dd($response);
 
         //consultarUrlNfse - indisponivel em 08/05/2026
         //$this->nfse->consultarUrlNfse('issnet', 361, '22645177000188', '4048539', 1, '2026-04-20', '2026-04-30');

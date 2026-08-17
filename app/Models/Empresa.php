@@ -49,7 +49,9 @@ class Empresa extends Model
         'natureza_juridica',
         'serie_nota',
         'nbs_id',
-        'num_ultimo_dps'
+        'num_ultimo_dps',
+        'sigla_provedor',
+        'ambiente_emissao'
     ];
 
     /*public function getCepAttribute($value)
@@ -179,6 +181,21 @@ class Empresa extends Model
             4 => 'Cooperativa',
             5 => 'Microempresário Individual (MEI)',
             6 => 'Microempresa ou Empresa de Pequeno Porte (ME EPP)',
+        ];
+    }
+
+    public static function getProvedorEmissao(){
+        return [
+            '' => 'Nenhum Provedor Selecionado',
+            'issnet' => 'Nota Control - ISSNET',
+        ];
+    }
+
+    public static function getAmbienteEmissao(){
+        return [
+            '' => 'Nenhum Ambiente Selecionado',
+            'HOMOLOGACAO' => 'Homologação(Testes)',
+            'PRODUCAO' => 'Produção'
         ];
     }
 }

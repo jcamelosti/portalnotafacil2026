@@ -72,7 +72,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
         Route::get('/', [\App\Http\Controllers\Emissor\DashboardController::class, 'dashboard'])->name('dashboard');
         
         Route::group(['prefix' => 'emissor'], function () {
-            /*Route::get('nota/listagem', [\App\Http\Controllers\Emissor\NotaController::class, 'index'])->name('nota.index');
+            Route::get('nota/listagem', [\App\Http\Controllers\Emissor\NotaController::class, 'index'])->name('nota.index');
             Route::get('nota/criar', [\App\Http\Controllers\Emissor\NotaController::class, 'create'])->name('nota.emitir');
             Route::post('nota/salvar', [\App\Http\Controllers\Emissor\NotaController::class, 'store'])->name('notas.store');
             
@@ -90,9 +90,10 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             Route::get('nota/substuicao/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'substituirNota'])->name('notas.substitucao');
             Route::post('nota/substituicao/salvar', [\App\Http\Controllers\Emissor\NotaController::class, 'store_substituicao'])->name('notas.store-substituicao');
 
-            Route::get('teste/nfse-nacional', [\App\Http\Controllers\Emissor\NfseNacional::class, 'teste']);*/
+            Route::get('teste/nfse-nacional', [\App\Http\Controllers\Emissor\NfseNacional::class, 'teste']);
+
+            //novas rotas - 17/08/2026
             Route::get('nfse-nacional/testes', [\App\Http\Controllers\Emissor\TesteNfeNacionalController::class, 'teste']);
-            
         });
 
         Route::group(['prefix' => 'emissor-nacional-mei'], function () {

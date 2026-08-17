@@ -4,12 +4,14 @@ namespace JCamelo\NfseNacionalLib\Services;
 use Illuminate\Support\Facades\Log;
 use JCamelo\NfseNacionalLib\DTO\CadastroDTO;
 use JCamelo\NfseNacionalLib\Manager\CertificateManager;
+use JCamelo\NfseNacionalLib\Manager\WebServicesManager;
 
 class ISSNetService
 {
      public function __construct(
         private CertificateManager $certManager,
-        private SoapTransport $transport
+        private SoapTransport $transport,
+        private WebServicesManager $wsManager
     ) {}
        
     public function gerarNfse(string $xml, int $empresaId)
@@ -42,16 +44,18 @@ class ISSNetService
     {
         $soap = SoapBuilder::build('ConsultarDadosCadastrais', $xml);
         $cert = $this->certManager->getCertificate($empresaId);
-
+        //Obter o Endpoint correto se produção ou homologação conforme campo ambiente_emissao do registro da empresa
+        $ws = $this->wsManager->getWsUrl($empresaId);
+        
         $response = $this->transport->send(
-            config('nfse.url'),
+            $ws['url'],
             config('nfse.uri'),
             'ConsultarDadosCadastrais',
             $soap,
             $cert
         );
         $cadastroXml = $this->extractCadastro($response);
-        dd($cadastroXml);
+        
         return $this->toDTO($cadastroXml);
     }
 

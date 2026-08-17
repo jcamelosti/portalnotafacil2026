@@ -236,6 +236,9 @@ class EmpresasController extends Controller
         }
 
         $regimeEspecialTributacaoList = $this->empresaModel->getRegimeEspecialTributacao();
+
+        $provedores = Empresa::getProvedorEmissao();
+        $ambientes_emissao = Empresa::getAmbienteEmissao();
                      
         return view('admin.empresas.editar')->with([
             'estados' => $estados,
@@ -249,7 +252,9 @@ class EmpresasController extends Controller
             'planos' => $planos,
             'usuarios' => $usuarios,
             'reg_esp_trib' => $regimeEspecialTributacaoList,
-            'nbs_list' => $nbs_list            
+            'nbs_list' => $nbs_list,
+            'provedores' => $provedores,
+            'ambientes_emissao' => $ambientes_emissao           
         ]);
     }
 

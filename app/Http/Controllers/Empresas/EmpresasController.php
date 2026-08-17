@@ -317,7 +317,10 @@ class EmpresasController extends Controller
         }else{
             $nbs_list = [];
         }
-        
+
+        $provedores = Empresa::getProvedorEmissao();
+        $ambientes_emissao = Empresa::getAmbienteEmissao();
+
         return view('empresas.editar')->with([
             'estados' => $estados,
             'empresa' => $empresa,
@@ -328,7 +331,9 @@ class EmpresasController extends Controller
             'atividades' => $atividades,
             'cnaes' => $cnaes,
             'reg_esp_trib' => $regimeEspecialTributacaoList,
-            'nbs_list' => $nbs_list
+            'nbs_list' => $nbs_list,
+            'provedores' => $provedores,
+            'ambientes_emissao' => $ambientes_emissao           
         ]);
     }
 
@@ -516,8 +521,15 @@ class EmpresasController extends Controller
                 return redirect()->route('empresas.edit', $empresa->id);
             }
 
-            $dados = $this->consultarDadosCadastrais($empresa->cpf_cnpj, $empresa->inscricao_municipal);
+            //$dados = $this->consultarDadosCadastrais($empresa->cpf_cnpj, $empresa->inscricao_municipal);
             //Log::info($dados);
+            
+            $consultarDadosCadastraisDTO = $this->nfse->consultarDadosCadastrais(
+                $empresa->sigla_provedor,
+                $empresaId, // 🔥 empresa dinâmica - referencia para buscar certificado digital,
+                $empresa->cpf_cnpj, // 🔥 cnpj dinâmico
+                $empresa->inscricao_municipal // 🔥 inscrição municipal dinâmica
+            );
                         
             if(isset($dados['error'])){
                 session()->flash('danger', $dados['message']);
@@ -529,7 +541,7 @@ class EmpresasController extends Controller
                 }
             }
             
-            if(!isset($dados['Atividades']['Atividade']['CodigoTributacaoMunicipio'])){
+            /*if(!isset($dados['Atividades']['Atividade']['CodigoTributacaoMunicipio'])){
                 foreach ($dados['Atividades']['Atividade'] as $atividade) {
                     $empresaAtividade = new EmpresaAtividade();
                     $empresaAtividade->insere([
@@ -587,14 +599,18 @@ class EmpresasController extends Controller
             }
 
             $empresa->dados_cadastrais = json_encode($dados);
-            $empresa->save();
+            $empresa->save();*/
 
-            DB::statement("
+            /*DB::statement("
                 UPDATE empresa_cnaes AS e
                 JOIN cnae_lc AS c ON e.codigo_cnae = c.cnae
                 SET e.descricao_cnae = c.descricao_cnae
                 WHERE e.empresa_id = ?
-            ", [$empresaId]);
+            ", [$empresaId]);*/
+
+            $empresa->dados_cadastrais = json_encode($consultarDadosCadastraisDTO);
+            $empresa->save();
+            
         }catch(\Exception $e){
             dd($e->getMessage());
         }
