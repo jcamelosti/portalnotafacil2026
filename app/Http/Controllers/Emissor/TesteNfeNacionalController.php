@@ -67,16 +67,15 @@ class TesteNfeNacionalController extends Controller
             numDps: 6
         );
 
-        //$simplesNacionalDPS = DPSFactory::make($dataSN);
+        /*$simplesNacionalDPS = DPSFactory::make($dataSN);
+        dd($simplesNacionalDPS);*/
 
         //funcionando normalmente
-        $response = $this->nfse->gerarNfse(
+        /*$response = $this->nfse->gerarNfse(
             'issnet',
             $dataSN,
             361 // empresaId
-        );
-
-        dd($response);
+        );*/
 
         //consultarUrlNfse - indisponivel em 08/05/2026
         //$this->nfse->consultarUrlNfse('issnet', 361, '22645177000188', '4048539', 1, '2026-04-20', '2026-04-30');

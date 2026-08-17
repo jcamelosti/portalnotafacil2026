@@ -73,13 +73,15 @@ XML;
     public function build(DPSDataDTO $data): string
     {
         $dpsId = $this->generateId($data);
+        $dataCompetencia = $data->dataCompetencia;
+        $dhEmi = $dataCompetencia . 'T00:00:00-03:00';
 
         return <<<XML
         <GerarNfseEnvio xmlns="http://www.sped.fazenda.gov.br/nfse">
             <DPS versao="1.01">
                 <infDPS Id="{$dpsId}">
-                    <tpAmb>2</tpAmb>
-                    <dhEmi>2026-05-02T10:19:01-03:00</dhEmi>
+                    <tpAmb>{$data->ambiente_emissao}</tpAmb>
+                    <dhEmi>{$dhEmi}</dhEmi>
                     <verAplic>1.01</verAplic>
                     <serie>8</serie>
                     <nDPS>{$data->numDps}</nDPS>
@@ -92,7 +94,7 @@ XML;
                         <fone>62991728787</fone>
                         <email>virlei79@gmail.com</email>
                         <regTrib>
-                            <opSimpNac>1</opSimpNac>
+                            <opSimpNac>{$data->opSimpNac}</opSimpNac>
                             <regEspTrib>0</regEspTrib>
                         </regTrib>
                     </prest>
@@ -159,14 +161,14 @@ XML;
                     </valores>
                     <IBSCBS>
                         <finNFSe>0</finNFSe>
-                        <indFinal>0</indFinal>
-                        <cIndOp>050103</cIndOp>
-                        <indDest>0</indDest>
+                        <indFinal>{$data->indFinal}</indFinal>
+                        <cIndOp>{$data->cIndOp}</cIndOp>
+                        <indDest>{$data->indDest}</indDest>
                         <valores>
                             <trib>
                                 <gIBSCBS>
-                                    <CST>000</CST>
-                                    <cClassTrib>000001</cClassTrib>
+                                    <CST>{$data->cst}</CST>
+                                    <cClassTrib>{$data->cClassTrib}</cClassTrib>
                                 </gIBSCBS>
                             </trib>
                         </valores>

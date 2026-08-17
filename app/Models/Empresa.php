@@ -51,7 +51,10 @@ class Empresa extends Model
         'nbs_id',
         'num_ultimo_dps',
         'sigla_provedor',
-        'ambiente_emissao'
+        'ambiente_emissao',
+        'regime_tributario',
+        'op_simp_nac',
+        'tp_regime_esp_trib_mun'
     ];
 
     /*public function getCepAttribute($value)
@@ -101,10 +104,10 @@ class Empresa extends Model
         return $this->hasMany(EmpresaAtividade::class, 'empresa_id', 'id');
     }
 
-    public function naturezaOperacoes()
+    /*public function naturezaOperacoes()
     {
         return $this->hasMany(EmpresaNaturezaOperacao::class, 'empresa_id', 'id');
-    }
+    }*/
 
     public function tomadores()
     {
@@ -196,6 +199,37 @@ class Empresa extends Model
             '' => 'Nenhum Ambiente Selecionado',
             'HOMOLOGACAO' => 'Homologação(Testes)',
             'PRODUCAO' => 'Produção'
+        ];
+    }
+
+    public static function getRegimeTributario(){
+        return [
+            'normal' => 'Regime Normal',
+            'simples' => 'Simples Nacional - ME/EPP',
+            //'mei' => 'MEI',
+            //'optante_pendente' => 'Optante Pendente'
+        ];
+    }
+
+
+    //preenche opSimpNac na nota
+    public static function getOpcaoSimplesNacional(){
+        return [
+            1 => 'Regime de apuração dos tributos federais e municipal pelo SN',
+			2 => 'Regime de apuração dos tributos federais pelo SN e o ISSQN pela NFS-e conforme respectiva legislação municipal do tributo',
+			3 => 'Regime de apuração dos tributos federais e municipal pela NFS-e conforme respectivas legilações federal e municipal de cada tributo'
+        ];
+    }
+
+    public static function getTiposRegimeEspecialTributacaoMunicipio(){
+        return [
+            0 => 'Nenhum',
+			1 => 'Ato Cooperado (Cooperativa)',
+			2 => 'Estimativa',
+			3 => 'Microempresa Municipal',
+			4 => 'Notário ou Registrador', 
+			5 => 'Profissional Autônomo',
+			6 => 'Sociedade de Profissionais'
         ];
     }
 }

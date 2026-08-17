@@ -305,7 +305,9 @@
         </label>
     </div>
 
-     <div class="grid grid-cols-4 gap-1">
+    <h2 class="mt-4 mb-4 text-2xl font-semibold text-blue-700">Campos importantes para NFSe Nacional</h2>
+
+    <div class="grid grid-cols-4 gap-1 mt-4">
         <label class="block text-sm">
             <span class="text-gray-700 ">Provedor de Emissão NFS-e:</span>
             {!! Form::select('sigla_provedor', $provedores
@@ -328,6 +330,49 @@
             @if ($errors->has('ambiente_emissao'))
                 <span class="text-xs text-red-600 ">
                 <strong>{ { $errors->first('ambiente_emissao') }}</strong>
+            </span>
+            @endif
+        </label>
+    </div>
+
+    <div class="grid grid-cols-4 gap-1 mt-4">
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Regime de Apuração Tributária pelo Simples Nacional:</span>
+            {!! Form::select('regime_tributario', $regimes_tributarios
+            ,$empresa->regime_tributario, ['required','class'=>'block w-full mt-1 text-sm  
+            form-select
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+            @if ($errors->has('regime_tributario'))
+                <span class="text-xs text-red-600 ">
+                <strong>{ { $errors->first('regime_tributario') }}</strong>
+            </span>
+            @endif
+        </label>
+
+        @if($empresa->regime_tributario == 'simples')
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Situação perante Simples Nacional:</span>
+            {!! Form::select('op_simp_nac', $situacao_simples_nacional
+            ,$empresa->op_simp_nac, ['required','class'=>'block w-full mt-1 text-sm  
+            form-select
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+            @if ($errors->has('op_simp_nac'))
+                <span class="text-xs text-red-600 ">
+                <strong>{ { $errors->first('op_simp_nac') }}</strong>
+            </span>
+            @endif
+        </label>
+        @endif
+
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Tipos de Regimes Especiais de Tributação Municipal:</span>
+            {!! Form::select('tp_regime_esp_trib_mun', $tipos_regime_esp_trib_mun
+            ,$empresa->tp_regime_esp_trib_mun, ['required','class'=>'block w-full mt-1 text-sm  
+            form-select
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+            @if ($errors->has('tp_regime_esp_trib_mun'))
+                <span class="text-xs text-red-600 ">
+                <strong>{ { $errors->first('tp_regime_esp_trib_mun') }}</strong>
             </span>
             @endif
         </label>

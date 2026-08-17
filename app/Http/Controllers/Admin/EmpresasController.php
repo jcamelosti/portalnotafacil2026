@@ -239,7 +239,11 @@ class EmpresasController extends Controller
 
         $provedores = Empresa::getProvedorEmissao();
         $ambientes_emissao = Empresa::getAmbienteEmissao();
-                     
+
+        $regimes_tributarios = Empresa::getRegimeTributario();//Situação perante Simples Nacional, preenche campo opSimpNac na NFSE em regTrib
+        $situacao_simples_nacional = Empresa::getOpcaoSimplesNacional();//Regime de Apuração Tributária pelo Simples Nacional, campo regApTribSN em regTrib
+        $tipos_regime_esp_trib_mun = Empresa::getTiposRegimeEspecialTributacaoMunicipio();
+
         return view('admin.empresas.editar')->with([
             'estados' => $estados,
             'empresa' => $empresa,
@@ -254,7 +258,10 @@ class EmpresasController extends Controller
             'reg_esp_trib' => $regimeEspecialTributacaoList,
             'nbs_list' => $nbs_list,
             'provedores' => $provedores,
-            'ambientes_emissao' => $ambientes_emissao           
+            'ambientes_emissao' => $ambientes_emissao,
+            'regimes_tributarios' => $regimes_tributarios,
+            'situacao_simples_nacional' => $situacao_simples_nacional,
+            'tipos_regime_esp_trib_mun' => $tipos_regime_esp_trib_mun,           
         ]);
     }
 
