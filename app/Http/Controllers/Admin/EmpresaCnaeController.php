@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\EmpresaCnae;
+//use App\Models\EmpresaCnae;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
+use stdClass;
 
 class EmpresaCnaeController extends Controller
 {
     private $cnaesModel;
 
-    public function __construct(EmpresaCnae $cnaesModel)
+    public function __construct(stdClass $cnaesModel)
     {
         $this->cnaesModel = $cnaesModel;
     }
@@ -44,7 +45,7 @@ class EmpresaCnaeController extends Controller
     public function create()
     {
         $empresaId = session()->get('empresa_id');
-        $cnae = new EmpresaCnae();
+        $cnae = new stdClass();
         $cnae->empresa_id = $empresaId;
         $cnae->principal = 2;
 

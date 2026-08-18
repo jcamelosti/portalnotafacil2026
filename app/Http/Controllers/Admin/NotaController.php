@@ -4,17 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Empresa;
-use App\Models\NotaEmitida;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class NotaController extends Controller
 {
-    private $nfseModel;
     private $empresaModel;
     
-    public function __construct(NotaEmitida $nfseModel, Empresa $empresaModel){
-        $this->nfseModel = $nfseModel;
+    public function __construct(Empresa $empresaModel){
         $this->empresaModel = $empresaModel;
     }
 
@@ -30,7 +27,7 @@ class NotaController extends Controller
      
         $campos = request()->all();
 
-        $notas = $this->nfseModel
+        /*$notas = $this->nfseModel
             //->whereMonth('created_at', '=', date('m'))
             ->where(function($query) use($campos) {
                 if(isset($campos['empresa_id']) && $campos['empresa_id'] != '0'){
@@ -38,10 +35,10 @@ class NotaController extends Controller
                 }
             })
             ->orderBy('id', 'DESC')
-            ->paginate(10);
+            ->paginate(10);*/
             
         return view('admin.notas-emitidas.index', [
-            'notas' => $notas,
+            //'notas' => $notas,
             'empresasList' => $empresasList,
             'pesquisa' => $campos
         ]);

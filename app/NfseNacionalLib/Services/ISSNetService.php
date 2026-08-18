@@ -54,6 +54,7 @@ class ISSNetService
             $soap,
             $cert
         );
+
         $cadastroXml = $this->extractCadastro($response);
         
         return $this->toDTO($cadastroXml);
@@ -106,7 +107,6 @@ class ISSNetService
 
     private function toDTO(\SimpleXMLElement $cadastro): CadastroDTO
     {
-        //dd($cadastro);
         return new CadastroDTO(
             cnpj: (string) $cadastro->CNPJ,
             im: (string) $cadastro->IM,
@@ -164,13 +164,13 @@ class ISSNetService
         if (isset($cadastro->Atividades->Atividade)) {
             foreach ($cadastro->Atividades->Atividade as $atv) {
                 $result[] = [
-                    'codigo' => (string) $atv->cTribMun,
-                    'descricao' => (string) $atv->xTribMun,
-                    'aliquota' => (float) $atv->pAliq,
+                    'cTribMun' => (string) $atv->cTribMun,
+                    'xTribMun' => (string) $atv->xTribMun,
+                    'pAliq' => (float) $atv->pAliq,
+                    'vigencia_data_inicial' => (string)$atv->Vigencias->Vigencia->DataInicial
                 ];
             }
         }
-
         return $result;
     }
 

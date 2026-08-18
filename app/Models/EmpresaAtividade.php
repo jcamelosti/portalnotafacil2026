@@ -47,7 +47,7 @@ class EmpresaAtividade extends Model
     }
 
     public function atividadesList($empresaId){
-        return [0 =>'Selecione a Atividade no Município'] + $this
+        return [null =>'Selecione a Atividade no Município'] + $this
             ->select(
                 'id',
                 DB::raw("concat(codigo_atividade, ' - ', IFNULL(descricao_atividade, '')) as field1")
@@ -60,5 +60,29 @@ class EmpresaAtividade extends Model
             ->orderBy('descricao_atividade', 'asc')
             ->pluck('field1', 'id')
             ->all();
+    }
+
+    public function atividadesByCTribMunList($empresaId){
+        return [null =>'Selecione a Atividade no Município'] + $this
+            ->select(
+                'codigo_atividade',
+                DB::raw("concat(codigo_atividade, ' - ', IFNULL(descricao_atividade, '')) as field1")
+            )
+            ->where('empresa_id', $empresaId)
+            ->where(function ($query) {
+                $query->whereNull('vigencia_final')
+                    ->orWhere('vigencia_final', '>=', now());
+            })
+            ->orderBy('descricao_atividade', 'asc')
+            ->pluck('field1', 'codigo_atividade')
+            ->all();
+    }
+
+    public function scopePorEmpresa($query, $empresaId)
+    {
+        return $query->where(
+            $query->getModel()->getTable() . '.empresa_id',
+            $empresaId
+        );
     }
 }

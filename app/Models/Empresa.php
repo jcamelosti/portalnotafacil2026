@@ -62,6 +62,16 @@ class Empresa extends Model
         return Utilitarios::formatar('cep', $value);
     }*/
 
+    public function getCidadeIdAttribute(){
+        $cidade_id = $this->attributes['cidade_id'];
+        
+        if($this->attributes['ambiente_emissao'] === 'HOMOLOGACAO'){
+            $cidade_id = '5002704'; // Se estive setado $this->attributes['ambiente_emissao'] === 'HOMOLOGACAO', em hmg só funciona com campo grande
+        }
+
+        return $cidade_id;
+    }
+
     public function getCpfCnpjFmtAttribute(){
         $doc = null;
         
@@ -94,11 +104,6 @@ class Empresa extends Model
         return (strlen($cpf_cnpj) <= 12) ? 1 : 2;
     }
 
-    public function cnaes()
-    {
-        return $this->hasMany(EmpresaCnae::class, 'empresa_id', 'id');
-    }
-
     public function atividadesEmpresa()
     {
         return $this->hasMany(EmpresaAtividade::class, 'empresa_id', 'id');
@@ -112,11 +117,6 @@ class Empresa extends Model
     public function tomadores()
     {
         return $this->hasMany(Tomador::class, 'empresa_id', 'id');
-    }
-
-    public function notasEmitidas()
-    {
-        return $this->hasMany(NotaEmitida::class, 'empresa_id', 'id');
     }
 
     public function licenca()
@@ -151,10 +151,6 @@ class Empresa extends Model
             ->orderBy('razao_social', 'asc')
             ->pluck('field1', 'id')
             ->all();
-    }
-
-    public function itemLc(){
-        return $this->belongsTo(ListaServico::class, 'item_lc_id', 'id');
     }
 
     public function getValidateLicencaAttribute()

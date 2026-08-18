@@ -7,7 +7,7 @@ use App\Models\Empresa;
 use App\Models\EmpresaCompartilhada;
 use App\Models\Fatura;
 use App\Models\License;
-use App\Models\NotaEmitida;
+//use App\Models\NotaEmitida;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

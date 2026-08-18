@@ -8,14 +8,9 @@ use Illuminate\Http\Request;
 
 use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
-use App\Models\EmpresaCnae;
-use App\Models\Fatura;
-use App\Models\FaturaItem;
 use App\Models\License;
-use App\Models\ListaServico;
 use App\Models\Municipio;
 use App\Models\Nbs;
-use App\Models\NotaEmitida;
 use App\Models\Plano;
 use App\Models\Tomador;
 use App\Models\Uf;
@@ -42,8 +37,8 @@ class EmpresasController extends Controller
 
     public function __construct(
         Empresa $empresaModel, Uf $estadoModel, 
-        Municipio $municipioModel, ListaServico $listaServicoModel,
-        EmpresaCnae $cnaeModel, EmpresaAtividade $atividadeModel,
+        Municipio $municipioModel, 
+        EmpresaAtividade $atividadeModel,
         License $licenseModel,
         Plano $planoModel,
         User $userModel,
@@ -53,8 +48,6 @@ class EmpresasController extends Controller
         $this->empresaModel = $empresaModel;
         $this->estadoModel = $estadoModel;
         $this->municipioModel = $municipioModel;
-        $this->listaServicoModel = $listaServicoModel;
-        $this->cnaeModel = $cnaeModel;
         $this->atividadeModel = $atividadeModel;
         $this->licenseModel = $licenseModel;
         $this->planoModel = $planoModel;
@@ -138,7 +131,6 @@ class EmpresasController extends Controller
     {
         $estados = $this->estadoModel->getListaEstados();
         $cidades = $this->municipioModel->municipios();
-        $servicos = $this->listaServicoModel->getListaServicos();
 
         return view('admin.empresas.inserir')->with([
             'empresa' => new Empresa(),
@@ -201,7 +193,7 @@ class EmpresasController extends Controller
     public function edit($id)
     {
         $empresa = $this->empresaModel
-            ->with(['cnaes'])
+            //->with(['cnaes'])
             ->find($id);
         
         $estados = $this->estadoModel->getListaEstados();
@@ -210,31 +202,7 @@ class EmpresasController extends Controller
         $cidades = $this->municipioModel->municipios($uf_id);
         $planos = $this->planoModel->list();
         $usuarios = $this->userModel->list();
-
-        $cnaes = $this->cnaeModel->cnaesList($empresa->id);
         $atividades = $this->atividadeModel->atividadesList($empresa->id);
-                
-        $empresaCnaePrincipalId = $empresa->empresa_cnae_id;
-        
-        //filtro items lc conforme cnae
-        $listaCnae = $this->cnaeModel->find($empresaCnaePrincipalId);
-        if(!is_null($listaCnae)){
-            $filtroLc = CnaeLc::where('cnae', $listaCnae->codigo_cnae)->get();
-            $itemLcFiltro = [];
-            foreach($filtroLc as $filter){
-                $itemLcFiltro[] = $filter->item_lc;
-            }
-            $servicos = $this->listaServicoModel->getListaServicos($itemLcFiltro);
-        }else{
-            $servicos = [];
-        }
-
-        if(!empty($empresa->item_lc_id)){
-            $nbs_list = $this->nbsModel->getListaNbs($empresa->item_lc_id);
-        }else{
-            $nbs_list = [];
-        }
-
         $regimeEspecialTributacaoList = $this->empresaModel->getRegimeEspecialTributacao();
 
         $provedores = Empresa::getProvedorEmissao();
@@ -250,13 +218,10 @@ class EmpresasController extends Controller
             'uf_id' => $uf_id,
             'cidade' => $cidade,
             'cidades' => $cidades,
-            'servicos' => $servicos,
             'atividades' => $atividades,
-            'cnaes' => $cnaes,
             'planos' => $planos,
             'usuarios' => $usuarios,
             'reg_esp_trib' => $regimeEspecialTributacaoList,
-            'nbs_list' => $nbs_list,
             'provedores' => $provedores,
             'ambientes_emissao' => $ambientes_emissao,
             'regimes_tributarios' => $regimes_tributarios,

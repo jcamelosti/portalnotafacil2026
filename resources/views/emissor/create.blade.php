@@ -36,8 +36,12 @@
         
 
         <script type="text/javascript">
-            /*$(function(){
-                $('#uf_id').change(function(e){
+            $(function(){
+                 const oldData = {
+                    empresa_id: "{{ old('empresa_id') }}",
+                    cTribMun: "{{ old('empresa_atividade_id') }}",
+                };
+                /*$('#uf_id').change(function(e){
                     $('#cidade_id').remove();
                     if( $(this).val() != '' ) {
                         e.preventDefault();
@@ -60,11 +64,36 @@
                         //$('.comboBoxCidades1').show();
                         //$('.comboBoxCidades1').html('<option value="">Escolha o Estado</option>');
                     }
+                });*/
+
+                 $('#empresa_atividade_id').on('change', function () {
+                    carregarCodTributacaoNac(
+                        oldData.cTribMun,
+                        $(this).val()
+                    );
                 });
-            });*/
+            });
 
-            
+            function carregarCodTributacaoNac(tribNacSelecionada = null, cTribMun) {
+                let cTribNacSelect = $('#cTribNac');
 
+                cTribNacSelect.empty();
+                cTribNacSelect.append('<option value="">Código Tributação Nacional</option>');
+
+                $.getJSON('/c/emissor/obter/tributacao-nacional/por-tributacao-mun?cTribMun=' + cTribMun, function (data) {
+                    console.log(data);
+                    $.each(data, function (_, tribNac) {
+                        cTribNacSelect.append(
+                            $('<option>', {
+                                value: tribNac.cTribNac,
+                                text: tribNac.descricao,
+                                selected: tribNac.id == tribNacSelecionada
+                            })
+                        );
+
+                    });
+                });
+            }
         </script>
     @endsection
 </x-area-empresa-layout>

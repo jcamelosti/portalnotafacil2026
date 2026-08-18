@@ -9,21 +9,17 @@ class WebServicesManager
 {
     public function getWsUrl(int $empresaId): array
     {
+        $url = null;
+
         $empresa = Empresa::findOrFail($empresaId);
         $endpoint = EndPoint::where('codigo_municipio', $empresa->cidade_id)
             ->first();
-        $url = '';
-
-        if($endpoint){
-            switch ($empresa->ambiente_emissao){
-                case 'PRODUCAO':
-                    $url = $endpoint->url_endpoint;
-                    break;
-                default:
-                    $url = $endpoint->url_endpoint2;
-                    break;
-            }
-        }   
+            
+        if ($empresa->ambiente_emissao === 'PRODUCAO') {
+            $url = $endpoint->url_endpoint;
+        } else {
+            $url = $endpoint->url_endpoint2;
+        }
 
         return [
             'url' => $url,

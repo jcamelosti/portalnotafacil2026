@@ -39,9 +39,9 @@ class RemoverNotasMais4Meses extends Command
      */
     public function handle()
     {
-        NotaEmitida::
+        /*NotaEmitida::
             whereDate('data_emissao_nfse', '<', Carbon::now()->subMonth(3))
-            ->delete();
+            ->delete();*/
 
         return 0;
     }

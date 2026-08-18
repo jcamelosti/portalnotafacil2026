@@ -4,13 +4,10 @@ namespace App\Http\Controllers\Empresas;
 
 use App\Http\Controllers\Controller;
 use App\Models\Certificado;
-use App\Models\CnaeLc;
 use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
-use App\Models\EmpresaCnae;
 use App\Models\EmpresaCompartilhada;
 use App\Models\License;
-use App\Models\ListaServico;
 use App\Models\Municipio;
 use App\Models\Nbs;
 use App\Models\Uf;
@@ -21,7 +18,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Log;
 use JCamelo\NfseNacionalLib\Services\NFSeService;
 
 class EmpresasController extends Controller
@@ -31,8 +27,6 @@ class EmpresasController extends Controller
     private $empresaModel;
     private $estadoModel;
     private $municipioModel;
-    private $listaServicoModel;
-    private $cnaeModel;
     private $atividadeModel;
     private $licenseModel;
     private $certificadoModel;
@@ -43,16 +37,14 @@ class EmpresasController extends Controller
     public function __construct(
         NFSeService $nfse,
         Empresa $empresaModel, Uf $estadoModel, 
-        Municipio $municipioModel, ListaServico $listaServicoModel,
-        EmpresaCnae $cnaeModel, EmpresaAtividade $atividadeModel,
+        Municipio $municipioModel, 
+        EmpresaAtividade $atividadeModel,
         License $licenseModel, Certificado $certificadoModel, EmpresaCompartilhada $empresaCompartilhadaModel, Nbs $nbsModel
     )
     {
         $this->empresaModel = $empresaModel;
         $this->estadoModel = $estadoModel;
         $this->municipioModel = $municipioModel;
-        $this->listaServicoModel = $listaServicoModel;
-        $this->cnaeModel = $cnaeModel;
         $this->atividadeModel = $atividadeModel;
         $this->licenseModel = $licenseModel;
         $this->certificadoModel = $certificadoModel;
@@ -127,14 +119,11 @@ class EmpresasController extends Controller
        
         $estados = $this->estadoModel->getListaEstados();
         $cidades = $this->municipioModel->municipiosComEndPoint();
-        $servicos = $this->listaServicoModel->getListaServicos();
         $uf_id = 9;
         $cidades = $this->municipioModel->municipiosComEndPoint($uf_id);
-        $cnaes = [];
         $atividades = [];
         $estado = null;
         $empresa = new Empresa();
-        //$empresa->cidade_id = 0;
         $regimeEspecialTributacaoList = $this->empresaModel->getRegimeEspecialTributacao();
         
         $dados_busca_cnpj = Session::has('nova_empresa_prest');
@@ -158,9 +147,7 @@ class EmpresasController extends Controller
             'uf_id' => !empty($estado) ? $estado->id : 9,
             'estados' => $estados,
             'cidades' => $cidades,
-            'servicos' => $servicos,
             'atividades' => $atividades,
-            'cnaes' => $cnaes,
             'reg_esp_trib' => $regimeEspecialTributacaoList,
             'estado' => $estado
         ]);
@@ -261,7 +248,7 @@ class EmpresasController extends Controller
         $userId = Auth::user()->id;
         
         $empresa = $this->empresaModel
-            ->with(['cnaes'])
+            //->with(['cnaes'])
             //->where('user_id', $userId)
              // OU empresas compartilhadas com ele
             /*->orWhereIn('id', function($sub) use ($userId) {
@@ -291,32 +278,8 @@ class EmpresasController extends Controller
         $cidade = $empresa->cidade()->first();
         $uf_id = $empresa->cidade()->first()->estado()->first()->id;
         $cidades = $this->municipioModel->municipiosComEndPoint($uf_id);
-        
-        $cnaes = $this->cnaeModel->cnaesList($empresa->id);
-        $atividades = $this->atividadeModel->atividadesList($empresa->id);
-        
-        $empresaCnaePrincipalId = $empresa->empresa_cnae_id;
-        
-        //filtro items lc conforme cnae
-        $listaCnae = $this->cnaeModel->find($empresaCnaePrincipalId);
-        if(!is_null($listaCnae)){
-            $filtroLc = CnaeLc::where('cnae', $listaCnae->codigo_cnae)->get();
-            $itemLcFiltro = [];
-            foreach($filtroLc as $filter){
-                $itemLcFiltro[] = $filter->item_lc;
-            }
-            $servicos = $this->listaServicoModel->getListaServicos($itemLcFiltro);
-        }else{
-            $servicos = [];
-        }
-
+        $atividades = $this->atividadeModel->atividadesList($empresa->id);       
         $regimeEspecialTributacaoList = $this->empresaModel->getRegimeEspecialTributacao();
-        
-        if(!empty($empresa->item_lc_id)){
-            $nbs_list = $this->nbsModel->getListaNbs($empresa->item_lc_id);
-        }else{
-            $nbs_list = [];
-        }
 
         $provedores = Empresa::getProvedorEmissao();
         $ambientes_emissao = Empresa::getAmbienteEmissao();
@@ -331,11 +294,8 @@ class EmpresasController extends Controller
             'uf_id' => $uf_id,
             'cidade' => $cidade,
             'cidades' => $cidades,
-            'servicos' => $servicos,
             'atividades' => $atividades,
-            'cnaes' => $cnaes,
             'reg_esp_trib' => $regimeEspecialTributacaoList,
-            'nbs_list' => $nbs_list,
             'provedores' => $provedores,
             'ambientes_emissao' => $ambientes_emissao,
             'regimes_tributarios' => $regimes_tributarios,
@@ -527,9 +487,6 @@ class EmpresasController extends Controller
                 session()->flash('danger', 'A Empresa '. $empresa->razao_social .' não possui um certificado digital válido cadastrado. O Certificado Digital é necessário para a comunicação com o Sistema da Prefeitura.');
                 return redirect()->route('empresas.edit', $empresa->id);
             }
-
-            //$dados = $this->consultarDadosCadastrais($empresa->cpf_cnpj, $empresa->inscricao_municipal);
-            //Log::info($dados);
             
             $consultarDadosCadastraisDTO = $this->nfse->consultarDadosCadastrais(
                 $empresa->sigla_provedor,
@@ -608,12 +565,19 @@ class EmpresasController extends Controller
             $empresa->dados_cadastrais = json_encode($dados);
             $empresa->save();*/
 
-            /*DB::statement("
-                UPDATE empresa_cnaes AS e
-                JOIN cnae_lc AS c ON e.codigo_cnae = c.cnae
-                SET e.descricao_cnae = c.descricao_cnae
-                WHERE e.empresa_id = ?
-            ", [$empresaId]);*/
+            $atividades = [];
+            foreach ($consultarDadosCadastraisDTO->atividades as $atividade) {
+                $atividades[] = [
+                    'empresa_id' => $empresa->id,
+                    'codigo_atividade' => $atividade['cTribMun'],
+                    'descricao_atividade' => $atividade['xTribMun'],
+                    'vigencia_inicial' => date('Y-m-d', strtotime($atividade['vigencia_data_inicial'])),
+                    'vigencia_final'   => (isset($atividade['vigencia_data_final'])) ? $atividade['vigencia_data_final'] : null,
+                    'aliquota' => $atividade['pAliq']
+                ];
+            }
+            EmpresaAtividade::where('empresa_id', $empresa->id)->delete();
+            EmpresaAtividade::insert($atividades);
 
             $empresa->dados_cadastrais = json_encode($consultarDadosCadastraisDTO);
             $empresa->save();

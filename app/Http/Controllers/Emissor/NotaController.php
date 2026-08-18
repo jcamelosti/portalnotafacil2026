@@ -8,13 +8,14 @@ use App\Http\Requests\NotaCreateRequest;
 use App\Models\Certificado;
 use App\Models\CnaeLc;
 use App\Models\CodigoTribNacional;
+use App\Models\CorrelacaoTribMunTribNac;
 use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
 use App\Models\EmpresaCnae;
 use App\Models\ListaServico;
 use App\Models\Municipio;
 use App\Models\Nbs;
-use App\Models\NotaEmitida;
+//use App\Models\NotaEmitida;
 use App\Models\Tomador;
 use App\Models\Uf;
 use App\Traits\IssnetTrait;
@@ -32,23 +33,18 @@ use function PHPUnit\Framework\isNull;
 class NotaController extends Controller
 {
     use IssnetTrait;
-
-    private $notaBO;
     private $empresaModel;
     private $tomadorModel;
-    //private $notasModel;
     private $estadoModel;
     private $municipioModel;
-    private $nfseModel;
-    private $cnaeModel;
+
     private $atividadeModel;
-    private $listaServicoModel;
-    private $nbsModel;
+
     
     public function __construct(Empresa $empresaModel, Tomador $tomadorModel, 
         Uf $estadoModel, Municipio $municipioModel,
-        NotaEmitida $nfseModel, EmpresaCnae $cnaeModel, EmpresaAtividade $atividadeModel,
-        ListaServico $listaServicoModel, Nbs $nbsModel
+        EmpresaAtividade $atividadeModel,
+        Nbs $nbsModel
     ){
         $this->notaBO = NotasBO::newInstance();
         $this->empresaModel = $empresaModel;
@@ -56,10 +52,7 @@ class NotaController extends Controller
         //$this->notasModel = $notasModel;
         $this->estadoModel = $estadoModel;
         $this->municipioModel = $municipioModel;
-        $this->nfseModel = $nfseModel;
-        $this->cnaeModel = $cnaeModel;
         $this->atividadeModel = $atividadeModel;
-        $this->listaServicoModel = $listaServicoModel;
         $this->nbsModel = $nbsModel;
     }
 
@@ -71,11 +64,7 @@ class NotaController extends Controller
         $tomador = $this->tomadorModel->find(Session::get('tomador_selecionado'));
         $empresa = $this->empresaModel->with(['atividadesEmpresa'])
             ->find(Session::get('empresa_selecionada'));
-
-        $permiteDescontoCond = $empresa->permite_desc_cond == 2 ? 'display: none;' : '';
-        $permiteDescontoInc = $empresa->permite_desc_incond == 2 ? 'display: none;' : '';
-        $permiteDeducao = $empresa->permite_deducao == 2 ? 'display: none;' : '';
-
+        
         $estados = $this->estadoModel->getListaEstados();
         $uf_id = $empresa->cidade()->first()->uf_id;
         $cidades = $this->municipioModel->municipios($uf_id);
@@ -106,31 +95,34 @@ class NotaController extends Controller
         }
     
         //atividades
-        $atividades = $this->atividadeModel->atividadesList($empresa->id);
+        $atividades = $this->atividadeModel->atividadesByCTribMunList($empresa->id);
+        $atividade = $this->atividadeModel
+            ->where('empresa_id', $empresa->id)
+            ->where('id', $empresa->empresa_atividade_id)->first();
 
         $data_competencia = date('Y-m-d');
 
-        $cod_trib_nac = [''=>'Selecione o Código De Tributação'] + CodigoTribNacional::select(
-                'codigo_tributacao',
-                DB::raw("concat(codigo_tributacao, ' - ', IFNULL(descricao, '')) as field1")
+        $cod_trib_nac = [null => 'Selecione o Código de Tributação Nacional'] + CorrelacaoTribMunTribNac::select(
+                'cTribNac',
+                DB::raw("concat(cTribNac, ' - ', IFNULL(xTribNac, '')) as field1")
             )
-            ->orderBy('codigo_tributacao', 'asc')
-            ->pluck('field1', 'codigo_tributacao')
+            ->where('cTribMun', $atividade->codigo_atividade)
+            ->where('empresa_id', $empresa->id)
+            ->orderBy('cTribMun', 'asc')
+            ->pluck('field1', 'cTribNac')
             ->all();
-        
+            
         return view('emissor.create', [
             'data_competencia' => $data_competencia,
             'tomador' => $tomador,
             'empresa' => $empresa,
-            'permiteDescontoInc' => $permiteDescontoInc,
-            'permiteDescontoCond' => $permiteDescontoCond,
-            'permiteDeducao' => $permiteDeducao,
             'estados' => $estados,
             'uf_id' => $uf_id,
             'cidades' => $cidades,
             'dados_cadastrais' => $dadosCadastrais,
             'atividades' => $atividades,
-            'cod_trib_nac' => $cod_trib_nac
+            'cod_trib_nac' => $cod_trib_nac,
+            'atividade' => $atividade
         ]);
     }
 
@@ -157,4 +149,20 @@ class NotaController extends Controller
 
         return redirect()->route('nota.index');
     }
+
+    /* Pesquisas */
+    public function obterTributacaoNacionalPorAtividadeMun(Request $request)
+    {                
+        $dados = CorrelacaoTribMunTribNac::query()->
+        select(
+                'cTribNac',
+                DB::raw("concat(cTribNac, ' - ', IFNULL(xTribNac, '')) as descricao")
+            )
+            ->where('cTribMun', $request->cTribMun)
+            ->where('empresa_id', Session::get('empresa_selecionada'))
+            ->orderBy('cTribMun', 'asc')
+            ->get();
+        
+        return response()->json($dados,200,[],JSON_UNESCAPED_UNICODE);
+    }  
 }

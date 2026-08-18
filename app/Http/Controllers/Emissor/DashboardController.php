@@ -8,7 +8,7 @@ use App\Models\CreditoUser;
 use App\Models\Empresa;
 use App\Models\EmpresaCompartilhada;
 use App\Models\License;
-use App\Models\NotaEmitida;
+//use App\Models\NotaEmitida;
 use App\Models\PlanoVariacao;
 use App\Utilitarios\Utilitarios;
 use Illuminate\Http\Request;

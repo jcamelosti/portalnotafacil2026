@@ -18,6 +18,14 @@
 
             <!-- AÇÕES -->
             <div class="flex flex-wrap gap-2 bg-gray-50 px-4 py-3 mt-4 justify-end">
+                <a href="{{ route('codtrimun-codtribnac.index', $empresa) }}"
+                   class="inline-flex justify-center rounded-md border border-blue-700 px-4 py-2 bg-white text-sm font-medium text-gray-700 shadow-sm hover:text-gray-500">
+                    Correlação Cód Trib. Municipal x Cód Trib. Nacional
+                </a>
+                <a href="{{ route('empresas.sincDataIssNet', $empresa->id) }}"
+                   class="inline-flex justify-center rounded-md border border-blue-700 px-4 py-2 bg-white text-sm font-medium text-gray-700 shadow-sm hover:text-gray-500">
+                    Cadastro de NBS
+                </a>
                 <a href="{{ route('empresas.sincDataIssNet', $empresa->id) }}"
                    class="inline-flex justify-center rounded-md border border-blue-700 px-4 py-2 bg-white text-sm font-medium text-gray-700 shadow-sm hover:text-gray-500">
                     Sinc. Dados Cadastrais ISSNet

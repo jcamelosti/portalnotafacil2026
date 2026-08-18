@@ -55,10 +55,10 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Atividade Municipal:</span>
                                 {!! Form::select('empresa_atividade_id', isset($atividades) ? $atividades : []
-                                ,$nota_original['empresa_atividade_id'] ?? $empresa->empresa_atividade_id, ['required','class'=>'block w-full mt-1 text-sm  
+                                ,$nota_original['empresa_atividade_id'] ?? $atividade->codigo_atividade, ['required','class'=>'block w-full mt-1 text-sm  
                                 px-3 py-1.5
                                 form-select
-                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray', 'id'=>"empresa_atividade_id"]) !!}
                                 @if ($errors->has('empresa_atividade_id'))
                                     <span class="text-xs text-red-600 ">
                                     <strong>{{ $errors->first('empresa_atividade_id') }}</strong>
@@ -68,14 +68,14 @@
 
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Tributação Nacional:</span>
-                                {!! Form::select('cod_trib_nacional_id', isset($cod_trib_nac) ? $cod_trib_nac : []
-                                ,null, ['required','class'=>'block w-full mt-1 text-sm  
+                                {!! Form::select('cTribNac', isset($cod_trib_nac) ? $cod_trib_nac : []
+                                ,null, ['required', 'id' => 'cTribNac','class'=>'block w-full mt-1 text-sm  
                                 px-3 py-1.5
                                 form-select
                                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
-                                @if ($errors->has('cod_trib_nacional_id'))
+                                @if ($errors->has('cTribNac'))
                                     <span class="text-xs text-red-600 ">
-                                    <strong>{{ $errors->first('cod_trib_nacional_id') }}</strong>
+                                    <strong>{{ $errors->first('cTribNac') }}</strong>
                                 </span>
                                 @endif
                             </label>

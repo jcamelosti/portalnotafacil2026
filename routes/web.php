@@ -4,7 +4,9 @@ use App\Http\Controllers\Emissor\CertificadoController;
 use App\Http\Controllers\Emissor\DadosFaturamentoController;
 use App\Http\Controllers\Emissor\DashboardController;
 use App\Http\Controllers\Emissor\NfseNacional;
+use App\Http\Controllers\Emissor\NotaController;
 use App\Http\Controllers\Emissor\ProtocoloController;
+use App\Http\Controllers\Empresas\CodTribMunCodTribNacController;
 use App\Http\Controllers\Empresas\EmpresasController;
 use App\Http\Controllers\Empresas\LicencasController;
 use App\Http\Controllers\Empresas\SolicitarCreditoController;
@@ -94,6 +96,10 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
 
             //novas rotas - 17/08/2026
             Route::get('nfse-nacional/testes', [\App\Http\Controllers\Emissor\TesteNfeNacionalController::class, 'teste']);
+
+            //pesquisar
+            Route::get('/obter/tributacao-nacional/por-tributacao-mun', [NotaController::class, 'obterTributacaoNacionalPorAtividadeMun']);
+            
         });
 
         Route::group(['prefix' => 'emissor-nacional-mei'], function () {
@@ -137,6 +143,33 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             Route::get('/', [\App\Http\Controllers\Emissor\DashboardController::class, 'index'])->name('area-cliente');
 
             Route::resource('empresas', EmpresasController::class);
+            Route::prefix('correlacao/codtribmun-codtribnac/{empresa}')->group(function () {
+                Route::get(
+                    'listagem',
+                    [CodTribMunCodTribNacController::class,'index']
+                )->name('codtrimun-codtribnac.index');
+                
+                Route::get(
+                    'criar',
+                    [CodTribMunCodTribNacController::class,'create']
+                )->name('codtrimun-codtribnac.create');
+                
+                Route::post(
+                    'store',
+                    [CodTribMunCodTribNacController::class,'store']
+                )->name('codtrimun-codtribnac.store');
+
+                Route::get(
+                    '{correlacaoTribMunTribNac}/editar',
+                    [CodTribMunCodTribNacController::class,'edit']
+                )->name('codtrimun-codtribnac.edit');
+
+                Route::put(
+                    '{correlacaoTribMunTribNac}/atualizar',
+                    [CodTribMunCodTribNacController::class,'update']
+                )->name('codtrimun-codtribnac.update');
+            });
+
             Route::get('/empresas/list/json', [EmpresasController::class, 'json'])->name('empresas.json');
             Route::resource('tomadores', TomadoresController::class);
             // Rota adicional para outro método de update
