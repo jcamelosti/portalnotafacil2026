@@ -95,7 +95,7 @@ XML;
                         <email>virlei79@gmail.com</email>
                         <regTrib>
                             <opSimpNac>{$data->opSimpNac}</opSimpNac>
-                            <regEspTrib>0</regEspTrib>
+                            <regEspTrib>{$data->regEspTrib}</regEspTrib>
                         </regTrib>
                     </prest>
                     <toma>

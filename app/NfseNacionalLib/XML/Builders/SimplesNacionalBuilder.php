@@ -149,8 +149,8 @@ class SimplesNacionalBuilder implements DPSBuilderInterface
 								<regTrib>
 									
 									<opSimpNac>{$data->opSimpNac}</opSimpNac>
-									<regApTribSN>{$data->regApIBSCBSSN}</regApTribSN>
-									<regEspTrib>0</regEspTrib>
+									<regApTribSN>{$data->regApTribSN}</regApTribSN>
+									<regEspTrib>{$data->regEspTrib}</regEspTrib>
 								</regTrib>
 							</prest>
 							<toma>
