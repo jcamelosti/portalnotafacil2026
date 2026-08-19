@@ -110,9 +110,9 @@ class NfseNacional extends Controller
 
         $nbs = [''=>'Selecione o Código NBS'] + Nbs::select(
                 'id',
-                DB::raw("concat(codigo_nbs, ' - ', IFNULL(descricao_nbs, '')) as field1")
+                DB::raw("concat(codigo, ' - ', IFNULL(descricao, '')) as field1")
             )
-            ->orderBy('codigo_nbs', 'asc')
+            ->orderBy('codigo', 'asc')
             ->pluck('field1', 'id')
             ->all();
         
@@ -172,9 +172,9 @@ class NfseNacional extends Controller
 
         $nbs = [''=>'Selecione o Código NBS'] + Nbs::select(
                 'id',
-                DB::raw("concat(codigo_nbs, ' - ', IFNULL(descricao_nbs, '')) as field1")
+                DB::raw("concat(codigo, ' - ', IFNULL(descricao, '')) as field1")
             )
-            ->orderBy('codigo_nbs', 'asc')
+            ->orderBy('codigo', 'asc')
             ->pluck('field1', 'id')
             ->all();
 
@@ -390,7 +390,7 @@ class NfseNacional extends Controller
             $std->infDPS->serv->cServ->cTribNac = $codigoTribNacional->codigo_tributacao;//Código de tributação Nacional
             //        $std->infDPS->serv->cServ->cTribMun = ''; //Código de tributação municipal do ISSQN.
             $std->infDPS->serv->cServ->xDescServ = $servico->descricao;
-            $std->infDPS->serv->cServ->cNBS = $nbs->codigo_nbs;//'122051900';// Código NBS correspondente ao serviço prestado
+            $std->infDPS->serv->cServ->cNBS = $nbs->codigo;//'122051900';// Código NBS correspondente ao serviço prestado
             $std->infDPS->serv->cServ->cIntContrib = str_pad($servico->id, 5, '0', STR_PAD_LEFT);;// Código interno do contribuinte - Utilizado para identificação da DPS no Sistema interno do Contribuinte
 
         //    $std->infDPS->serv->infoCompl = new stdClass();

@@ -75,7 +75,7 @@
 
                 <div>
                     <span class="text-gray-500">NBS:</span><br>
-                    <strong>{{ $servico->nbs->codigo_nbs . ' - '.$servico->nbs->descricao_nbs ?? '-' }}</strong>
+                    <strong>{{ $servico->nbs->codigo . ' - '.$servico->nbs->descricao ?? '-' }}</strong>
                 </div>
 
             </div>

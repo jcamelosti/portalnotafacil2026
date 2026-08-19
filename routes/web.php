@@ -9,6 +9,7 @@ use App\Http\Controllers\Emissor\ProtocoloController;
 use App\Http\Controllers\Empresas\CodTribMunCodTribNacController;
 use App\Http\Controllers\Empresas\EmpresasController;
 use App\Http\Controllers\Empresas\LicencasController;
+use App\Http\Controllers\Empresas\NbsController;
 use App\Http\Controllers\Empresas\SolicitarCreditoController;
 use App\Http\Controllers\InfinitePayWebHookController;
 use App\Http\Controllers\Irpj\RelatorioController;
@@ -168,6 +169,33 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
                     '{correlacaoTribMunTribNac}/atualizar',
                     [CodTribMunCodTribNacController::class,'update']
                 )->name('codtrimun-codtribnac.update');
+            });
+
+            Route::prefix('empresa/nbs/{empresa}')->group(function () {
+                Route::get(
+                    'listagem',
+                    [NbsController::class,'index']
+                )->name('empresa-nbs.index');
+                
+                Route::get(
+                    'criar',
+                    [NbsController::class,'create']
+                )->name('empresa-nbs.create');
+                
+                Route::post(
+                    'store',
+                    [NbsController::class,'store']
+                )->name('empresa-nbs.store');
+
+                Route::get(
+                    '{empresaNbs}/editar',
+                    [NbsController::class,'edit']
+                )->name('empresa-nbs.edit');
+
+                Route::put(
+                    '{empresaNbs}/atualizar',
+                    [NbsController::class,'update']
+                )->name('empresa-nbs.update');
             });
 
             Route::get('/empresas/list/json', [EmpresasController::class, 'json'])->name('empresas.json');

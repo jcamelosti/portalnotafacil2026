@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use Illuminate\Support\Facades\DB;
 
 class CorrelacaoTribMunTribNac extends Model
 {
@@ -30,6 +30,18 @@ class CorrelacaoTribMunTribNac extends Model
     }
 
     public function atividade(){
-        return $this->belongsTo(EmpresaAtividade::class, 'cTribMun' ,'codigo_atividade');
+        return $this->hasOne(EmpresaAtividade::class, 'codigo_atividade', 'cTribMun');
+    }
+
+    public function listCorrelacao($empresaId){
+        return [null =>'Selecione a Cód. Tributação Nacional'] + $this
+            ->select(
+                'id',
+                DB::raw("concat(cTribNac, ' - ', IFNULL(xTribNac, '')) as field1")
+            )
+            ->where('empresa_id', $empresaId)
+            ->orderBy('id', 'asc')
+            ->pluck('field1', 'id')
+            ->all();
     }
 }

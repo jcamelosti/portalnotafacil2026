@@ -37,7 +37,7 @@ class NotaController extends Controller
     private $tomadorModel;
     private $estadoModel;
     private $municipioModel;
-
+    private $nbsModel;
     private $atividadeModel;
 
     
@@ -46,7 +46,7 @@ class NotaController extends Controller
         EmpresaAtividade $atividadeModel,
         Nbs $nbsModel
     ){
-        $this->notaBO = NotasBO::newInstance();
+        //$this->notaBO = NotasBO::newInstance();
         $this->empresaModel = $empresaModel;
         $this->tomadorModel = $tomadorModel;
         //$this->notasModel = $notasModel;
@@ -94,11 +94,13 @@ class NotaController extends Controller
             return redirect()->route('empresas.edit', $empresa->id);
         }
     
-        //atividades
         $atividades = $this->atividadeModel->atividadesByCTribMunList($empresa->id);
+        dd($atividades);
         $atividade = $this->atividadeModel
             ->where('empresa_id', $empresa->id)
             ->where('id', $empresa->empresa_atividade_id)->first();
+
+        dd($atividade);
 
         $data_competencia = date('Y-m-d');
 

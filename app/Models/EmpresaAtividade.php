@@ -70,8 +70,8 @@ class EmpresaAtividade extends Model
             )
             ->where('empresa_id', $empresaId)
             ->where(function ($query) {
-                $query->whereNull('vigencia_final')
-                    ->orWhere('vigencia_final', '>=', now());
+                /*$query->whereNull('vigencia_final')
+                    ->orWhere('vigencia_final', '>=', now());*/
             })
             ->orderBy('descricao_atividade', 'asc')
             ->pluck('field1', 'codigo_atividade')
