@@ -29,8 +29,13 @@ class CorrelacaoTribMunTribNac extends Model
         );
     }
 
-    public function atividade(){
-        return $this->hasOne(EmpresaAtividade::class, 'codigo_atividade', 'cTribMun');
+    public function atividade()
+    {
+        return $this->belongsTo(
+            EmpresaAtividade::class,
+            'cTribMun',
+            'codigo_atividade'
+        );
     }
 
     public function listCorrelacao($empresaId){

@@ -147,7 +147,6 @@ class SimplesNacionalBuilder implements DPSBuilderInterface
 								<fone>62991728787</fone>
 								<email>virlei79@gmail.com</email>
 								<regTrib>
-									
 									<opSimpNac>{$data->opSimpNac}</opSimpNac>
 									<regApTribSN>{$data->regApTribSN}</regApTribSN>
 									<regEspTrib>{$data->regEspTrib}</regEspTrib>

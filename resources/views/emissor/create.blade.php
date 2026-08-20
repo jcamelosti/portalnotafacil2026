@@ -1,22 +1,15 @@
-<x-area-empresa-layout title="Nota" class="text-4xl">
-    <div class="">
-        
-        @include('components.mensagens')
-
-        <div class="max-w-7xl mx-auto px-4 py-4">
-            @if ( request()->routeIs('nota.emitir') || request()->routeIs('notas.duplicar') )
-                {!! Form::open(['route'=>'notas.store', 'files'=> true, 'name'=> 'Form1']) !!}
+<x-area-empresa-layout title="Emissor NFSe">
+    <!-- FULL WIDTH -->
+    <div class="w-full px-4 py-6 sm:px-6 lg:px-8">
+        <!-- FORM FULL -->
+        <div class="w-full py-6">
+            {!! Form::open(['route'=>'notas.store', 'files'=> true, 'name'=> 'Form1']) !!}
                 @include('emissor._form')
-                {!! Form::close() !!}
-            @else
-                {!! Form::open(['route'=>'notas.store-substituicao', 'files'=> true, 'name'=> 'Form1']) !!}
-                @include('emissor._form')
-                {!! Form::close() !!}
-            @endif
+            {!! Form::close() !!}
         </div>
     </div>
 
-    @section('jquery')
+ @section('jquery')
         <script src="https://code.jquery.com/jquery-3.6.0.min.js"
                 integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
         <script src="https://cdn.es.gov.br/scripts/jquery/jquery-maskedinput/1.4.1/jquery.maskedinput-1.4.1.min.js"></script>
@@ -33,14 +26,17 @@
 
         <script src="{{ asset('js/fn_geral.js') }}"></script>
         <script src="{{ asset('js/calculos_geral.js?'.time()) }}"></script>
-        
+        <script src="{{ asset('js/tela_nfse.js?'.time()) }}"></script>
 
         <script type="text/javascript">
             $(function(){
                  const oldData = {
                     empresa_id: "{{ old('empresa_id') }}",
                     cTribMun: "{{ old('empresa_atividade_id') }}",
+                    cTribNac: "{{ old('cTribNac') }}",
+                    nbs: "{{ old('nbs') }}"
                 };
+                
                 /*$('#uf_id').change(function(e){
                     $('#cidade_id').remove();
                     if( $(this).val() != '' ) {
@@ -66,12 +62,28 @@
                     }
                 });*/
 
-                 $('#empresa_atividade_id').on('change', function () {
+                $('#empresa_atividade_id').on('change', function () {
                     carregarCodTributacaoNac(
                         oldData.cTribMun,
                         $(this).val()
                     );
                 });
+
+                $('#cTribNac').on('change', function () {
+                    carregarNbs(
+                        oldData.cTribNac,
+                        $(this).val()
+                    );
+
+                    $('#nbs').prop("disabled", false);
+                });
+
+                if (oldData.cTribNac) {
+                    carregarNbs(
+                        oldData.nbs,    
+                        oldData.cTribNac                   
+                    );
+                }
             });
 
             function carregarCodTributacaoNac(tribNacSelecionada = null, cTribMun) {
@@ -88,6 +100,27 @@
                                 value: tribNac.cTribNac,
                                 text: tribNac.descricao,
                                 selected: tribNac.id == tribNacSelecionada
+                            })
+                        );
+
+                    });
+                });
+            }
+
+            function carregarNbs(nbsSelecionado= null, cTribNac) {
+                let nbsSelect = $('#nbs');
+
+                nbsSelect.empty();
+                nbsSelect.append('<option value="">NBS</option>');
+
+                $.getJSON('/c/emissor/obter/nbs/por-empresa?cTribNac=' + cTribNac, function (data) {
+    
+                    $.each(data, function (_, nbs) {
+                        nbsSelect.append(
+                            $('<option>', {
+                                value: nbs.codigo,
+                                text: nbs.descricao,
+                                selected: nbs.codigo == nbsSelecionado
                             })
                         );
 

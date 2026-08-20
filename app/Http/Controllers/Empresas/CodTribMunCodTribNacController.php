@@ -25,7 +25,7 @@ class CodTribMunCodTribNacController extends Controller
         $codTribs = $query
             ->paginate(15)
             ->withQueryString();
-
+        
         return view('empresas.correlacao-codtribmun-codtribnac.index')->with([
             'codTribs' => $codTribs,
             'empresa' => $empresa

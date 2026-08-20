@@ -182,24 +182,6 @@ class EmpresasController extends Controller
             $dados['plano_id'] = 1;
         }
 
-        switch($dados['cidade_id']):
-            case '5208707'://goiania
-                $dados['serie_nota'] = 1;
-                break;
-            case '5201405'://aparecidada de goiania
-                $dados['serie_nota'] = 9;
-                break;
-            case '3301702'://duque de caxias
-                $dados['serie_nota'] = 1;
-                break;
-            case '3543402'://Ribeirão Preto
-                $dados['serie_nota'] = 1;
-                break;
-            default:
-                $dados['serie_nota'] = 8;
-                break;
-        endswitch;
-
         if(!is_null($empresaExiste)){
             session()->flash('info', 'Não foi possível adicionar a Empresa. A empresa já encontra-se cadastrada no sistema.');
             return redirect()->back();
@@ -278,7 +260,7 @@ class EmpresasController extends Controller
         $cidade = $empresa->cidade()->first();
         $uf_id = $empresa->cidade()->first()->estado()->first()->id;
         $cidades = $this->municipioModel->municipiosComEndPoint($uf_id);
-        $atividades = $this->atividadeModel->atividadesList($empresa->id);       
+        $atividades = $this->atividadeModel->atividadesList($empresa->id);    
         $regimeEspecialTributacaoList = $this->empresaModel->getRegimeEspecialTributacao();
 
         $provedores = Empresa::getProvedorEmissao();

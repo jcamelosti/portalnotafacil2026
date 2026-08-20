@@ -12,6 +12,7 @@ use App\Models\CorrelacaoTribMunTribNac;
 use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
 use App\Models\EmpresaCnae;
+use App\Models\EmpresaNbs;
 use App\Models\ListaServico;
 use App\Models\Municipio;
 use App\Models\Nbs;
@@ -95,12 +96,9 @@ class NotaController extends Controller
         }
     
         $atividades = $this->atividadeModel->atividadesByCTribMunList($empresa->id);
-        dd($atividades);
         $atividade = $this->atividadeModel
             ->where('empresa_id', $empresa->id)
             ->where('id', $empresa->empresa_atividade_id)->first();
-
-        dd($atividade);
 
         $data_competencia = date('Y-m-d');
 
@@ -128,7 +126,7 @@ class NotaController extends Controller
         ]);
     }
 
-    public function store(NotaCreateRequest $request){
+    public function store(Request $request){
         try{
             $empresaSessao = request()->session()->get('empresa_selecionada');
             $empresaSessao = $this->empresaModel->find($empresaSessao);
@@ -167,4 +165,22 @@ class NotaController extends Controller
         
         return response()->json($dados,200,[],JSON_UNESCAPED_UNICODE);
     }  
+
+    public function obterNbs(Request $request){
+        $corrTrib = CorrelacaoTribMunTribNac::where('cTribNac', $request->cTribNac)
+            ->where('empresa_id', Session::get('empresa_selecionada'))
+            ->first();
+
+        $dados = EmpresaNbs::query()->
+        select(
+                'codigo',
+                DB::raw("concat(codigo, ' - ', IFNULL(descricao, '')) as descricao")
+            )
+            ->where('correlaca_trib_id', $corrTrib->id)
+            ->where('empresa_id', Session::get('empresa_selecionada'))
+            ->orderBy('codigo', 'asc')
+            ->get();
+        
+        return response()->json($dados,200,[],JSON_UNESCAPED_UNICODE);
+    }
 }

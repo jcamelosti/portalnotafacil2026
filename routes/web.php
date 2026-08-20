@@ -100,7 +100,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
 
             //pesquisar
             Route::get('/obter/tributacao-nacional/por-tributacao-mun', [NotaController::class, 'obterTributacaoNacionalPorAtividadeMun']);
-            
+            Route::get('/obter/nbs/por-empresa', [NotaController::class, 'obterNbs']);
         });
 
         Route::group(['prefix' => 'emissor-nacional-mei'], function () {
