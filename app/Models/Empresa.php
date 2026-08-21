@@ -54,7 +54,8 @@ class Empresa extends Model
         'ambiente_emissao',
         'regime_tributario',
         'op_simp_nac',
-        'tp_regime_esp_trib_mun'
+        'tp_regime_esp_trib_mun',
+        'tp_reg_apuracao_sn'
     ];
 
     /*public function getCepAttribute($value)
@@ -172,17 +173,6 @@ class Empresa extends Model
         return $this->belongsTo(Plano::class, 'plano_id', 'id');
     }
 
-    public function getRegimeEspecialTributacao(){
-        return [
-            1 => 'Microempresa Municipal',
-            2 => 'Estimativa',
-            3 => 'Sociedade de Profissionais',
-            4 => 'Cooperativa',
-            5 => 'Microempresário Individual (MEI)',
-            6 => 'Microempresa ou Empresa de Pequeno Porte (ME EPP)',
-        ];
-    }
-
     public static function getProvedorEmissao(){
         return [
             '' => 'Nenhum Provedor Selecionado',
@@ -198,18 +188,16 @@ class Empresa extends Model
         ];
     }
 
-    public static function getRegimeTributario(){
+    //Situação perante Simples Nacional:
+    public static function getOpcaoSimplesNacional(){
         return [
-            'normal' => 'Regime Normal',
-            'simples' => 'Simples Nacional - ME/EPP',
-            //'mei' => 'MEI',
-            //'optante_pendente' => 'Optante Pendente'
+            1 => 'Não Optante',
+			2 => 'Optante - Microempreendedor Individual (MEI)',
+			3 => 'Optante - Microempresa ou Empresa de Pequeno Porte (ME/EPP)'
         ];
     }
 
-
-    //preenche opSimpNac na nota
-    public static function getOpcaoSimplesNacional(){
+    public static function getRegimeApuracaoSimplesNacional(){
         return [
             1 => 'Regime de apuração dos tributos federais e municipal pelo SN',
 			2 => 'Regime de apuração dos tributos federais pelo SN e o ISSQN pela NFS-e conforme respectiva legislação municipal do tributo',

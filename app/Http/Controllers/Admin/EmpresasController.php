@@ -203,13 +203,14 @@ class EmpresasController extends Controller
         $planos = $this->planoModel->list();
         $usuarios = $this->userModel->list();
         $atividades = $this->atividadeModel->atividadesList($empresa->id);
-        $regimeEspecialTributacaoList = $this->empresaModel->getRegimeEspecialTributacao();
-
+        
         $provedores = Empresa::getProvedorEmissao();
         $ambientes_emissao = Empresa::getAmbienteEmissao();
 
-        $regimes_tributarios = Empresa::getRegimeTributario();//Situação perante Simples Nacional, preenche campo opSimpNac na NFSE em regTrib
         $situacao_simples_nacional = Empresa::getOpcaoSimplesNacional();//Regime de Apuração Tributária pelo Simples Nacional, campo regApTribSN em regTrib
+        //Regime de Apuração Tributária pelo Simples Nacional.
+        $regimes_apuracao_sn = Empresa::getRegimeApuracaoSimplesNacional();
+        //Tipos de Regimes Especiais de Tributação Municipal:
         $tipos_regime_esp_trib_mun = Empresa::getTiposRegimeEspecialTributacaoMunicipio();
 
         return view('admin.empresas.editar')->with([
@@ -221,10 +222,9 @@ class EmpresasController extends Controller
             'atividades' => $atividades,
             'planos' => $planos,
             'usuarios' => $usuarios,
-            'reg_esp_trib' => $regimeEspecialTributacaoList,
             'provedores' => $provedores,
             'ambientes_emissao' => $ambientes_emissao,
-            'regimes_tributarios' => $regimes_tributarios,
+            'regimes_apuracao_sn' => $regimes_apuracao_sn,
             'situacao_simples_nacional' => $situacao_simples_nacional,
             'tipos_regime_esp_trib_mun' => $tipos_regime_esp_trib_mun,           
         ]);
@@ -242,23 +242,6 @@ class EmpresasController extends Controller
         $dados = $request->all();
         
         $empresa = $this->empresaModel->find($id);     
-        switch($empresa->cidade_id):
-            case '5208707'://goiania
-                $dados['serie_nota'] = 1;
-                break;
-            case '5201405'://aparecidada de goiania
-                $dados['serie_nota'] = 9;
-                break;
-            case '3301702'://duque de caxias
-                $dados['serie_nota'] = 1;
-                break;
-            case '3543402'://Ribeirão Preto
-                $dados['serie_nota'] = 1;
-                break;
-            default:
-                $dados['serie_nota'] = 8;
-                break;
-        endswitch;  
         $empresa->update($dados);
 
         session()->flash('message', 'Registro Atualizado com Sucesso.');

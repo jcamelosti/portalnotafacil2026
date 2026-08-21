@@ -111,7 +111,7 @@ class NotaController extends Controller
             ->orderBy('cTribMun', 'asc')
             ->pluck('field1', 'cTribNac')
             ->all();
-            
+        
         return view('emissor.create', [
             'data_competencia' => $data_competencia,
             'tomador' => $tomador,

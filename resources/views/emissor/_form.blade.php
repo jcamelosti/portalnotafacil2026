@@ -441,6 +441,12 @@
                         </div>
 
                         <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
+                            Regimes de Tributação do Prestador de Serviço
+                        </h4>
+
+                        
+
+                        <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
                             Tributação Federal
                         </h4>
 

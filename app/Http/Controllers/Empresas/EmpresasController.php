@@ -261,13 +261,16 @@ class EmpresasController extends Controller
         $uf_id = $empresa->cidade()->first()->estado()->first()->id;
         $cidades = $this->municipioModel->municipiosComEndPoint($uf_id);
         $atividades = $this->atividadeModel->atividadesList($empresa->id);    
-        $regimeEspecialTributacaoList = $this->empresaModel->getRegimeEspecialTributacao();
-
+               
         $provedores = Empresa::getProvedorEmissao();
         $ambientes_emissao = Empresa::getAmbienteEmissao();
+        
 
-        $regimes_tributarios = Empresa::getRegimeTributario();//Situação perante Simples Nacional, preenche campo opSimpNac na NFSE em regTrib
+
         $situacao_simples_nacional = Empresa::getOpcaoSimplesNacional();//Regime de Apuração Tributária pelo Simples Nacional, campo regApTribSN em regTrib
+        //Regime de Apuração Tributária pelo Simples Nacional.
+        $regimes_apuracao_sn = Empresa::getRegimeApuracaoSimplesNacional();
+        //Tipos de Regimes Especiais de Tributação Municipal:
         $tipos_regime_esp_trib_mun = Empresa::getTiposRegimeEspecialTributacaoMunicipio();
 
         return view('empresas.editar')->with([
@@ -277,11 +280,10 @@ class EmpresasController extends Controller
             'cidade' => $cidade,
             'cidades' => $cidades,
             'atividades' => $atividades,
-            'reg_esp_trib' => $regimeEspecialTributacaoList,
             'provedores' => $provedores,
             'ambientes_emissao' => $ambientes_emissao,
-            'regimes_tributarios' => $regimes_tributarios,
             'situacao_simples_nacional' => $situacao_simples_nacional,
+            'regimes_apuracao_sn' => $regimes_apuracao_sn,
             'tipos_regime_esp_trib_mun' => $tipos_regime_esp_trib_mun,
         ]);
     }
@@ -298,25 +300,6 @@ class EmpresasController extends Controller
         $dados = $request->all();
         $userId = Auth::user()->id;
         $empresa = $this->empresaModel->find($id);
-
-
-        switch($dados['cidade_id']):
-            case '5208707'://goiania
-                $dados['serie_nota'] = 1;
-                break;
-            case '5201405'://aparecidada de goiania
-                $dados['serie_nota'] = 9;
-                break;
-            case '3301702'://duque de caxias
-                $dados['serie_nota'] = 1;
-                break;
-            case '3543402'://Ribeirão Preto
-                $dados['serie_nota'] = 1;
-                break;
-            default:
-                $dados['serie_nota'] = 8;
-                break;
-        endswitch;
 
         $empresaCompartilhada = $this->empresaCompartilhadaModel->where('empresa_id', $id)
             ->where('autorizado', 'S')
