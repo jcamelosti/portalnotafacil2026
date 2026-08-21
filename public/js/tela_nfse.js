@@ -60,28 +60,36 @@ $(document).ready(function () {
                 if(situacaoTribPisCofins == '00'){
                     desabilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '01'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '02'){
-                    
+                    desabilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '03'){
-                    
+                    desabilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '04'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    desabilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '05'){
-                    
+                    desabilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '06'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    desabilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    
+                    desabilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '08'){
-                    
+                    desabilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '09'){
-                    
+                    desabilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '49'){
-                    
+                    desabilitarCampo($valorCSLL);
                 }else{
-                    if (cstsCredito.includes(cst)) {
-
+                    if (cstsCredito.includes(situacaoTribPisCofins)) {
+                        desabilitarCampo($valorCSLL);
                     }
                 } 
                 break;
@@ -92,28 +100,34 @@ $(document).ready(function () {
                     habilitarCampo($valorIRRF);
                     habilitarCampo($valorCP)
                 }else if(situacaoTribPisCofins == '01'){
-                    
+                    desabilitarCampo($valorPIS);
+                    desabilitarCampo($valorCOFINS);
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '02'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '03'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '04'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '05'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '06'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else{
-                    if (cstsCredito.includes(cst)) {
-                        
+                    if (cstsCredito.includes(situacaoTribPisCofins)) {
+                        hablitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -124,28 +138,38 @@ $(document).ready(function () {
                     habilitarCampo($valorIRRF);
                     habilitarCampo($valorCP)
                 }else if(situacaoTribPisCofins == '01'){
-                    
+                    desabilitarCampo($valorPIS);
+                    desabilitarCampo($valorCOFINS);
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '02'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '03'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '04'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '05'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '06'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else{
-                    if (cstsCredito.includes(cst)) {
-                        
+                    if (cstsCredito.includes(situacaoTribPisCofins)) {
+                        hablitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -156,28 +180,38 @@ $(document).ready(function () {
                     habilitarCampo($valorIRRF);
                     habilitarCampo($valorCP)
                 }else if(situacaoTribPisCofins == '01'){
-                    
+                    desabilitarCampo($valorPIS);
+                    desabilitarCampo($valorCOFINS);
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '02'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '03'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '04'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '05'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '06'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else{
-                    if (cstsCredito.includes(cst)) {
-                        
+                    if (cstsCredito.includes(situacaoTribPisCofins)) {
+                        hablitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -188,28 +222,38 @@ $(document).ready(function () {
                     habilitarCampo($valorIRRF);
                     habilitarCampo($valorCP)
                 }else if(situacaoTribPisCofins == '01'){
-                    
+                    desabilitarCampo($valorPIS);
+                    desabilitarCampo($valorCOFINS);
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '02'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '03'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '04'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '05'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '06'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else{
-                    if (cstsCredito.includes(cst)) {
-                        
+                    if (cstsCredito.includes(situacaoTribPisCofins)) {
+                        hablitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -220,28 +264,38 @@ $(document).ready(function () {
                     habilitarCampo($valorIRRF);
                     habilitarCampo($valorCP)
                 }else if(situacaoTribPisCofins == '01'){
-                    
+                    desabilitarCampo($valorPIS);
+                    desabilitarCampo($valorCOFINS);
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '02'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '03'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '04'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '05'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '06'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else{
-                    if (cstsCredito.includes(cst)) {
-                        
+                    if (cstsCredito.includes(situacaoTribPisCofins)) {
+                        hablitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -252,28 +306,38 @@ $(document).ready(function () {
                     habilitarCampo($valorIRRF);
                     habilitarCampo($valorCP)
                 }else if(situacaoTribPisCofins == '01'){
-                    
+                    desabilitarCampo($valorPIS);
+                    desabilitarCampo($valorCOFINS);
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '02'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '03'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '04'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '05'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '06'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else{
-                    if (cstsCredito.includes(cst)) {
-                        
+                    if (cstsCredito.includes(situacaoTribPisCofins)) {
+                        hablitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -284,28 +348,38 @@ $(document).ready(function () {
                     habilitarCampo($valorIRRF);
                     habilitarCampo($valorCP)
                 }else if(situacaoTribPisCofins == '01'){
-                    
+                    desabilitarCampo($valorPIS);
+                    desabilitarCampo($valorCOFINS);
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '02'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '03'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '04'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '05'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '06'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else{
-                    if (cstsCredito.includes(cst)) {
-                        
+                    if (cstsCredito.includes(situacaoTribPisCofins)) {
+                        hablitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -316,28 +390,38 @@ $(document).ready(function () {
                     habilitarCampo($valorIRRF);
                     habilitarCampo($valorCP)
                 }else if(situacaoTribPisCofins == '01'){
-                    
+                    desabilitarCampo($valorPIS);
+                    desabilitarCampo($valorCOFINS);
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '02'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '03'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '04'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '05'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '06'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else{
                     if (cstsCredito.includes(cst)) {
-                        
+                        hablitarCampo($valorCSLL) 
                     }
                 }              
                 break;
@@ -348,28 +432,38 @@ $(document).ready(function () {
                     habilitarCampo($valorIRRF);
                     habilitarCampo($valorCP)
                 }else if(situacaoTribPisCofins == '01'){
-                    
+                    desabilitarCampo($valorPIS);
+                    desabilitarCampo($valorCOFINS);
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '02'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '03'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '04'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '05'){
-                    
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '06'){
-                    
+                    desabilitarCampo($aliqPIS);
+                    $aliqPIS.val('0,00');
+                    desabilitarCampo($aliqCOFINS);
+                    $aliqCOFINS.val('0,00');
+                    habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    
+                    hablitarCampo($valorCSLL)
                 }else{
-                    if (cstsCredito.includes(cst)) {
-                        
+                    if (cstsCredito.includes(situacaoTribPisCofins)) {
+                        hablitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -429,7 +523,7 @@ $(document).ready(function () {
                 break;
 
             default:
-                if (cstsCredito.includes(cst)) {
+                if (cstsCredito.includes(situacaoTribPisCofins)) {
                     configurarCSTCredito();
                 }
                 break;
@@ -500,8 +594,7 @@ $(document).ready(function () {
         $divValorCSLL.show();
         mostrarCampo($valorCSLL);
         desabilitarCampo($valorCSLL);
-        habilitarCampo($valorCSLL);
-        
+                
         $divValorIRRF.show()
         mostrarCampo($valorIRRF);
         habilitarCampo($valorIRRF);
@@ -512,6 +605,10 @@ $(document).ready(function () {
     }
 
     function cst02() {
+        $divValorPIS.show();
+        $divValorCOFINS.show();
+        configurarValoresCalculados();
+       
         mostrarCampo($baseCalcFederal);
         habilitarCampo($baseCalcFederal);
 
@@ -526,9 +623,25 @@ $(document).ready(function () {
 
         mostrarCampo($valorCOFINS);
         desabilitarCampo($valorCOFINS);
+
+        $divValorCSLL.show();
+        mostrarCampo($valorCSLL);
+        habilitarCampo($valorCSLL);
+                
+        $divValorIRRF.show()
+        mostrarCampo($valorIRRF);
+        habilitarCampo($valorIRRF);
+
+        $divValorCP.show();
+        mostrarCampo($valorCP);
+        habilitarCampo($valorCP);
     }
 
     function cst03() {
+        $divValorPIS.show();
+        $divValorCOFINS.show();
+        configurarValoresCalculados();
+       
         mostrarCampo($baseCalcFederal);
         habilitarCampo($baseCalcFederal);
 
@@ -543,9 +656,25 @@ $(document).ready(function () {
 
         mostrarCampo($valorCOFINS);
         desabilitarCampo($valorCOFINS);
+
+        $divValorCSLL.show();
+        mostrarCampo($valorCSLL);
+        habilitarCampo($valorCSLL);
+                
+        $divValorIRRF.show()
+        mostrarCampo($valorIRRF);
+        habilitarCampo($valorIRRF);
+
+        $divValorCP.show();
+        mostrarCampo($valorCP);
+        habilitarCampo($valorCP);
     }
 
     function cst04() {
+        $divValorPIS.show();
+        $divValorCOFINS.show();
+        configurarValoresCalculados();
+       
         mostrarCampo($baseCalcFederal);
         habilitarCampo($baseCalcFederal);
 
@@ -559,15 +688,29 @@ $(document).ready(function () {
 
         mostrarCampo($valorPIS);
         desabilitarCampo($valorPIS);
-        $valorPIS.val('0,00');
 
         mostrarCampo($valorCOFINS);
         desabilitarCampo($valorCOFINS);
-        $valorCOFINS.val('0,00');
+
+        $divValorCSLL.show();
+        mostrarCampo($valorCSLL);
+        habilitarCampo($valorCSLL);
+                
+        $divValorIRRF.show()
+        mostrarCampo($valorIRRF);
+        habilitarCampo($valorIRRF);
+
+        $divValorCP.show();
+        mostrarCampo($valorCP);
+        habilitarCampo($valorCP);
     }
 
     function cst05() {
 
+        $divValorPIS.show();
+        $divValorCOFINS.show();
+        configurarValoresCalculados();
+       
         mostrarCampo($baseCalcFederal);
         habilitarCampo($baseCalcFederal);
 
@@ -582,9 +725,25 @@ $(document).ready(function () {
 
         mostrarCampo($valorCOFINS);
         desabilitarCampo($valorCOFINS);
+
+        $divValorCSLL.show();
+        mostrarCampo($valorCSLL);
+        habilitarCampo($valorCSLL);
+                
+        $divValorIRRF.show()
+        mostrarCampo($valorIRRF);
+        habilitarCampo($valorIRRF);
+
+        $divValorCP.show();
+        mostrarCampo($valorCP);
+        habilitarCampo($valorCP);
     }
 
     function cst06() {
+       $divValorPIS.show();
+        $divValorCOFINS.show();
+        configurarValoresCalculados();
+       
         mostrarCampo($baseCalcFederal);
         habilitarCampo($baseCalcFederal);
 
@@ -598,78 +757,29 @@ $(document).ready(function () {
 
         mostrarCampo($valorPIS);
         desabilitarCampo($valorPIS);
-        $valorPIS.val('0,00');
 
         mostrarCampo($valorCOFINS);
         desabilitarCampo($valorCOFINS);
-        $valorCOFINS.val('0,00');
+
+        $divValorCSLL.show();
+        mostrarCampo($valorCSLL);
+        desabilitarCampo($valorCSLL);
+                
+        $divValorIRRF.show()
+        mostrarCampo($valorIRRF);
+        habilitarCampo($valorIRRF);
+
+        $divValorCP.show();
+        mostrarCampo($valorCP);
+        habilitarCampo($valorCP);
     }    
 
     function cst07() {
 
-        mostrarCampo($baseCalcFederal);
-        habilitarCampo($baseCalcFederal);
-
-        mostrarCampo($aliqPIS);
-        desabilitarCampo($aliqPIS);
-        $aliqPIS.val('0,00');
-
-        mostrarCampo($aliqCOFINS);
-        desabilitarCampo($aliqCOFINS);
-        $aliqCOFINS.val('0,00');
-
-        mostrarCampo($valorPIS);
-        desabilitarCampo($valorPIS);
-        $valorPIS.val('0,00');
-
-        mostrarCampo($valorCOFINS);
-        desabilitarCampo($valorCOFINS);
-        $valorCOFINS.val('0,00');
-    }
-
-    function cst08() {
-        mostrarCampo($baseCalcFederal);
-        habilitarCampo($baseCalcFederal);
-
-        mostrarCampo($aliqPIS);
-        desabilitarCampo($aliqPIS);
-        $aliqPIS.val('0,00');
-
-        mostrarCampo($aliqCOFINS);
-        desabilitarCampo($aliqCOFINS);
-        $aliqCOFINS.val('0,00');
-
-        mostrarCampo($valorPIS);
-        desabilitarCampo($valorPIS);
-        $valorPIS.val('0,00');
-
-        mostrarCampo($valorCOFINS);
-        desabilitarCampo($valorCOFINS);
-        $valorCOFINS.val('0,00');
-    }
-
-    function cst09() {
-        mostrarCampo($baseCalcFederal);
-        habilitarCampo($baseCalcFederal);
-
-        mostrarCampo($aliqPIS);
-        desabilitarCampo($aliqPIS);
-        $aliqPIS.val('0,00');
-
-        mostrarCampo($aliqCOFINS);
-        desabilitarCampo($aliqCOFINS);
-        $aliqCOFINS.val('0,00');
-
-        mostrarCampo($valorPIS);
-        desabilitarCampo($valorPIS);
-        $valorPIS.val('0,00');
-
-        mostrarCampo($valorCOFINS);
-        desabilitarCampo($valorCOFINS);
-        $valorCOFINS.val('0,00');
-    }
-
-    function cst49() {
+       $divValorPIS.show();
+        $divValorCOFINS.show();
+        configurarValoresCalculados();
+       
         mostrarCampo($baseCalcFederal);
         habilitarCampo($baseCalcFederal);
 
@@ -684,6 +794,117 @@ $(document).ready(function () {
 
         mostrarCampo($valorCOFINS);
         desabilitarCampo($valorCOFINS);
+
+        $divValorCSLL.show();
+        mostrarCampo($valorCSLL);
+        habilitarCampo($valorCSLL);
+                
+        $divValorIRRF.show()
+        mostrarCampo($valorIRRF);
+        habilitarCampo($valorIRRF);
+
+        $divValorCP.show();
+        mostrarCampo($valorCP);
+        habilitarCampo($valorCP);
+    }
+
+    function cst08() {
+        $divValorPIS.show();
+        $divValorCOFINS.show();
+        configurarValoresCalculados();
+       
+        mostrarCampo($baseCalcFederal);
+        habilitarCampo($baseCalcFederal);
+
+        mostrarCampo($aliqPIS);
+        habilitarCampo($aliqPIS);
+
+        mostrarCampo($aliqCOFINS);
+        habilitarCampo($aliqCOFINS);
+
+        mostrarCampo($valorPIS);
+        desabilitarCampo($valorPIS);
+
+        mostrarCampo($valorCOFINS);
+        desabilitarCampo($valorCOFINS);
+
+        $divValorCSLL.show();
+        mostrarCampo($valorCSLL);
+        habilitarCampo($valorCSLL);
+                
+        $divValorIRRF.show()
+        mostrarCampo($valorIRRF);
+        habilitarCampo($valorIRRF);
+
+        $divValorCP.show();
+        mostrarCampo($valorCP);
+        habilitarCampo($valorCP);
+    }
+
+    function cst09() {
+        $divValorPIS.show();
+        $divValorCOFINS.show();
+        configurarValoresCalculados();
+       
+        mostrarCampo($baseCalcFederal);
+        habilitarCampo($baseCalcFederal);
+
+        mostrarCampo($aliqPIS);
+        habilitarCampo($aliqPIS);
+
+        mostrarCampo($aliqCOFINS);
+        habilitarCampo($aliqCOFINS);
+
+        mostrarCampo($valorPIS);
+        desabilitarCampo($valorPIS);
+
+        mostrarCampo($valorCOFINS);
+        desabilitarCampo($valorCOFINS);
+
+        $divValorCSLL.show();
+        mostrarCampo($valorCSLL);
+        habilitarCampo($valorCSLL);
+                
+        $divValorIRRF.show()
+        mostrarCampo($valorIRRF);
+        habilitarCampo($valorIRRF);
+
+        $divValorCP.show();
+        mostrarCampo($valorCP);
+        habilitarCampo($valorCP);
+    }
+
+    function cst49() {
+        $divValorPIS.show();
+        $divValorCOFINS.show();
+        configurarValoresCalculados();
+       
+        mostrarCampo($baseCalcFederal);
+        habilitarCampo($baseCalcFederal);
+
+        mostrarCampo($aliqPIS);
+        habilitarCampo($aliqPIS);
+
+        mostrarCampo($aliqCOFINS);
+        habilitarCampo($aliqCOFINS);
+
+        mostrarCampo($valorPIS);
+        desabilitarCampo($valorPIS);
+
+        mostrarCampo($valorCOFINS);
+        desabilitarCampo($valorCOFINS);
+
+        $divValorCSLL.show();
+        mostrarCampo($valorCSLL);
+        habilitarCampo($valorCSLL);
+                
+        $divValorIRRF.show()
+        mostrarCampo($valorIRRF);
+        habilitarCampo($valorIRRF);
+
+        $divValorCP.show();
+        mostrarCampo($valorCP);
+        habilitarCampo($valorCP);
     }
 
     //se tiver particularidade depois chamo separado
@@ -788,27 +1009,42 @@ $(document).ready(function () {
         $valorCSLL.closest('div').hide();
         $valorIRRF.closest('div').hide();
         $valorCP.closest('div').hide();
+
+        $tipoRetFederal.prop('selectedIndex', 0);
     }
 
     function configurarCSTCredito() {
-        // Base de cálculo
+       $divValorPIS.show();
+        $divValorCOFINS.show();
+        configurarValoresCalculados();
+       
         mostrarCampo($baseCalcFederal);
         habilitarCampo($baseCalcFederal);
 
-        // Alíquota PIS
         mostrarCampo($aliqPIS);
-        habilitarCampo($aliqPIS);
+        desabilitarCampo($aliqPIS);
+        $aliqPIS.val('0,00');
 
-        // Alíquota COFINS
         mostrarCampo($aliqCOFINS);
-        habilitarCampo($aliqCOFINS);
+        desabilitarCampo($aliqCOFINS);
+        $aliqCOFINS.val('0,00');
 
-        // Valor PIS - calculado
         mostrarCampo($valorPIS);
         desabilitarCampo($valorPIS);
 
-        // Valor COFINS - calculado
         mostrarCampo($valorCOFINS);
         desabilitarCampo($valorCOFINS);
+
+        $divValorCSLL.show();
+        mostrarCampo($valorCSLL);
+        habilitarCampo($valorCSLL);
+                
+        $divValorIRRF.show()
+        mostrarCampo($valorIRRF);
+        habilitarCampo($valorIRRF);
+
+        $divValorCP.show();
+        mostrarCampo($valorCP);
+        habilitarCampo($valorCP);
     }
 });
