@@ -43,8 +43,6 @@ $(document).ready(function () {
     // ==========================================
     // INICIALIZAÇÃO
     // ==========================================
-
-    console.log('Tributação federal inicializada');
     
     $tipoRetFederal.closest('label').hide();
     $divBaseCalcFederal.closest('label').hide()
@@ -60,7 +58,7 @@ $(document).ready(function () {
                 if(situacaoTribPisCofins == '00'){
                     desabilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '01'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '02'){
                     desabilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '03'){
@@ -118,16 +116,16 @@ $(document).ready(function () {
                 }else if(situacaoTribPisCofins == '06'){
                     habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else{
                     if (cstsCredito.includes(situacaoTribPisCofins)) {
-                        hablitarCampo($valorCSLL)
+                        habilitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -160,16 +158,16 @@ $(document).ready(function () {
                     $aliqCOFINS.val('0,00');
                     habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else{
                     if (cstsCredito.includes(situacaoTribPisCofins)) {
-                        hablitarCampo($valorCSLL)
+                        habilitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -202,16 +200,16 @@ $(document).ready(function () {
                     $aliqCOFINS.val('0,00');
                     habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else{
                     if (cstsCredito.includes(situacaoTribPisCofins)) {
-                        hablitarCampo($valorCSLL)
+                        habilitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -244,16 +242,16 @@ $(document).ready(function () {
                     $aliqCOFINS.val('0,00');
                     habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else{
                     if (cstsCredito.includes(situacaoTribPisCofins)) {
-                        hablitarCampo($valorCSLL)
+                        habilitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -286,16 +284,16 @@ $(document).ready(function () {
                     $aliqCOFINS.val('0,00');
                     habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else{
                     if (cstsCredito.includes(situacaoTribPisCofins)) {
-                        hablitarCampo($valorCSLL)
+                        habilitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -328,16 +326,16 @@ $(document).ready(function () {
                     $aliqCOFINS.val('0,00');
                     habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else{
                     if (cstsCredito.includes(situacaoTribPisCofins)) {
-                        hablitarCampo($valorCSLL)
+                        habilitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -370,16 +368,16 @@ $(document).ready(function () {
                     $aliqCOFINS.val('0,00');
                     habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else{
                     if (cstsCredito.includes(situacaoTribPisCofins)) {
-                        hablitarCampo($valorCSLL)
+                        habilitarCampo($valorCSLL)
                     }
                 } 
                 break;
@@ -412,16 +410,16 @@ $(document).ready(function () {
                     $aliqCOFINS.val('0,00');
                     habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else{
                     if (cstsCredito.includes(cst)) {
-                        hablitarCampo($valorCSLL) 
+                        habilitarCampo($valorCSLL) 
                     }
                 }              
                 break;
@@ -454,16 +452,16 @@ $(document).ready(function () {
                     $aliqCOFINS.val('0,00');
                     habilitarCampo($valorCSLL);
                 }else if(situacaoTribPisCofins == '07'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '08'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '09'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else if(situacaoTribPisCofins == '49'){
-                    hablitarCampo($valorCSLL)
+                    habilitarCampo($valorCSLL)
                 }else{
                     if (cstsCredito.includes(situacaoTribPisCofins)) {
-                        hablitarCampo($valorCSLL)
+                        habilitarCampo($valorCSLL)
                     }
                 } 
                 break;

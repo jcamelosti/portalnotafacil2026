@@ -30,37 +30,73 @@
 
         <script type="text/javascript">
             $(function(){
-                 const oldData = {
+                const $campoSelectNbs  = $('#nbs');
+                const $campoSelectDdlSitTribFederal = $('#ddlSitTribFederal');
+                
+                const oldData = {
                     empresa_id: "{{ old('empresa_id') }}",
                     cTribMun: "{{ old('empresa_atividade_id') }}",
                     cTribNac: "{{ old('cTribNac') }}",
                     nbs: "{{ old('nbs') }}"
                 };
+
+                $campoSelectNbs.prop("disabled", false);
+                $campoSelectNbs.css('background-color', '#D3D3D3');
+
+                $campoSelectDdlSitTribFederal.prop("disabled", true);
+                $campoSelectDdlSitTribFederal.css('background-color', '#D3D3D3');
                 
-                /*$('#uf_id').change(function(e){
-                    $('#cidade_id').remove();
+                $('#ddlPaisPrestacao').change(function(e){
+                    e.preventDefault();
+                    if($(this).val() != 26){
+                        $('#ddlEstadoPrestacao').prop("disabled", true).css('background-color', '#D3D3D3');
+                        $('#ddlCidadePrestacao').prop("disabled", true).css('background-color', '#D3D3D3');
+                    }else{
+                        $('#ddlEstadoPrestacao').prop("disabled", false).css('background-color', '');
+                        $('#ddlCidadePrestacao').prop("disabled", false).css('background-color', '');
+                    }
+                });
+
+
+                $('#ddlEstadoPrestacao').change(function(e){
                     if( $(this).val() != '' ) {
                         e.preventDefault();
           
                         $.ajax({
-                          type      : 'GET',
-                          url: base_url + '/consultar/cidades/' + $(this).val(),
-                          contentType: false,
-                          cache: false,
-                          processData: false,
-                          success : function(result){
-                              $('#cidade_id').remove();
-                              $('.localPrestacaoServico').append(result);
-                          },
-                          error : function(){
-                              alert('Verifique os dados Informados e tente novamente.');
-                          }
+                            type: 'GET',
+                            url: base_url + '/consultar/cidades/' + $(this).val() + '/json',
+                            dataType: 'json',
+                            cache: false,
+
+                            success: function(data) {
+                                const $cidade = $('#ddlCidadePrestacao');
+                                $cidade.empty();
+                                $cidade.append(
+                                    $('<option>', {
+                                        value: '',
+                                        text: 'Selecione a Cidade'
+                                    })
+                                );
+
+                                $.each(data, function(index, cidade) {
+                                    $cidade.append(
+                                        $('<option>', {
+                                            value: cidade.codigo,
+                                            text: cidade.municipio
+                                        })
+                                    );
+                                });
+                            },
+
+                            error: function(xhr) {
+                                console.log('ERRO:', xhr);
+                                console.log(xhr.responseText);
+
+                                alert('Verifique os dados Informados e tente novamente.');
+                            }
                         });
-                    } else {
-                        //$('.comboBoxCidades1').show();
-                        //$('.comboBoxCidades1').html('<option value="">Escolha o Estado</option>');
-                    }
-                });*/
+                    } 
+                });
 
                 $('#empresa_atividade_id').on('change', function () {
                     carregarCodTributacaoNac(
@@ -76,6 +112,7 @@
                     );
 
                     $('#nbs').prop("disabled", false);
+                     $campoSelectNbs.css('background-color', '');
                 });
 
                 if (oldData.cTribNac) {
@@ -84,6 +121,11 @@
                         oldData.cTribNac                   
                     );
                 }
+
+                $campoSelectNbs.on('change', function () {
+                    $campoSelectDdlSitTribFederal.prop("disabled", false);
+                    $campoSelectDdlSitTribFederal.css('background-color', '');
+                });
             });
 
             function carregarCodTributacaoNac(tribNacSelecionada = null, cTribMun) {
@@ -93,7 +135,6 @@
                 cTribNacSelect.append('<option value="">Código Tributação Nacional</option>');
 
                 $.getJSON('/c/emissor/obter/tributacao-nacional/por-tributacao-mun?cTribMun=' + cTribMun, function (data) {
-                    console.log(data);
                     $.each(data, function (_, tribNac) {
                         cTribNacSelect.append(
                             $('<option>', {
@@ -114,7 +155,6 @@
                 nbsSelect.append('<option value="">NBS</option>');
 
                 $.getJSON('/c/emissor/obter/nbs/por-empresa?cTribNac=' + cTribNac, function (data) {
-    
                     $.each(data, function (_, nbs) {
                         nbsSelect.append(
                             $('<option>', {

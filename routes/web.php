@@ -47,6 +47,7 @@ Route::get('/consultar/cidades/{uf_id}', [SiteController::class, 'consultarCidad
 Route::get('/consultar/item-lc/{cnae_id}', [SiteController::class, 'consultarItemLc'])->name('site.consulta_item_lc');
 Route::get('/consultar/nbs/{item_lc_id}', [SiteController::class, 'consultarNbs'])->name('site.consulta_nbs');
 Route::get('/listar/cidades', [SiteController::class, 'buscarCidades'])->name('site.consulta_cidades_geral');
+Route::get('/consultar/cidades/{uf_id}/json', [SiteController::class, 'buscarCidadesJson'])->name('site.consulta_cidades-json');
 
 //MERCADO PAGO - /retorno/mercadopago
 //essa rota é sobre aguardar o pagamento do pix e redirecionar o usuário.

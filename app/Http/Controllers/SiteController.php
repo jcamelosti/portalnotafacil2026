@@ -80,4 +80,16 @@ class SiteController extends Controller
 
         return response()->json($dados,200,[],JSON_UNESCAPED_UNICODE);
     }    
+
+    public function buscarCidadesJson(Request $request, $uf_id)
+    {        
+        $municipios = Municipio::query()
+            ->where('uf_id', $uf_id)
+            ->get([
+                'codigo',
+                'municipio',
+            ]);
+
+        return response()->json($municipios,200,[],JSON_UNESCAPED_UNICODE);
+    }    
 }
