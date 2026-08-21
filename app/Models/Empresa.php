@@ -191,29 +191,29 @@ class Empresa extends Model
     //Situação perante Simples Nacional:
     public static function getOpcaoSimplesNacional(){
         return [
-            1 => 'Não Optante',
-			2 => 'Optante - Microempreendedor Individual (MEI)',
-			3 => 'Optante - Microempresa ou Empresa de Pequeno Porte (ME/EPP)'
+            '1' => 'Não Optante',
+			'2' => 'Optante - Microempreendedor Individual (MEI)',
+			'3' => 'Optante - Microempresa ou Empresa de Pequeno Porte (ME/EPP)'
         ];
     }
 
     public static function getRegimeApuracaoSimplesNacional(){
         return [
-            1 => 'Regime de apuração dos tributos federais e municipal pelo SN',
-			2 => 'Regime de apuração dos tributos federais pelo SN e o ISSQN pela NFS-e conforme respectiva legislação municipal do tributo',
-			3 => 'Regime de apuração dos tributos federais e municipal pela NFS-e conforme respectivas legilações federal e municipal de cada tributo'
+            '1' => 'Regime de apuração dos tributos federais e municipal pelo SN',
+			'2' => 'Regime de apuração dos tributos federais pelo SN e o ISSQN pela NFS-e conforme respectiva legislação municipal do tributo',
+			'3' => 'Regime de apuração dos tributos federais e municipal pela NFS-e conforme respectivas legilações federal e municipal de cada tributo'
         ];
     }
 
     public static function getTiposRegimeEspecialTributacaoMunicipio(){
         return [
-            0 => 'Nenhum',
-			1 => 'Ato Cooperado (Cooperativa)',
-			2 => 'Estimativa',
-			3 => 'Microempresa Municipal',
-			4 => 'Notário ou Registrador', 
-			5 => 'Profissional Autônomo',
-			6 => 'Sociedade de Profissionais'
+            '0' => 'Nenhum',
+			'1' => 'Ato Cooperado (Cooperativa)',
+			'2' => 'Estimativa',
+			'3' => 'Microempresa Municipal',
+			'4' => 'Notário ou Registrador', 
+			'5' => 'Profissional Autônomo',
+			'6' => 'Sociedade de Profissionais'
         ];
     }
 }

@@ -444,7 +444,35 @@
                             Regimes de Tributação do Prestador de Serviço
                         </h4>
 
-                        
+                        <div class="grid md:grid-cols-2 gap-1 mt-4 mb-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Situação Perante Simples Nacional*</span>
+                                {!! Form::select('op_simp_nac', $situacao_simples_nacional
+                                ,$empresa->op_simp_nac, ['required','class'=>'block w-full mt-1 text-sm  
+                                form-select
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                @if ($errors->has('op_simp_nac'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{ { $errors->first('op_simp_nac') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+
+                            @if($empresa->op_simp_nac == 3 || $empresa->op_simp_nac == 2)
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Regime de Apuração Tributária pelo Simples Nacional*:</span>
+                                    {!! Form::select('tp_reg_apuracao_sn', $regimes_apuracao_sn
+                                    ,$empresa->tp_reg_apuracao_sn, ['required','class'=>'block w-full mt-1 text-sm  
+                                    form-select
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                    @if ($errors->has('tp_reg_apuracao_sn'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{ { $errors->first('tp_reg_apuracao_sn') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+                            @endif
+                        </div>
 
                         <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
                             Tributação Federal

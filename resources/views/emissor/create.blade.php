@@ -49,11 +49,45 @@
                 $('#ddlPaisPrestacao').change(function(e){
                     e.preventDefault();
                     if($(this).val() != 26){
-                        $('#ddlEstadoPrestacao').prop("disabled", true).css('background-color', '#D3D3D3');
-                        $('#ddlCidadePrestacao').prop("disabled", true).css('background-color', '#D3D3D3');
+                        $('#ddlEstadoPrestacao').prop("disabled", true).css('background-color', '#D3D3D3').empty();
+                        $('#ddlCidadePrestacao').prop("disabled", true).css('background-color', '#D3D3D3').empty();
                     }else{
                         $('#ddlEstadoPrestacao').prop("disabled", false).css('background-color', '');
                         $('#ddlCidadePrestacao').prop("disabled", false).css('background-color', '');
+
+                        $.ajax({
+                            type: 'GET',
+                            url: base_url + '/consultar/estados/json',
+                            dataType: 'json',
+                            cache: false,
+
+                            success: function(data) {
+                                const $estados = $('#ddlEstadoPrestacao');
+                                $estados.empty();
+                                $estados.append(
+                                    $('<option>', {
+                                        value: '',
+                                        text: 'Selecione o Estado'
+                                    })
+                                );
+
+                                $.each(data, function(index, uf) {
+                                    $estados.append(
+                                        $('<option>', {
+                                            value: uf.id,
+                                            text: uf.nome
+                                        })
+                                    );
+                                });
+                            },
+
+                            error: function(xhr) {
+                                console.log('ERRO:', xhr);
+                                console.log(xhr.responseText);
+
+                                alert('Verifique os dados Informados e tente novamente.');
+                            }
+                        });
                     }
                 });
 

@@ -111,7 +111,20 @@ class NotaController extends Controller
             ->orderBy('cTribMun', 'asc')
             ->pluck('field1', 'cTribNac')
             ->all();
+
+        $situacao_simples_nacional = Empresa::getOpcaoSimplesNacional();//Regime de Apuração Tributária pelo Simples Nacional, campo regApTribSN em regTrib
+        //Regime de Apuração Tributária pelo Simples Nacional.
+        $regimes_apuracao_sn = Empresa::getRegimeApuracaoSimplesNacional();
+        //Tipos de Regimes Especiais de Tributação Municipal:
         
+        $situacao_simples_nacional = array_filter($situacao_simples_nacional, function($chave) use ($empresa) {
+            return (int)$chave === (int)$empresa->op_simp_nac;
+        }, ARRAY_FILTER_USE_KEY);
+        
+        $regimes_apuracao_sn = array_filter($regimes_apuracao_sn, function($chave) use ($empresa) {
+            return (int)$chave === (int)$empresa->tp_reg_apuracao_sn;
+        }, ARRAY_FILTER_USE_KEY);
+
         return view('emissor.create', [
             'data_competencia' => $data_competencia,
             'tomador' => $tomador,
@@ -122,7 +135,9 @@ class NotaController extends Controller
             'dados_cadastrais' => $dadosCadastrais,
             'atividades' => $atividades,
             'cod_trib_nac' => $cod_trib_nac,
-            'atividade' => $atividade
+            'atividade' => $atividade,
+            'situacao_simples_nacional' => $situacao_simples_nacional,
+            'regimes_apuracao_sn' => $regimes_apuracao_sn
         ]);
     }
 

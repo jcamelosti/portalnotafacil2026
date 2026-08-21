@@ -92,4 +92,15 @@ class SiteController extends Controller
 
         return response()->json($municipios,200,[],JSON_UNESCAPED_UNICODE);
     }    
+
+    public function buscarEstadosJson(){
+        $estados = Uf::query()
+            ->where('id', '<', 28 )
+            ->get([
+                'id',
+                'nome',
+            ]);
+
+        return response()->json($estados,200,[],JSON_UNESCAPED_UNICODE);
+    }
 }
