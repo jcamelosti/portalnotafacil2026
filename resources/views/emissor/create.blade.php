@@ -1,8 +1,8 @@
 <x-area-empresa-layout title="Emissor NFSe">
     <!-- FULL WIDTH -->
-    <div class="w-full px-4 py-6 sm:px-6 lg:px-8">
+    <div class="w-full px-4 py-0 sm:px-0 lg:px-0">
         <!-- FORM FULL -->
-        <div class="w-full py-6">
+        <div class="w-full py-2">
             {!! Form::open(['route'=>'notas.store', 'files'=> true, 'name'=> 'Form1']) !!}
                 @include('emissor._form')
             {!! Form::close() !!}

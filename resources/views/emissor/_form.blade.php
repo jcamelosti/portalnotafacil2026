@@ -55,7 +55,7 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Atividade Municipal:</span>
                                 {!! Form::select('empresa_atividade_id', isset($atividades) ? $atividades : []
-                                ,$nota_original['empresa_atividade_id'] ?? $atividade->codigo_atividade, ['required','class'=>'block w-full mt-1 text-sm  
+                                ,old('empresa_atividade_id'), ['required','class'=>'block w-full mt-1 text-sm  
                                 px-3 py-1.5
                                 form-select
                                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray', 'id'=>"empresa_atividade_id"]) !!}
@@ -95,16 +95,6 @@
                             </label>
                         </div>
                         
-
-                        @if($empresa->regime_tributario === 'simples')
-                        <!--div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
-                            <label class="block text-sm">
-                                <span class="text-gray-700 ">Como IBS/CBS são apurados?:</span>
-                                
-                            </label>
-                        </div-->
-                        @endif
-
                         <div class="grid md:grid-cols-5 gap-1">
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Valor Total dos Serviços(*):</span>
@@ -475,6 +465,186 @@
                         </div>
 
                         <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
+                            Impostos Sobre Serviços de Qualquer Natureza - ISSQN
+                        </h4>
+                        <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Tributação do ISSQN*</span>
+                                {!! Form::select('ddlTribISSQN', $tributacao_issqn_list
+                                ,null, ['required','id' => 'ddlTribISSQN','class'=>'block w-full mt-1 text-sm  
+                                form-select
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                @if ($errors->has('ddlTribISSQN'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{ { $errors->first('ddlTribISSQN') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Tipo Imunidade</span>
+                                {!! Form::select('ddlImunidade', []
+                                ,null, ['id' => 'ddlImunidade','class'=>'block w-full mt-1 text-sm  
+                                form-select
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                @if ($errors->has('ddlImunidade'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{ { $errors->first('ddlImunidade') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Tipo de Suspensão Exigibilidade</span>
+                                {!! Form::select('ddlSuspExig', []
+                                ,null, ['id'=> 'ddlSuspExig' ,'class'=>'block w-full mt-1 text-sm  
+                                form-select
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                @if ($errors->has('ddlSuspExig'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{ { $errors->first('ddlSuspExig') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Nº Processo Suspensão Exigibilidade. *:</span>
+                                <input name="txtProcExig" type="text" id="txtProcExig" placeholder="" class="block w-full mt-1 text-sm  
+              focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+              :shadow-outline-gray form-input" onkeypress="" onpaste="return false;" onblur="">
+                                @if ($errors->has('txtProcExig'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{ { $errors->first('txtProcExig') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-1 mt-4 mb-4">
+                            <label class="block text-sm w-10/12" id="cidade_incidencia_id">
+                                <span class="text-gray-700 ">Município Incidência (Cidade/UF)</span>
+                                {!! Form::select('ddlMunInci', $cidades, $empresa->cidade_id, [
+                                    'id' => 'ddlMunInci', 
+                                    'maxlength' => '255',
+                                    'disabled',
+                                    'class'=>'block w-10/12 mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'']) !!}
+                                @if ($errors->has('ddlMunInci'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{{ $errors->first('ddlMunInci') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+
+                            <label class="block text-sm w-10/12" id="uf_incidencia_id">
+                                <span>&nbsp;<span>
+                                {!! Form::select('ddlUFInci', $estados, $empresa->cidade->estado->id, [
+                                    'id' => 'ddlUFInci', 
+                                    'maxlength' => '255',
+                                    'disabled',
+                                    'class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'']) !!}
+                                @if ($errors->has('ddlUFInci'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{{ $errors->first('ddlUFInci') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+                        </div>
+
+                        <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Regimes Especiais de Tributação*</span>
+                                {!! Form::select('ddlRegimeEspecial', $tipos_regime_esp_trib_mun
+                                ,null, ['id'=> 'ddlRegimeEspecial','disabled','class'=>'block w-full mt-1 text-sm  
+                                form-select
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                @if ($errors->has('ddlRegimeEspecial'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{ { $errors->first('ddlRegimeEspecial') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Tipo de Retenção do ISSQN</span>
+                                {!! Form::select('ddlTipoRetencao', $tipos_retencoes
+                                ,null, ['id'=> 'ddlTipoRetencao','disabled','class'=>'block w-full mt-1 text-sm  
+                                form-select
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                @if ($errors->has('ddlTipoRetencao'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{ { $errors->first('ddlTipoRetencao') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Código Obra</span>
+                                {!! Form::text('txtCodigoObra', old('txtCodigoObra'), ['disabled','class'=>'block w-full mt-1 text-sm  
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtCodigoObra']) !!}
+                                @if ($errors->has('txtCodigoObra'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{{ $errors->first('txtCodigoObra') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+
+                             <label class="block text-sm">
+                                <span class="text-gray-700 ">Deduções Base Cálc.*:</span>
+                                <input disabled name="txtDeducaoBaseCalculo" type="text" maxlength="20" id="txtDeducaoBaseCalculo" placeholder="0,00" class="block w-full mt-1 text-sm  
+              focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+              :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
+                            </label>
+                        </div>
+
+                        <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">ART</span>
+                                {!! Form::text('txtArt', old('txtArt'), ['disabled','class'=>'block w-full mt-1 text-sm  
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtArt']) !!}
+                                @if ($errors->has('txtArt'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{{ $errors->first('txtArt') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+
+                             <label class="block text-sm">
+                                <span class="text-gray-700 ">Base de Cálculo do ISSQN</span>
+                                <input disabled name="txtBaseCalculoISS" type="text" maxlength="20" id="txtBaseCalculoISS" placeholder="0,00" class="block w-full mt-1 text-sm  
+              focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+              :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
+                            </label>
+
+                             <label class="block text-sm">
+                                <span class="text-gray-700 ">Aliq. ISSQN</span>
+                                <input value="{{ number_format($atividade->aliquota,2, ',', '') }}" disabled name="txtAliquota" type="text" maxlength="5" id="txtAliquota" placeholder="0,00" class="block w-full mt-1 text-sm  
+              focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+              :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
+                            </label>
+
+                             <label class="block text-sm">
+                                <span class="text-gray-700 ">Valor ISSQN</span>
+                                <input disabled name="txtValorISSQN" type="text" maxlength="5" id="txtValorISSQN" placeholder="0,00" class="block w-full mt-1 text-sm  
+              focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+              :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
+                            </label>
+
+                             <label class="block text-sm">
+                                <span class="text-gray-700 ">Valor ISSQN Retido</span>
+                                <input disabled name="txtValorRetido" type="text" maxlength="20" id="txtValorRetido" placeholder="0,00" class="block w-full mt-1 text-sm  
+              focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+              :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
+                            </label>
+                        </div>
+
+
+                        <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
                             Tributação Federal
                         </h4>
 
@@ -578,7 +748,7 @@
                                     <span class="text-gray-700">Valor PIS</span>
                                     <input placeholder="0,00" name="txtValorPis" type="text" maxlength="22" id="txtValorPis" disabled="disabled" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-                    :shadow-outline-gray form-input" oninput="Money(event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
+                    :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                 </label>
                             </div>
                             <div id="divValorCOFINS">
@@ -586,7 +756,7 @@
                                     <span class="text-gray-700">Valor COFINS</span>
                                     <input placeholder="0,00" name="txtValorCOFINS" type="text" maxlength="22" id="txtValorCOFINS" disabled="disabled" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-                    :shadow-outline-gray form-input" oninput="Money(event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
+                    :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                 </label>
                             </div>
                             <div id="divValorCSLL">
@@ -594,7 +764,7 @@
                                     <span class="text-gray-700">Valor CSLL</span>
                                     <input placeholder="0,00" name="txtValorCSLL" type="text" maxlength="22" onchange="" onkeypress="" language="javascript" id="txtValorCSLL" disabled="disabled" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-                    :shadow-outline-gray form-input" oninput="Money(event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
+                    :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                 </label>
                             </div>
                             
@@ -603,7 +773,7 @@
                                     <span class="text-gray-700">Valor IRRF</span>
                                     <input placeholder="0,00" name="txtValorIRRF" type="text" maxlength="22" onchange="" onkeypress="" language="javascript" id="txtValorIRRF" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-                    :shadow-outline-gray form-input" oninput="Money(event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
+                    :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                 </label>
                             </div>
                             <div id="divValorCP">
@@ -611,7 +781,7 @@
                                     <span class="text-gray-700">Valor CP</span>
                                     <input placeholder="0,00" name="txtValorCP" type="text" maxlength="22" onchange="" language="javascript" id="txtValorCP" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-                    :shadow-outline-gray form-input" oninput="Money(event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
+                    :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                  </label>
                             </div>
                         </div>

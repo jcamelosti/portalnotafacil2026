@@ -50,6 +50,7 @@ class Empresa extends Model
         'serie_nota',
         'nbs_id',
         'num_ultimo_dps',
+        'serie_dps',
         'sigla_provedor',
         'ambiente_emissao',
         'regime_tributario',

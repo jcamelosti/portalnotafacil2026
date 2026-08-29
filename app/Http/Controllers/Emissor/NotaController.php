@@ -125,6 +125,58 @@ class NotaController extends Controller
             return (int)$chave === (int)$empresa->tp_reg_apuracao_sn;
         }, ARRAY_FILTER_USE_KEY);
 
+        ///Campo ddlTribISSQN
+        $dadosCadastrais = json_decode($empresa->dados_cadastrais, true);
+        
+        $tributacaoIssqnList = [
+            null => 'Selecione',
+            1 => 'Operação Tributável',
+		    2 => 'Imunidade',
+			3 => 'Exportação de serviço',
+			4 => 'Não Incidência',
+        ];
+
+        if(isset($dadosCadastrais['tributacoesPermitidas']['tribISSQN']) && $dadosCadastrais['tributacoesPermitidas']['tribISSQN'] == 1){
+            unset($tributacaoIssqnList[2]);
+            unset($tributacaoIssqnList[3]);
+            unset($tributacaoIssqnList[4]);
+        }else{
+            unset($tributacaoIssqnList[2]);
+            unset($tributacaoIssqnList[3]);
+            unset($tributacaoIssqnList[4]);
+        }
+
+        $tiposImunidadeList = [
+            null => 'Selecione',
+            0 => 'Imunidade',
+            1 => 'Patrimônio, renda ou serviços, uns dos outros (CF88, Art 150, VI, a)',
+            2 => 'Templos de qualquer culto (CF88, Art 150, VI, b)',
+            3 => 'Patrimônio, renda ou serviços dos partidos políticos, inclusive suas fundações, das entidades sindicais dos trabalhadores, das instituições de educação e de assistência social, sem fins lucrativos, atendidos os requisitos da lei (CF88, Art 150, VI, c)',
+            4 => 'Livros, jornais, periódicos e o papel destinado a sua impressão (CF88, Art 150, VI, d)',
+            5 => 'Fonogramas e videofonogramas musicais produzidos no Brasil contendo obras musicais ou literomusicais de autores brasileiros e/ou obras em geral interpretadas por artistas brasileiros bem como os suportes materiais ou arquivos digitais que os contenham, salvo na etapa de replicação industrial de mídias ópticas de leitura a laser. (CF88, Art 150, VI, e)',
+        ];
+
+        $tiposSuspencaoExigibilidade = [
+            null => 'Selecione',
+            1 => 'Exigibilidade Suspensa por Decisão Judicial',
+			2 => 'Exigibilidade Suspensa por Processo Administrativo'
+        ];
+
+        $tipos_regime_esp_trib_mun = Empresa::getTiposRegimeEspecialTributacaoMunicipio();
+        $tipos_regime_esp_trib_mun = array_filter($tipos_regime_esp_trib_mun, function($chave) use ($empresa) {
+            return (int)$chave === (int)$empresa->tp_regime_esp_trib_mun;
+        }, ARRAY_FILTER_USE_KEY);
+        $tipos_regime_esp_trib_mun = ['' => 'Selecione'] + $tipos_regime_esp_trib_mun;
+
+        $tipos_retencoes = [
+            1 => 'Não retido',
+            2 => 'Retido pelo Tomador',
+            3 => 'Retido pelo Intermediário'
+        ];
+
+        //$municipio_incidencia = $empresa->cidade_id;
+        $municipio_incidencia = Municipio::where('codigo', $empresa->cidade_id)->first();
+
         return view('emissor.create', [
             'data_competencia' => $data_competencia,
             'tomador' => $tomador,
@@ -137,7 +189,13 @@ class NotaController extends Controller
             'cod_trib_nac' => $cod_trib_nac,
             'atividade' => $atividade,
             'situacao_simples_nacional' => $situacao_simples_nacional,
-            'regimes_apuracao_sn' => $regimes_apuracao_sn
+            'regimes_apuracao_sn' => $regimes_apuracao_sn,
+            'tributacao_issqn_list' => $tributacaoIssqnList,
+            'tiposImunidadeList' => $tiposImunidadeList,
+            'tiposSuspencaoExigibilidade' => $tiposSuspencaoExigibilidade,
+            'tipos_regime_esp_trib_mun' => $tipos_regime_esp_trib_mun,
+            'tipos_retencoes' => $tipos_retencoes,
+            'municipio_incidencia' => $municipio_incidencia
         ]);
     }
 
@@ -197,5 +255,14 @@ class NotaController extends Controller
             ->get();
         
         return response()->json($dados,200,[],JSON_UNESCAPED_UNICODE);
+    }
+
+    public function obterPercentualAtividadeMunicipio(){
+        $identificador = request()->q;
+        $atividade = EmpresaAtividade::where('empresa_id', Session::get('empresa_selecionada'))
+            ->where('codigo_atividade', $identificador)
+            ->first();
+
+        return response()->json($atividade,200,[],JSON_UNESCAPED_UNICODE);
     }
 }

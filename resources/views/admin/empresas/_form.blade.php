@@ -415,35 +415,8 @@
             @endif
         </label>
     <div>
-
-    <div class="grid grid-cols-1 gap-1">
-        <label class="block text-sm">
-            <span class="text-gray-700 ">Número da Última Nota Emitida:</span>
-            {!! Form::text('num_ultima_nota', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
-            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
-            @if ($errors->has('num_ultima_nota'))
-                <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('num_ultima_nota') }}</strong>
-            </span>
-            @endif
-        </label>
-    </div>
-    <div class="grid grid-cols-1 gap-1">
-        <label class="block text-sm">
-            <span class="text-gray-700 ">Número de Série(Série da Nota):</span>
-            {!! Form::text('serie_nota', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
-            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
-            @if ($errors->has('serie_nota'))
-                <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('serie_nota') }}</strong>
-            </span>
-            @endif
-        </label>
-    </div>
-
-    <div class="grid grid-cols-1 gap-1">
+    
+    <div class="grid grid-cols-2 gap-1 mt-4">
         <label class="block text-sm">
             <span class="text-gray-700 ">Próximo Número de DPS(Número do próximo DPS NFSe Nacional):</span>
             {!! Form::text('num_ultimo_dps', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
@@ -452,6 +425,18 @@
             @if ($errors->has('num_ultimo_dps'))
                 <span class="text-xs text-red-600 ">
                 <strong>{{ $errors->first('num_ultimo_dps') }}</strong>
+            </span>
+            @endif
+        </label>
+
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Série DPS:</span>
+            {!! Form::text('serie_dps', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
+            @if ($errors->has('serie_dps'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('serie_dps') }}</strong>
             </span>
             @endif
         </label>

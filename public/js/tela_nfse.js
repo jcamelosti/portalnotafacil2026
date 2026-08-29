@@ -4,6 +4,7 @@ $(document).ready(function () {
     // CAMPOS TRIBUTÁRIOS FEDERAIS
     // ==========================================
 
+    const $empresaAtividade = $('#empresa_atividade_id');
     const $sitTribFederal   = $('#ddlSitTribFederal');
     const $tipoRetFederal   = $('#ddlTipoRetFederal');
 
@@ -17,6 +18,24 @@ $(document).ready(function () {
     const $valorIRRF        = $('#txtValorIRRF');
     const $valorCP          = $('#txtValorCP');
 
+    const $tributacaoIssqn  = $('#ddlTribISSQN');
+    const $regimeEspTrib    = $('#ddlRegimeEspecial');
+    const $tipoRetencao     = $('#ddlTipoRetencao');
+    const $aliquotaIssqn    = $('#txtAliquota');
+
+    const $txtArt                   = $('#txtArt');
+    const $txtCodigoObra            = $('#txtCodigoObra');
+    const $txtDeducaoBaseCalculo    = $('#txtDeducaoBaseCalculo');
+    const $txtBaseCalculoISS        = $('#txtBaseCalculoISS');
+    const $txtAliquota              = $('#txtAliquota');
+    const $txtValorISSQN            = $('#txtValorISSQN');
+    const $txtValorRetido           = $('#txtValorRetido');
+
+
+    //SUSPENSÕES
+    $ddlSuspExig            = $('#ddlSuspExig');
+    $ddlImunidade           = $('#ddlImunidade');
+    $txtProcExig            = $('#txtProcExig');
 
     // ==========================================
     // CONTAINERS
@@ -39,6 +58,7 @@ $(document).ready(function () {
         '98', '99'
     ];
 
+    const $valorTotalServico     = $('#txtTotal');
 
     // ==========================================
     // INICIALIZAÇÃO
@@ -47,9 +67,24 @@ $(document).ready(function () {
     $tipoRetFederal.closest('label').hide();
     $divBaseCalcFederal.closest('label').hide()
 
+    desabilitarCampo($ddlSuspExig);          
+    desabilitarCampo($ddlImunidade);           
+    desabilitarCampo($txtProcExig);
+    desabilitarCampo($regimeEspTrib);
+    desabilitarCampo($txtArt);
+    desabilitarCampo($tipoRetencao);
+    desabilitarCampo($txtCodigoObra);
+    desabilitarCampo($txtDeducaoBaseCalculo);
+    desabilitarCampo($txtBaseCalculoISS);
+    desabilitarCampo($txtAliquota);
+    desabilitarCampo($txtValorISSQN);
+    desabilitarCampo($txtValorRetido);
+
     resetarTributacaoFederal();
 
-    $tipoRetFederal.on('change', function () {
+    $tipoRetFederal.on('change', function (event) {
+        event.preventDefault();
+
         const tpRetFederal = $(this).val();
         const situacaoTribPisCofins = $sitTribFederal.val();
 
@@ -468,7 +503,9 @@ $(document).ready(function () {
         }
     });
 
-    $sitTribFederal.on('change', function () {
+    $sitTribFederal.on('change', function (event) {
+        event.preventDefault();
+
         const situacaoTribPisCofins = $(this).val();
 
         // Primeiro limpa o estado anterior
@@ -528,6 +565,231 @@ $(document).ready(function () {
         }
     });
 
+    $tributacaoIssqn.on('change', function ( event ) {
+        event.preventDefault();
+
+        habilitarCampo($regimeEspTrib);
+        habilitarCampo($txtDeducaoBaseCalculo);
+    });    
+
+    $regimeEspTrib.on('change', function ( event ) {
+        event.preventDefault();
+
+        habilitarCampo($tipoRetencao);
+        habilitarCampo($aliquotaIssqn);
+
+        calcularValorIssqn();
+    }); 
+
+    //ddlTipoRetencao
+    $tipoRetencao.on('change', function(event){
+        event.preventDefault();
+        tp = $(this).val();
+
+        if(tp != 1){
+            $txtValorRetido.val($txtValorISSQN.val());
+        }else{
+            $txtValorRetido.val('');
+        }
+    });
+    
+    function calcularValorIssqn() {
+        const baseCalcIssqn = converterNumero($txtBaseCalculoISS.val());
+        const aliquotaIssqn = converterNumero($aliquotaIssqn.val());
+        const valorDeducao = converterNumero($txtDeducaoBaseCalculo.val());
+
+        const valorIssqn = (baseCalcIssqn - valorDeducao ) * (aliquotaIssqn / 100);
+        
+        $txtBaseCalculoISS.val( formatarMoeda(baseCalcIssqn - valorDeducao) )
+
+        $txtValorISSQN.val(formatarMoeda(valorIssqn));
+        
+        if( $tipoRetencao.val() != 1 ){
+            $txtValorRetido.val($txtValorISSQN.val());
+        }else{
+            $txtValorRetido.val('');
+        }
+    }
+
+    function converterNumero(valor) {
+        if (!valor) {
+            return 0;
+        }
+
+        valor = valor.toString().trim();
+
+        // Remove separador de milhar e transforma vírgula em ponto
+        valor = valor.replace(/\./g, '').replace(',', '.');
+
+        const numero = parseFloat(valor);
+
+        return isNaN(numero) ? 0 : numero;
+    }
+
+    function formatarMoeda(valor) {
+        return valor.toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function calcularPisCofins() {
+        const base      = converterNumero($txtBaseCalcFederal.val());
+        const aliqPIS   = converterNumero($txtAliqPIS.val());
+        const aliqCOFINS = converterNumero($txtAliqCOFINS.val());
+
+        // Limpa os valores se não houver base
+        if (base <= 0) {
+            $txtValorPis.val('');
+            $txtValorCOFINS.val('');
+
+            $txtValorPis.prop('readonly', false);
+            $txtValorCOFINS.prop('readonly', false);
+
+            return;
+        }
+
+        // Validação das alíquotas
+        if (aliqPIS <= 0) {
+            $txtValorPis.val('');
+            $txtValorPis.prop('readonly', false);
+        } else {
+            const valorPIS = base * (aliqPIS / 100);
+
+            $txtValorPis
+                .val(formatarMoeda(valorPIS))
+                .prop('readonly', true);
+        }
+
+        if (aliqCOFINS <= 0) {
+            $txtValorCOFINS.val('');
+            $txtValorCOFINS.prop('readonly', false);
+        } else {
+            const valorCOFINS = base * (aliqCOFINS / 100);
+
+            $txtValorCOFINS
+                .val(formatarMoeda(valorCOFINS))
+                .prop('readonly', true);
+        }
+    }
+
+    $baseCalcFederal.on('change', function () {
+        calcularPisCofins();
+    });
+
+    $aliqPIS.on('change', function () {
+        calcularPisCofins();
+    });
+
+    $aliqCOFINS.on('change', function () {
+        calcularPisCofins();
+    });
+
+    $empresaAtividade.on('change', function(event){
+        valorCampo = $(this).val();
+        obterAtividade(valorCampo);
+    });
+
+    function validarCamposPisCofins() {
+        let valido = true;
+
+        const base = $baseCalcFederal.val().trim();
+        const pis = $aliqPIS.val().trim();
+        const cofins = $aliqCOFINS.val().trim();
+
+        [$baseCalcFederal, $aliqPIS, $aliqCOFINS].forEach(function ($campo) {
+            $campo.removeClass('border-red-500');
+        });
+
+        if (!base) {
+            $baseCalcFederal.addClass('border-red-500');
+            valido = false;
+        }
+
+        if (!pis) {
+            $aliqPIS.addClass('border-red-500');
+            valido = false;
+        }
+
+        if (!cofins) {
+            $aliqCOFINS.addClass('border-red-500');
+            valido = false;
+        }
+
+        return valido;
+    }
+
+    function calcularPisCofins() {
+        if (!validarCamposPisCofins()) {
+            $valorPIS.val('').prop('readonly', false);
+            $valorCOFINS.val('').prop('readonly', false);
+            return;
+        }
+
+        const base       = converterNumero($txtBaseCalcFederal.val());
+        const aliqPIS    = converterNumero($txtAliqPIS.val());
+        const aliqCOFINS = converterNumero($txtAliqCOFINS.val());
+
+        const valorPIS = base * (aliqPIS / 100);
+        const valorCOFINS = base * (aliqCOFINS / 100);
+
+        $valorPIS
+            .val(formatarMoeda(valorPIS))
+            .prop('readonly', true);
+
+        $valorCOFINS
+            .val(formatarMoeda(valorCOFINS))
+            .prop('readonly', true);
+    }
+
+    function formatoBrasileiro(valor) {
+        if (valor === null || valor === undefined || valor === '') {
+            return '';
+        }
+
+        return valor.toString().replace('.', ',');
+    }
+
+    function calcularPisCofins() {
+        if (!validarCamposPisCofins()) {
+            $valorPIS.val('').prop('readonly', false);
+            $valorCOFINS.val('').prop('readonly', false);
+            return;
+        }
+
+        const base       = converterNumero($baseCalcFederal.val());
+        const aliqPIS    = converterNumero($aliqPIS.val());
+        const aliqCOFINS = converterNumero($aliqCOFINS.val());
+
+        const valorPIS = base * (aliqPIS / 100);
+        const valorCOFINS = base * (aliqCOFINS / 100);
+
+        $valorPIS
+            .val(formatarMoeda(valorPIS))
+            .prop('readonly', true);
+
+        $valorCOFINS
+            .val(formatarMoeda(valorCOFINS))
+            .prop('readonly', true);
+    }
+
+    function obterAtividade(codigoAtividade){
+        $.getJSON('/c/emissor/obter/percentual-atividade-mun?q=' + codigoAtividade, function (data) {
+            $('#txtAliquota').val(formatoBrasileiro(data.aliquota));
+        });
+    }
+
+    $valorTotalServico.on('blur', function () {
+        valorServico = $(this).val();
+        $txtBaseCalculoISS.val(valorServico);
+    });
+
+    $txtDeducaoBaseCalculo.on('blur', function(event){
+        event.preventDefault();
+        calcularValorIssqn();
+
+    });
+
     function mostrarCampo($campo) {
         $campo.closest('label').show();
     }
@@ -545,6 +807,16 @@ $(document).ready(function () {
 
         $campo.prop('disabled', true);
         $campo.css('background-color', '#D3D3D3');
+    }
+
+    function campoSomenteLeitura($campo){
+        $campo.prop('readonly', true);
+        $campo.css('background-color', '#fffff0');
+    }
+
+    function campoEditavel($campo){
+        $campo.prop('readonly', false);
+        $campo.css('background-color', '');
     }
 
     function limparCampo($campo) {
@@ -1012,7 +1284,7 @@ $(document).ready(function () {
     }
 
     function configurarCSTCredito() {
-       $divValorPIS.show();
+        $divValorPIS.show();
         $divValorCOFINS.show();
         configurarValoresCalculados();
        
