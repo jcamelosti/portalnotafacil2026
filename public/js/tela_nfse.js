@@ -30,7 +30,11 @@ $(document).ready(function () {
     const $txtAliquota              = $('#txtAliquota');
     const $txtValorISSQN            = $('#txtValorISSQN');
     const $txtValorRetido           = $('#txtValorRetido');
-
+    const $txtPercentualTribSN      = $('#txtPercentualTribSN');
+    const $ddlSituacaoTributaria    = $('#ddlSituacaoTributaria');
+    const $ddlClassificacaoTributaria = $('#ddlClassificacaoTributaria');
+    const $ddlIndicadorOperacao     =   $('#ddlIndicadorOperacao');
+    
 
     //SUSPENSÕES
     $ddlSuspExig            = $('#ddlSuspExig');
@@ -79,6 +83,8 @@ $(document).ready(function () {
     desabilitarCampo($txtAliquota);
     desabilitarCampo($txtValorISSQN);
     desabilitarCampo($txtValorRetido);
+    desabilitarCampo($ddlSituacaoTributaria);
+    desabilitarCampo($ddlClassificacaoTributaria);
 
     resetarTributacaoFederal();
 
@@ -690,6 +696,31 @@ $(document).ready(function () {
         obterAtividade(valorCampo);
     });
 
+    $ddlSituacaoTributaria.on('change', function(event){
+        valorCampo = $(this).val();
+        obterClassificacoesTributarias(valorCampo);
+    });
+
+    function obterClassificacoesTributarias(valorCampo){
+        $.getJSON('/c/emissor/obter/classificacoes-tributarias?q=' + valorCampo, function (data) {
+            //console.log(data);
+            //
+            $ddlClassificacaoTributaria.empty();
+            $ddlClassificacaoTributaria.append('<option value="">Selecione</option>');
+
+             $.each(data, function (_, cClassTrib) {
+                $ddlClassificacaoTributaria.append(
+                    $('<option>', {
+                        value: cClassTrib.codigo,
+                        text: cClassTrib.codigo + ' - ' + cClassTrib.descricao,
+                        //selected: tribNac.id == tribNacSelecionada
+                    })
+                );
+
+            });
+        });
+    }
+
     function validarCamposPisCofins() {
         let valido = true;
 
@@ -776,6 +807,27 @@ $(document).ready(function () {
     function obterAtividade(codigoAtividade){
         $.getJSON('/c/emissor/obter/percentual-atividade-mun?q=' + codigoAtividade, function (data) {
             $('#txtAliquota').val(formatoBrasileiro(data.aliquota));
+        });
+    }
+
+    $ddlIndicadorOperacao.on('change', function (event) {
+        event.preventDefault();
+        habilitarCampo($ddlSituacaoTributaria);
+    });
+
+    $ddlSituacaoTributaria.on('change', function (event) {
+        event.preventDefault();
+        habilitarCampo($ddlClassificacaoTributaria);
+    });
+
+    $('#cTribNac').on('change', function (event) {
+        event.preventDefault();
+        consultarPercentualTribNac($(this).val());
+    });
+
+    function consultarPercentualTribNac(cTribNac){
+        $.getJSON('/c/emissor/obter/percentual-trib-nac?q=' + cTribNac, function (data) {
+            $('#txtPercentualTribSN').val(formatoBrasileiro(data.aliquota));
         });
     }
 

@@ -4,19 +4,16 @@ namespace App\Http\Controllers\Emissor;
 
 use App\Business\NotasBO;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\NotaCreateRequest;
 use App\Models\Certificado;
-use App\Models\CnaeLc;
-use App\Models\CodigoTribNacional;
+use App\Models\ClassificacaoTributaria;
 use App\Models\CorrelacaoTribMunTribNac;
+use App\Models\CstIbsCbs;
 use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
-use App\Models\EmpresaCnae;
 use App\Models\EmpresaNbs;
-use App\Models\ListaServico;
+use App\Models\IndOpIbsCbs;
 use App\Models\Municipio;
 use App\Models\Nbs;
-//use App\Models\NotaEmitida;
 use App\Models\Tomador;
 use App\Models\Uf;
 use App\Traits\IssnetTrait;
@@ -24,11 +21,7 @@ use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-
-use NFePHP\NFSe\Models\Issnet\RpsClass;
-
 use function PHPUnit\Framework\isNull;
 
 class NotaController extends Controller
@@ -40,12 +33,16 @@ class NotaController extends Controller
     private $municipioModel;
     private $nbsModel;
     private $atividadeModel;
+    private $indOperModel;
+    private $cstIbsCsbModel;
+    private $classificacaoTributariaModel;    
 
     
     public function __construct(Empresa $empresaModel, Tomador $tomadorModel, 
         Uf $estadoModel, Municipio $municipioModel,
         EmpresaAtividade $atividadeModel,
-        Nbs $nbsModel
+        Nbs $nbsModel, IndOpIbsCbs $indOperModel, CstIbsCbs $cstIbsCsbModel, 
+        ClassificacaoTributaria $classificacaoTributariaModel
     ){
         //$this->notaBO = NotasBO::newInstance();
         $this->empresaModel = $empresaModel;
@@ -55,6 +52,9 @@ class NotaController extends Controller
         $this->municipioModel = $municipioModel;
         $this->atividadeModel = $atividadeModel;
         $this->nbsModel = $nbsModel;
+        $this->indOperModel = $indOperModel;
+        $this->cstIbsCsbModel = $cstIbsCsbModel;
+        $this->classificacaoTributariaModel = $classificacaoTributariaModel;
     }
 
     public function index(){
@@ -177,6 +177,10 @@ class NotaController extends Controller
         //$municipio_incidencia = $empresa->cidade_id;
         $municipio_incidencia = Municipio::where('codigo', $empresa->cidade_id)->first();
 
+        //indicador de operação
+        $indOpIbsCbs = $this->indOperModel->indicadorOperacoes();
+        $cstIbsCsb = $this->cstIbsCsbModel->listar();
+
         return view('emissor.create', [
             'data_competencia' => $data_competencia,
             'tomador' => $tomador,
@@ -195,7 +199,9 @@ class NotaController extends Controller
             'tiposSuspencaoExigibilidade' => $tiposSuspencaoExigibilidade,
             'tipos_regime_esp_trib_mun' => $tipos_regime_esp_trib_mun,
             'tipos_retencoes' => $tipos_retencoes,
-            'municipio_incidencia' => $municipio_incidencia
+            'municipio_incidencia' => $municipio_incidencia,
+            'indOpIbsCbs' => $indOpIbsCbs,
+            'cstIbsCsb' => $cstIbsCsb,
         ]);
     }
 
@@ -264,5 +270,28 @@ class NotaController extends Controller
             ->first();
 
         return response()->json($atividade,200,[],JSON_UNESCAPED_UNICODE);
+    }
+
+    public function obterPercentualTribNac(){
+        $identificador = request()->q;
+
+        $corrTrib = CorrelacaoTribMunTribNac::where('cTribNac', $identificador)
+            ->where('empresa_id', Session::get('empresa_selecionada'))
+            ->first();
+        
+        return response()->json($corrTrib,200,[],JSON_UNESCAPED_UNICODE);
+    }
+
+    public function obterClassificacoesTributarias(){
+        $identificador = request()->q;
+
+        $classificacoes = CstIbsCbs::where('codigo', $identificador)
+            ->first()
+            ->classificacoesTributarias()
+            ->ativos()
+            ->orderBy('codigo')
+            ->get();
+
+        return response()->json($classificacoes,200,[],JSON_UNESCAPED_UNICODE);
     }
 }

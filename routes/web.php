@@ -105,6 +105,8 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             Route::get('/obter/nbs/por-empresa', [NotaController::class, 'obterNbs']);
             //obterPercentualAtividadeMunicipio
             Route::get('/obter/percentual-atividade-mun', [NotaController::class, 'obterPercentualAtividadeMunicipio']);
+            Route::get('/obter/percentual-trib-nac', [NotaController::class, 'obterPercentualTribNac']);
+            Route::get('/obter/classificacoes-tributarias', [NotaController::class, 'obterClassificacoesTributarias']);
         });
 
         Route::group(['prefix' => 'emissor-nacional-mei'], function () {

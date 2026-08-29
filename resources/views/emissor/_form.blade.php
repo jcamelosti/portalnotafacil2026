@@ -786,6 +786,81 @@
                             </div>
                         </div>
 
+                        <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
+                            Valores Aproximados dos Tributos
+                        </h4>
+
+                        <div class="grid md:grid-cols-2 gap-1 mt-4 mb-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Escolha o Tipo de Informação:</span>
+                                    <select name="ddlTipoInfo" onchange="" language="javascript" id="ddlTipoInfo" 
+                                    class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
+                                        <option selected="selected" value="1">Valores Percentuais</option>
+                                        <option value="2">Valores Monetários</option>
+                                    </select>
+                                    @if ($errors->has('ddlTipoInfo'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('ddlTipoInfo') }}</strong>
+                                    </span>
+                                    @endif
+                            </label>
+
+                            <div id="divPercentualTribSN">
+                                <label class="block text-sm">
+                                        <span class="text-gray-700">Percentual Tot. Tributos - SN*</span>
+                                        <input required placeholder="0,00" name="txtPercentualTribSN" type="text" maxlength="22" onchange="" language="javascript" id="txtPercentualTribSN" class="block w-full mt-1 text-sm  
+                        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                        :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
+                                </label>
+                            </div>
+                        </div>
+
+
+                        <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
+                            Imposto e Contribuição Sobre Bens e Servicos - IBS/CBS
+                        </h4>
+
+                        <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Indicação da Operação</span>
+                                {!! Form::select('ddlIndicadorOperacao', $indOpIbsCbs
+                                ,null, ['id'=> 'ddlIndicadorOperacao','class'=>'block w-full mt-1 text-sm  
+                                form-select
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                @if ($errors->has('ddlIndicadorOperacao'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{{ $errors->first('ddlIndicadorOperacao') }}</strong>
+                                </span>
+                                @endif
+                            </label>                            
+
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Situação Tributária</span>
+                                {!! Form::select('ddlSituacaoTributaria', $cstIbsCsb
+                                ,null, ['required','id'=> 'ddlSituacaoTributaria','class'=>'block w-full mt-1 text-sm  
+                                form-select
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                @if ($errors->has('ddlSituacaoTributaria'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{{ $errors->first('ddlSituacaoTributaria') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+
+                            <label class="block text-sm">
+                                <span class="text-gray-700 ">Classificação Tributária</span>
+                                {!! Form::select('ddlClassificacaoTributaria', ['' => 'Selecione']
+                                ,null, ['required','id'=> 'ddlClassificacaoTributaria','class'=>'block w-full mt-1 text-sm  
+                                form-select
+                                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                @if ($errors->has('ddlClassificacaoTributaria'))
+                                    <span class="text-xs text-red-600 ">
+                                    <strong>{{ $errors->first('ddlClassificacaoTributaria') }}</strong>
+                                </span>
+                                @endif
+                            </label>
+                        </div>
+             
                         <!--
                             FINAL DO NOVO FORMULÁRIO DAQUI PARA BAIXO                       
                         -->

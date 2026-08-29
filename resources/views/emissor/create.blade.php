@@ -146,7 +146,7 @@
                     );
 
                     $('#nbs').prop("disabled", false);
-                     $campoSelectNbs.css('background-color', '');
+                    $campoSelectNbs.css('background-color', '');
                 });
 
                 if (oldData.cTribNac) {
