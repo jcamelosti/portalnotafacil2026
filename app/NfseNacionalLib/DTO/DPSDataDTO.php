@@ -2,29 +2,69 @@
 
 namespace JCamelo\NfseNacionalLib\DTO;
 
-/*class DPSDataDTO
+
+
+class DPSDataDTO
 {
     public function __construct(
+        public string $ambiente,
+        public string $dataEmissao,
+        public int $serieDps,
+        public int $numDps,
+
         public string $cnpjPrestador,
         public string $imPrestador,
+
         public string $cnpjTomador,
         public string $razaoTomador,
-        public string $codigoMunicipio,
+        public string $cMunTomador,
+        public string $cepTomador,
+        public string $logradouroTomador,
+        public string $numeroTomador,
+        public string $complementoTomador,
+        public string $bairroTomador,
+        public string $cPaisTomadorExterior,
+        public string $cEndPostTomador,
+        public string $xCidadeTomador,
+
+ 
+        public string $localPrestacaoServico,
+
+        public string $codigoMunicipio, //Local de Emissão
         public string $codigoTributacaoNacional,
         public string $codigoServico,
         public string $descricaoServico,
         public float $valorServico,
         public string $dataCompetencia,
+        public string $nbs,
+
+
+        public string $complemento,
 
         // 🔥 NOVOS CAMPOS
         public int $opSimpNac, // 1 ou 3
         public ?int $regApTribSN,
+        public ?int $regEspTrib,
 
-        public int $numDps
+        public int $tribISSQN,
+        public int $tpRetISSQN,
+
+        public float $tribMunAliq, //trib->tribMun->pAliq
+        public string $tribFedCst,
+        public int $tpRetPisCofins,
+
+        public float $vRetCP,
+        public float $vRetIRRF,
+        public float $vRetCSLL,
+
+        public float $pTotTribSN,
+        public string $cIndOp,
+        public string $cstIbsCbs,
+        public string $cClassTrib,
     ) {}
-}*/
+}
 
-class DPSDataDTO
+class DPSDataDTO2
 {
     public function __construct(
         public string $cnpjPrestador,
@@ -99,9 +139,12 @@ class DPSDataDTO
         /*
          * Tributação IBS/CBS
          */
-        public string $cst = '000',
-        public string $cClassTrib = '000001',
-        public string $cIndOp = '050103',
+        public string $cst,
+        public string $cClassTrib,
+        public string $cIndOp,
+
+        //Indicador da finalidade da emissão de NFS-e 
+        public int $finNFSe = 0, //0 - NFS-e regular
 
         /*
          * Para operações de consumo pessoal

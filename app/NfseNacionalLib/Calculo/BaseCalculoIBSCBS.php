@@ -1,35 +1,6 @@
 <?php
 
 namespace JCamelo\NfseNacionalLib\Calculo;
-/*use JCamelo\NfseNacionalLib\DTO\DadosTributacao;
-
-class BaseCalculoIBSCBS
-{
-    public function calcular(
-        DadosTributacao $dados,
-        int $ano
-    ): float {
-
-        $base = $dados->vServ;
-
-        $base -= $dados->descIncond;
-
-        $base -= $dados->vCalcAjusteBCIBSCBS;
-
-        $base -= $dados->vCalcAjusteBCLocImoveis;
-
-        $base -= $dados->vISSQN;
-
-        if ($ano <= 2026) {
-            $base -= $dados->vPIS;
-            $base -= $dados->vCOFINS;
-        }
-
-        return max(0, round($base, 2));
-    }
-}*/
-
-namespace JCamelo\NfseNacionalLib\Calculo;
 
 use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
 
@@ -42,21 +13,27 @@ class BaseCalculoIBSCBS
 
         $base = $data->valorServico;
 
+        // Desconto incondicionado
         $base -= $data->descIncond;
 
+        // Ajustes da base IBS/CBS
         $base -= $data->vCalcAjusteBCIBSCBS;
 
+        // Ajustes relacionados a imóveis
         $base -= $data->vCalcAjusteBCLocImoveis;
 
+        // ISSQN
         $base -= $data->vISSQN;
 
         /*
          * Até 2026:
          *
-         * também deduz PIS e COFINS.
+         * PIS e COFINS também reduzem
+         * a base de cálculo do IBS/CBS.
          *
          * A partir de 2027:
-         * não deduz mais.
+         *
+         * não são mais deduzidos.
          */
         if ($ano <= 2026) {
             $base -= $data->vPIS;

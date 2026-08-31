@@ -14,6 +14,7 @@ use App\Models\EmpresaNbs;
 use App\Models\IndOpIbsCbs;
 use App\Models\Municipio;
 use App\Models\Nbs;
+use App\Models\Temp;
 use App\Models\Tomador;
 use App\Models\Uf;
 use App\Traits\IssnetTrait;
@@ -22,6 +23,9 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
+use JCamelo\NfseNacionalLib\Factories\DPSFactory;
+
 use function PHPUnit\Framework\isNull;
 
 class NotaController extends Controller
@@ -35,14 +39,15 @@ class NotaController extends Controller
     private $atividadeModel;
     private $indOperModel;
     private $cstIbsCsbModel;
-    private $classificacaoTributariaModel;    
+    private $classificacaoTributariaModel;  
+    private $tempModel;  
 
     
     public function __construct(Empresa $empresaModel, Tomador $tomadorModel, 
         Uf $estadoModel, Municipio $municipioModel,
         EmpresaAtividade $atividadeModel,
         Nbs $nbsModel, IndOpIbsCbs $indOperModel, CstIbsCbs $cstIbsCsbModel, 
-        ClassificacaoTributaria $classificacaoTributariaModel
+        ClassificacaoTributaria $classificacaoTributariaModel, Temp $tempModel
     ){
         //$this->notaBO = NotasBO::newInstance();
         $this->empresaModel = $empresaModel;
@@ -55,10 +60,204 @@ class NotaController extends Controller
         $this->indOperModel = $indOperModel;
         $this->cstIbsCsbModel = $cstIbsCsbModel;
         $this->classificacaoTributariaModel = $classificacaoTributariaModel;
+        $this->tempModel = $tempModel;
+    }
+
+    private static function numero(mixed $valor): string
+    {
+        if ($valor === null || $valor === '') {
+            return '0.00';
+        }
+
+        if (is_string($valor)) {
+            $valor = trim($valor);
+
+            // Formato brasileiro: 1.500,99
+            if (str_contains($valor, ',')) {
+                $valor = str_replace('.', '', $valor);
+                $valor = str_replace(',', '.', $valor);
+            }
+        }
+
+        return number_format((float) $valor, 2, '.', '');
+    }
+
+    public function definirMunicipioIncidencia(
+        string $cTribNac,
+        string $tributacaoIssqn,
+        bool $exigibilidadeSuspensa,
+        bool $regimeEspecial,
+        string $municipioPrestador,
+        string $municipioTomador,
+        string $municipioPrestacao,
+        string $localPrestacao
+    ): ?string {
+        // Não informar cLocIncid
+        if (
+            in_array($tributacaoIssqn, [2, 3,4])
+            || $exigibilidadeSuspensa
+            || $regimeEspecial
+        ) {
+            return null;
+        }
+
+        // Águas Marítimas
+        if (
+            $cTribNac !== '200101'
+            && $localPrestacao === 'AGUAS_MARITIMAS'
+        ) {
+            return $municipioPrestador;
+        }
+
+        // Serviços cujo município é o local da prestação
+        $codigosLocalPrestacao = [
+            '030401',
+            '030402',
+            '030403',
+            '030501',
+            '070201',
+            '070202',
+            '070401',
+            '070501',
+            '070502',
+            '070901',
+            '070902',
+            '071001',
+            '071002',
+            '071101',
+            '071102',
+            '071201',
+            '071601',
+            '071701',
+            '071801',
+            '071901',
+            '110101',
+            '110102',
+            '110201',
+            '110401',
+            '110402',
+            '120101',
+            '120201',
+            '120301',
+            '120401',
+            '120501',
+            '120601',
+            '120701',
+            '120801',
+            '120901',
+            '120902',
+            '120903',
+            '121001',
+            '121101',
+            '121201',
+            '121401',
+            '121501',
+            '121601',
+            '121701',
+            '141401',
+            '141402',
+            '141403',
+            '141404',
+            '160101',
+            '160102',
+            '160103',
+            '160104',
+            '160201',
+            '171001',
+            '171002',
+            '200101',
+            '200102',
+            '200201',
+            '200301',
+            '220101',
+        ];
+
+        if (in_array($cTribNac, $codigosLocalPrestacao)) {
+            return $municipioPrestacao;
+        }
+
+        // Código 170501
+        if ($cTribNac === '170501') {
+            return $municipioTomador;
+        }
+
+        // Demais códigos
+        return $municipioPrestador;
     }
 
     public function index(){
-       dd('Index');
+        $temp = Temp::all();
+        $dados = $temp[0]->dados;
+
+        $empresa = $this->empresaModel->with(['atividadesEmpresa'])
+            ->find(Session::get('empresa_selecionada'));
+
+        $tomador = $this->tomadorModel->find($dados['tomador_id']);
+
+        $localPrestacao = $this->definirMunicipioIncidencia(
+            $dados['cTribNac'],
+            $dados['ddlTribISSQN'],
+            0,//bool $exigibilidadeSuspensa,
+            0,//bool $regimeEspecial,
+            $empresa->cidade()->first()->codigo,
+            $tomador->cidade()->first()->codigo,
+            $dados['ddlCidadePrestacao'],
+            $dados['ddlCidadePrestacao']
+        );
+ 
+        $dataSN = new DPSDataDTO(
+            ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
+            dataEmissao: Carbon::now()->format('Y-m-d\TH:i:sP'),
+            serieDps: $empresa->serie_dps,
+            numDps: ($empresa->num_ultimo_dps + 1),
+
+            cnpjPrestador: $empresa->cpf_cnpj,
+            imPrestador: $empresa->inscricao_municipal,
+            
+            razaoTomador: $empresa->razao_social,
+            cnpjTomador: $tomador->cpf_cnpj,     
+            
+            cMunTomador: $tomador->cidade()->first()->codigo,
+            cepTomador: $tomador->cep,
+            logradouroTomador: $tomador->logradouro,
+            numeroTomador: $tomador->numero,
+            complementoTomador: $tomador->complemento,
+            bairroTomador: $tomador->bairro,
+            cPaisTomadorExterior: '',
+            cEndPostTomador: '',
+            xCidadeTomador: '',      
+            
+            localPrestacaoServico: $localPrestacao,
+
+            codigoMunicipio: $dados['ddlCidadePrestacao'], //municipio do prestado - cLocEmi
+            codigoTributacaoNacional: $dados['cTribNac'],
+            codigoServico: $dados['empresa_atividade_id'],
+            descricaoServico: $dados['txtDescServicos'],
+            valorServico: $this->numero($dados['txtTotal']),
+            dataCompetencia: date('Y-m-d'),
+            nbs: $dados['nbs'],
+            complemento: $dados['txtInfoComplementares'],
+
+            opSimpNac: $empresa->op_simp_nac,
+            regApTribSN: $empresa->tp_reg_apuracao_sn,//só quando for do simples
+            regEspTrib: $empresa->tp_regime_esp_trib_mun,
+            tribISSQN: $dados['ddlTribISSQN'],
+            tpRetISSQN: $dados['ddlTipoRetencao'],
+            tribMunAliq: $this->numero($dados['txtAliquota']),
+            
+            tribFedCst: $dados['ddlSitTribFederal'],
+            tpRetPisCofins: $dados['ddlTipoRetFederal'],
+            vRetCP: $this->numero($dados['txtValorCP']),
+            vRetIRRF: $this->numero($dados['txtValorIRRF']),
+            vRetCSLL: $this->numero($dados['txtValorCSLL']),
+
+            pTotTribSN: $this->numero($dados['txtPercentualTribSN']),
+            cIndOp: $dados['ddlIndicadorOperacao'],
+            cstIbsCbs: $dados['ddlSituacaoTributaria'],
+            cClassTrib: $dados['ddlClassificacaoTributaria'],
+        );
+
+        
     }
 
     public function create(){
@@ -212,9 +411,13 @@ class NotaController extends Controller
             
             $dados = $request->all();
             //$dados = $this->notaBO->tratarDados($dados);
+            $dados = $request->except('_token');
 
-            
-            dd($dados);
+            $temp = Temp::create([
+                'dados' => $dados,
+            ]);
+
+            dd($temp);
         }catch(\Exception $e){
             DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',

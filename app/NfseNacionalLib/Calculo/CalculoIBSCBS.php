@@ -1,50 +1,58 @@
 <?php
 
 namespace JCamelo\NfseNacionalLib\Calculo;
-use JCamelo\NfseNacionalLib\DTO\DadosTributacao;
+
+use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
 
 class CalculoIBSCBS
 {
     public function __construct(
-        private BaseCalculoIBSCBS $baseCalculo,
         private CalculoRegimeNormal $regimeNormal,
         private CalculoSimplesNacional $simples
-    ) {}
+    ) {
+    }
 
     public function calcular(
-        DadosTributacao $dados,
-        int $ano,
+        DPSDataDTO $data,
         string $regime,
         int $regApIBSCBSSN = 3
     ): ResultadoCalculo {
 
+        /*
+         * Regime Normal
+         */
         if ($regime === 'normal') {
             return $this->regimeNormal->calcular(
-                $dados,
-                $ano
+                $data
             );
         }
 
+        /*
+         * Simples Nacional
+         */
         if ($regime === 'simples') {
 
             return match ($regApIBSCBSSN) {
 
-                // IBS + CBS pelo Simples
+                /*
+                 * IBS + CBS pelo Simples
+                 */
                 1 => $this->simples->calcular(
-                    $dados,
-                    $ano
+                    $data
                 ),
 
-                // IBS regular + CBS Simples
+                /*
+                 * IBS regular + CBS Simples
+                 */
                 2 => $this->calcularIBSRegularCBSSimples(
-                    $dados,
-                    $ano
+                    $data
                 ),
 
-                // IBS + CBS regime regular
+                /*
+                 * IBS + CBS regime regular
+                 */
                 3 => $this->regimeNormal->calcular(
-                    $dados,
-                    $ano
+                    $data
                 ),
 
                 default => throw new \InvalidArgumentException(
@@ -58,45 +66,89 @@ class CalculoIBSCBS
         );
     }
 
+    /**
+     * IBS no regime regular
+     * CBS pelo Simples Nacional
+     */
     private function calcularIBSRegularCBSSimples(
-        DadosTributacao $dados,
-        int $ano
+        DPSDataDTO $data
     ): ResultadoCalculo {
 
         $normal = $this->regimeNormal->calcular(
-            $dados,
-            $ano
+            $data
         );
 
         $simples = $this->simples->calcular(
-            $dados,
-            $ano
+            $data
         );
 
         return new ResultadoCalculo(
+
+            /*
+             * Base
+             */
             vBC: $normal->vBC,
 
+            /*
+             * IBS UF
+             */
             pIBSUF: $normal->pIBSUF,
             pAliqEfetUF: $normal->pAliqEfetUF,
             vIBSUF: $normal->vIBSUF,
 
+            /*
+             * IBS Município
+             */
             pIBSMun: $normal->pIBSMun,
             pAliqEfetMun: $normal->pAliqEfetMun,
             vIBSMun: $normal->vIBSMun,
 
+            /*
+             * IBS total
+             */
             vIBSTot: $normal->vIBSTot,
 
+            /*
+             * CBS Simples
+             */
             pCBSSN: $simples->pCBSSN,
             vCBSSN: $simples->vCBSSN,
 
-            vTotNF: $ano >= 2027
-                ? round(
-                    ($dados->vServ - $dados->descIncond)
-                    + $normal->vIBSTot
-                    + $simples->vCBSSN,
-                    2
-                )
-                : ($dados->vServ - $dados->descIncond)
+            /*
+             * Total NF
+             */
+            vTotNF: $this->calcularTotalNF(
+                $data,
+                $normal->vIBSTot,
+                $simples->vCBSSN
+            )
+        );
+    }
+
+    private function calcularTotalNF(
+        DPSDataDTO $data,
+        float $vIBSTot,
+        float $vCBS
+    ): float {
+
+        $ano = (int) substr(
+            $data->dataCompetencia,
+            0,
+            4
+        );
+
+        if ($ano <= 2026) {
+            return round(
+                $data->valorLiquido,
+                2
+            );
+        }
+
+        return round(
+            ($data->valorServico - $data->descIncond)
+            + $vIBSTot
+            + $vCBS,
+            2
         );
     }
 }

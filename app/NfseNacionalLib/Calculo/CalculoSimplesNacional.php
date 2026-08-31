@@ -3,13 +3,13 @@
 namespace JCamelo\NfseNacionalLib\Calculo;
 
 use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
-use JCamelo\NfseNacionalLib\DTO\ResultadoCalculo;
 
 class CalculoSimplesNacional
 {
     public function __construct(
         private BaseCalculoIBSCBS $baseCalculo
-    ) {}
+    ) {
+    }
 
     public function calcular(
         DPSDataDTO $data
@@ -21,19 +21,31 @@ class CalculoSimplesNacional
             4
         );
 
+        /*
+         * Base IBS/CBS
+         */
         $vBC = $this->baseCalculo->calcular(
             $data,
             $ano
         );
 
+        /*
+         * Alíquotas do Simples
+         */
         $pIBSSN = $data->pIBSSN ?? 0;
         $pCBSSN = $data->pCBSSN ?? 0;
 
+        /*
+         * IBS Simples
+         */
         $vIBSSN = round(
             $vBC * ($pIBSSN / 100),
             2
         );
 
+        /*
+         * CBS Simples
+         */
         $vCBSSN = round(
             $vBC * ($pCBSSN / 100),
             2

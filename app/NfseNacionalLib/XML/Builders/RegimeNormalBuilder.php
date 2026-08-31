@@ -58,7 +58,7 @@ class RegimeNormalBuilder implements DPSBuilderInterface
 </DPS>
 XML;
     }*/
-     protected function generateId(DPSDataDTO $data): string
+    protected function generateId(DPSDataDTO $data): string
     {
         $string = 'DPS';
         $string .= substr($data->codigoMunicipio, 0, 7); //Cód.Mun. (7) + //seria código do municipio do emitente

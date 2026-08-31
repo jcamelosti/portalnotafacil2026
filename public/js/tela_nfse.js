@@ -34,6 +34,7 @@ $(document).ready(function () {
     const $ddlSituacaoTributaria    = $('#ddlSituacaoTributaria');
     const $ddlClassificacaoTributaria = $('#ddlClassificacaoTributaria');
     const $ddlIndicadorOperacao     =   $('#ddlIndicadorOperacao');
+    const $txtBaseCalc              = $('#txtBaseCalc');
     
 
     //SUSPENSÕES
@@ -600,7 +601,7 @@ $(document).ready(function () {
     });
     
     function calcularValorIssqn() {
-        const baseCalcIssqn = converterNumero($txtBaseCalculoISS.val());
+        const baseCalcIssqn = converterNumero($valorTotalServico.val());//valor total do serviço
         const aliquotaIssqn = converterNumero($aliquotaIssqn.val());
         const valorDeducao = converterNumero($txtDeducaoBaseCalculo.val());
 
@@ -813,6 +814,26 @@ $(document).ready(function () {
     $ddlIndicadorOperacao.on('change', function (event) {
         event.preventDefault();
         habilitarCampo($ddlSituacaoTributaria);
+        
+        const totalServico = converterNumero($valorTotalServico.val())
+        
+        const baseCalcIssqn = converterNumero($txtBaseCalculoISS.val());
+        const aliquotaIssqn = converterNumero($aliquotaIssqn.val());
+        //const valorDeducao = converterNumero($txtDeducaoBaseCalculo.val());
+
+        const valorIssqn = (baseCalcIssqn) * (aliquotaIssqn / 100);
+        
+
+        const base       = converterNumero($baseCalcFederal.val());
+        const aliqPIS    = converterNumero($aliqPIS.val());
+        const aliqCOFINS = converterNumero($aliqCOFINS.val());
+
+        const valorPIS = base * (aliqPIS / 100);
+        const valorCOFINS = base * (aliqCOFINS / 100);
+
+        const totalBC = totalServico - valorPIS - valorCOFINS - valorIssqn;
+        
+        $txtBaseCalc.val(formatoBrasileiro(totalBC)); 
     });
 
     $ddlSituacaoTributaria.on('change', function (event) {
@@ -839,7 +860,6 @@ $(document).ready(function () {
     $txtDeducaoBaseCalculo.on('blur', function(event){
         event.preventDefault();
         calcularValorIssqn();
-
     });
 
     function mostrarCampo($campo) {

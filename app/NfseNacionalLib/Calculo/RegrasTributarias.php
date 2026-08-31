@@ -8,22 +8,17 @@ class RegrasTributarias
     {
         if ($ano === 2026) {
             return [
-                'pIBSUF' => 0.10,
+                'pIBSUF'  => 0.10,
                 'pIBSMun' => 0.00,
-                'pCBS' => 0.90,
+                'pCBS'    => 0.90,
             ];
         }
 
         if ($ano === 2027 || $ano === 2028) {
             return [
-                'pIBSUF' => 0.05,
+                'pIBSUF'  => 0.05,
                 'pIBSMun' => 0.05,
-
-                /*
-                 * Não deixar CBS fixa aqui.
-                 * Deve ser parametrizada.
-                 */
-                'pCBS' => null,
+                'pCBS'    => null,
             ];
         }
 

@@ -859,6 +859,13 @@
                                 </span>
                                 @endif
                             </label>
+
+                            <label class="block text-sm">
+                                        <span class="text-gray-700">Base de Cálculo</span>
+                                        <input readonly placeholder="0,00" name="txtBaseCalc" type="text" maxlength="22" onchange="" language="javascript" id="txtBaseCalc" class="block w-full mt-1 text-sm  
+                        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                        :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
+                            </label>
                         </div>
              
                         <!--
