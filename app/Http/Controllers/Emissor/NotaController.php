@@ -24,7 +24,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
-use JCamelo\NfseNacionalLib\Factories\DPSFactory;
+//use JCamelo\NfseNacionalLib\Factories\DPSFactory;
+
+use JCamelo\NfseNacionalLib\Services\NFSeService;
 
 use function PHPUnit\Framework\isNull;
 
@@ -41,13 +43,16 @@ class NotaController extends Controller
     private $cstIbsCsbModel;
     private $classificacaoTributariaModel;  
     private $tempModel;  
+    private $notaBO;
 
+    private NFSeService $nfse;
     
     public function __construct(Empresa $empresaModel, Tomador $tomadorModel, 
         Uf $estadoModel, Municipio $municipioModel,
         EmpresaAtividade $atividadeModel,
         Nbs $nbsModel, IndOpIbsCbs $indOperModel, CstIbsCbs $cstIbsCsbModel, 
-        ClassificacaoTributaria $classificacaoTributariaModel, Temp $tempModel
+        ClassificacaoTributaria $classificacaoTributariaModel, Temp $tempModel,
+        NFSeService $nfse, 
     ){
         //$this->notaBO = NotasBO::newInstance();
         $this->empresaModel = $empresaModel;
@@ -61,6 +66,10 @@ class NotaController extends Controller
         $this->cstIbsCsbModel = $cstIbsCsbModel;
         $this->classificacaoTributariaModel = $classificacaoTributariaModel;
         $this->tempModel = $tempModel;
+
+        $this->notaBO = NotasBO::newInstance();
+
+        $this->nfse = $nfse;
     }
 
     private static function numero(mixed $valor): string
@@ -187,77 +196,8 @@ class NotaController extends Controller
 
     public function index(){
         $temp = Temp::all();
-        $dados = $temp[0]->dados;
-
-        $empresa = $this->empresaModel->with(['atividadesEmpresa'])
-            ->find(Session::get('empresa_selecionada'));
-
-        $tomador = $this->tomadorModel->find($dados['tomador_id']);
-
-        $localPrestacao = $this->definirMunicipioIncidencia(
-            $dados['cTribNac'],
-            $dados['ddlTribISSQN'],
-            0,//bool $exigibilidadeSuspensa,
-            0,//bool $regimeEspecial,
-            $empresa->cidade()->first()->codigo,
-            $tomador->cidade()->first()->codigo,
-            $dados['ddlCidadePrestacao'],
-            $dados['ddlCidadePrestacao']
-        );
- 
-        $dataSN = new DPSDataDTO(
-            ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
-            dataEmissao: Carbon::now()->format('Y-m-d\TH:i:sP'),
-            serieDps: $empresa->serie_dps,
-            numDps: ($empresa->num_ultimo_dps + 1),
-
-            cnpjPrestador: $empresa->cpf_cnpj,
-            imPrestador: $empresa->inscricao_municipal,
-            
-            razaoTomador: $empresa->razao_social,
-            cnpjTomador: $tomador->cpf_cnpj,     
-            
-            cMunTomador: $tomador->cidade()->first()->codigo,
-            cepTomador: $tomador->cep,
-            logradouroTomador: $tomador->logradouro,
-            numeroTomador: $tomador->numero,
-            complementoTomador: $tomador->complemento,
-            bairroTomador: $tomador->bairro,
-            cPaisTomadorExterior: '',
-            cEndPostTomador: '',
-            xCidadeTomador: '',      
-            
-            localPrestacaoServico: $localPrestacao,
-
-            codigoMunicipio: $dados['ddlCidadePrestacao'], //municipio do prestado - cLocEmi
-            codigoTributacaoNacional: $dados['cTribNac'],
-            codigoServico: $dados['empresa_atividade_id'],
-            descricaoServico: $dados['txtDescServicos'],
-            valorServico: $this->numero($dados['txtTotal']),
-            dataCompetencia: date('Y-m-d'),
-            nbs: $dados['nbs'],
-            complemento: $dados['txtInfoComplementares'],
-
-            opSimpNac: $empresa->op_simp_nac,
-            regApTribSN: $empresa->tp_reg_apuracao_sn,//só quando for do simples
-            regEspTrib: $empresa->tp_regime_esp_trib_mun,
-            tribISSQN: $dados['ddlTribISSQN'],
-            tpRetISSQN: $dados['ddlTipoRetencao'],
-            tribMunAliq: $this->numero($dados['txtAliquota']),
-            
-            tribFedCst: $dados['ddlSitTribFederal'],
-            tpRetPisCofins: $dados['ddlTipoRetFederal'],
-            vRetCP: $this->numero($dados['txtValorCP']),
-            vRetIRRF: $this->numero($dados['txtValorIRRF']),
-            vRetCSLL: $this->numero($dados['txtValorCSLL']),
-
-            pTotTribSN: $this->numero($dados['txtPercentualTribSN']),
-            cIndOp: $dados['ddlIndicadorOperacao'],
-            cstIbsCbs: $dados['ddlSituacaoTributaria'],
-            cClassTrib: $dados['ddlClassificacaoTributaria'],
-        );
-
-        
+        $dados = $temp[count($temp) - 1]->dados;
+        $this->emitir($dados);        
     }
 
     public function create(){
@@ -362,9 +302,11 @@ class NotaController extends Controller
         ];
 
         $tipos_regime_esp_trib_mun = Empresa::getTiposRegimeEspecialTributacaoMunicipio();
+        
         $tipos_regime_esp_trib_mun = array_filter($tipos_regime_esp_trib_mun, function($chave) use ($empresa) {
             return (int)$chave === (int)$empresa->tp_regime_esp_trib_mun;
         }, ARRAY_FILTER_USE_KEY);
+        
         $tipos_regime_esp_trib_mun = ['' => 'Selecione'] + $tipos_regime_esp_trib_mun;
 
         $tipos_retencoes = [
@@ -404,6 +346,91 @@ class NotaController extends Controller
         ]);
     }
 
+    private function emitir($dados){
+        $dados = $this->notaBO->tratarDados($dados);
+
+        $empresa = $this->empresaModel->with(['atividadesEmpresa'])
+            ->find(Session::get('empresa_selecionada'));
+
+        $tomador = $this->tomadorModel->find($dados['tomador_id']);
+
+        $localPrestacao = $this->definirMunicipioIncidencia(
+            $dados['cTribNac'],
+            $dados['ddlTribISSQN'],
+            0,//bool $exigibilidadeSuspensa,
+            0,//bool $regimeEspecial,
+            $empresa->cidade()->first()->codigo,
+            $tomador->cidade()->first()->codigo,
+            $dados['ddlCidadePrestacao'],
+            $dados['ddlCidadePrestacao']
+        );
+        
+        $dataSN = new DPSDataDTO(
+            ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
+            dataEmissao: Carbon::now()->format('Y-m-d\TH:i:sP'),
+            serieDps: $empresa->serie_dps,
+            numDps: ($empresa->num_ultimo_dps + 1),
+
+            cnpjPrestador: $empresa->cpf_cnpj,
+            imPrestador: $empresa->inscricao_municipal,
+            
+            razaoTomador: $empresa->razao_social,
+            cnpjTomador: $tomador->cpf_cnpj,     
+            
+            cMunTomador: $tomador->cidade()->first()->codigo,
+            cepTomador: preg_replace('/[^\d\-]/', '', $tomador->cep),
+            logradouroTomador: $tomador->logradouro,
+            numeroTomador: $tomador->numero,
+            complementoTomador: $tomador->complemento,
+            bairroTomador: $tomador->bairro,
+            cPaisTomadorExterior: '',
+            cEndPostTomador: '',
+            xCidadeTomador: '',      
+            
+            localPrestacaoServico: $localPrestacao,
+
+            codigoMunicipio: $dados['ddlCidadePrestacao'], //municipio do prestado - cLocEmi
+            codigoTributacaoNacional: $dados['cTribNac'],
+            codigoServico: $dados['empresa_atividade_id'],
+            descricaoServico: $dados['txtDescServicos'],
+            valorServico: $this->numero($dados['txtTotal']),
+            dataCompetencia: date('Y-m-d'),
+            nbs: $dados['nbs'],
+            complemento: $dados['txtInfoComplementares'],
+
+            opSimpNac: $empresa->op_simp_nac,
+            regApTribSN: $empresa->tp_reg_apuracao_sn,//só quando for do simples
+            regEspTrib: $empresa->tp_regime_esp_trib_mun,
+            tribISSQN: $dados['ddlTribISSQN'],
+            tpRetISSQN: $dados['ddlTipoRetencao'],
+            tribMunAliq: (float)$this->numero($dados['txtAliquota']),
+            
+            tribFedCst: $dados['ddlSitTribFederal'],
+            tpRetPisCofins: $dados['ddlTipoRetFederal'],
+            vRetCP: $this->numero($dados['txtValorCP']),
+            vRetIRRF: $this->numero($dados['txtValorIRRF']),
+            vRetCSLL: isset($dados['txtValorCSLL']) ? $this->numero($dados['txtValorCSLL']) : 0.00,
+
+            pTotTribSN: $this->numero($dados['txtPercentualTribSN']),
+            cIndOp: $dados['ddlIndicadorOperacao'],
+            cstIbsCbs: $dados['ddlSituacaoTributaria'],
+            cClassTrib: $dados['ddlClassificacaoTributaria'],
+        );
+
+
+        $retorno = $this->nfse->gerarNfse('issnet', $dataSN, $empresa->id);
+        if(isset($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno->MensagemRetorno)){
+            dd($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno->MensagemRetorno);
+        }else{
+            dd($retorno);
+        }        
+
+        /*$nfse = $retorno['ListaNfse']['CompNfse']['Nfse']['infNFSe'];
+        $protocolo = $retorno['Protocolo'];
+        $data_recebimento = date('Y-m-d', strtotime((string)  $retorno['DataRecebimento']));//data recebimento lote
+        $valorServico = $nfse['DPS']['infDPS']['valores']['vServPrest']['vServ'];*/
+    }
+
     public function store(Request $request){
         try{
             $empresaSessao = request()->session()->get('empresa_selecionada');
@@ -417,7 +444,9 @@ class NotaController extends Controller
                 'dados' => $dados,
             ]);
 
-            dd($temp);
+
+            $this->emitir($dados);
+            dd($dados);            
         }catch(\Exception $e){
             DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',

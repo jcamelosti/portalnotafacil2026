@@ -16,16 +16,15 @@ class NFSeService
         $xml = DPSFactory::make($data);
 
         // 🔥 2. ASSINAR XML
-        $signedXml = app(XmlSigner::class)->assinarXml($xml, $empresaId, 'infDPS');
-        
-        $signedXml = str_replace('<?xml version="1.0"?>', '', $signedXml);
-        Log::info("XML ASSINADO: " . $signedXml);
-        //dd($signedXml);
+        $assinador = app(XmlSigner::class);
+		$xml = $assinador->assinarNovo($xml, '', $empresaId);
+		$xml = str_replace('<?xml version="1.0"?>', '', $xml);
+				
         // 🔥 3. ESCOLHER PROVIDER
         $driver = NFSeProviderFactory::make($provider);
 
         // 🔥 4. ENVIAR
-        return $driver->gerarNfse($signedXml, $empresaId);
+        return $driver->gerarNfse($xml, $empresaId);
     }
     
     public function consultarDadosCadastrais(string $provider, int $empresaId, string $cnpj, string $im)
@@ -48,19 +47,22 @@ class NFSeService
 
     public function recepcionarLoteDpsSincrono(string $provider, DPSDataDTO $data, int $empresaId)
     {
+        
         // 🔥 1. GERAR XML (usa seu Factory + Builders)
-        $xml = DPSFactory::makeRecepcionarLoteDpsSincrono($data);
-
+        /*$xml = DPSFactory::makeRecepcionarLoteDpsSincrono($data);
+       
         // 🔥 2. ASSINAR XML
-        $signedXml = app(XmlSigner::class)->assinarXml($xml, $empresaId, 'infDPS');
-        $signedXml = app(XmlSigner::class)->assinarXml($signedXml, $empresaId, 'LoteDps');
-        $signedXml = str_replace('<?xml version="1.0"?>', '', $signedXml);
-        //Log::info("XML ASSINADO: " . $signedXml);
+        $xml = app(XmlSigner::class)->assinarXml($xml, $empresaId, 'infDPS');
+        $xml = app(XmlSigner::class)->sign($xml, $empresaId, 'LoteDps');
+        
+        $signedXml = str_replace('<?xml version="1.0"?>', '', $xml);
+        Log::info("XML ASSINADO: " . $xml);
         //dd($signedXml);
         // 🔥 3. ESCOLHER PROVIDER
         $driver = NFSeProviderFactory::make($provider);
 
         // 🔥 4. ENVIAR
-        return $driver->recepcionarLoteDpsSincrono($signedXml, $empresaId);
+        return $driver->recepcionarLoteDpsSincrono($signedXml, $empresaId);*/
+        dd("Recepcionar Lote DPS Sincrono - Não implementado ainda");
     }
 }

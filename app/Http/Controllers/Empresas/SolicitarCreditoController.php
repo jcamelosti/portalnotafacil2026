@@ -100,8 +100,8 @@ class SolicitarCreditoController extends Controller
                 'email' => auth()->user()->email,
                 'phone_number' => '+55'. $cliente->telefone1
             ],
-            'redirect_url' => "https://nfse.portalnotafacil.com.br/c/pagamento-realizado",
-            'webhook_url'=> 'https://nfse.portalnotafacil.com.br/webhook/infinitepay/capture',
+            'redirect_url' => "https://https://nfse-nacional.portalnotafacil.com.br/c/pagamento-realizado",
+            'webhook_url'=> 'https://https://nfse-nacional.portalnotafacil.com.br/webhook/infinitepay/capture',
             'address' => [
                 "cep" => $cliente->cep,
                 "street"=> $cliente->endereco,

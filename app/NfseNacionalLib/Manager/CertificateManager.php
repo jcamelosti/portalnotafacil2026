@@ -12,7 +12,7 @@ class CertificateManager
         $empresa = Empresa::findOrFail($empresaId);
 
         $cert = CertificadoModel::where('empresa_id', $empresaId)->firstOrFail();
-
+        
         $password = base64_decode($cert->senha);
 
         //$path = getenv("CAMINHO_CERTIFICADO_LOCAL") . $cert->arquivo;
@@ -33,9 +33,11 @@ class CertificateManager
         $oCert->loadPfxFile($path, $password);
 
         $pem = $oCert->pathCerts . $empresa->cpf_cnpj . "_certKEY.pem";
+        $pfx = $oCert->pathCerts . $empresa->cpf_cnpj . ".pfx";
 
         return [
             'cert' => $pem,
+            'pfx' => $pfx,
             'password' => $password,
             'refClassCertificado' => $oCert
         ];

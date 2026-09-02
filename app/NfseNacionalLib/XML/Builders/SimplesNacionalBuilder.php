@@ -15,100 +15,104 @@ class SimplesNacionalBuilder implements DPSBuilderInterface
         $string .= str_pad($data->cnpjPrestador, 14, 0, STR_PAD_LEFT); //Inscrição Federal (14 - CPF completar com 000 à esquerda) +
         $string .= str_pad('8', 5, 0, STR_PAD_LEFT); //Série DPS (5) +
         $string .= str_pad($data->numDps, 15, 0, STR_PAD_LEFT); //Série DPS (5) +*/
-
+		
         return $string;
     }
 
     public function build(DPSDataDTO $data): string
     {
-		dd('Não utilizado...');
         $dpsId = $this->generateId($data);
-        return '
-<GerarNfseEnvio xmlns="http://www.sped.fazenda.gov.br/nfse">
+
+        $tribMunAliq = number_format((float)$data->tribMunAliq, 2, '.', '');
+		$vRetCSLL = number_format((float)$data->vRetCSLL, 2, '.', '');
+		$vRetCP = number_format((float)$data->vRetCP, 2, '.', '');
+		$vRetIRRF = number_format((float)$data->vRetIRRF, 2, '.', '');
+		$valorServico = number_format((float)$data->valorServico, 2, '.', '');
+		$pTotTribSN = number_format((float)$data->pTotTribSN, 2, '.', '');
+		$cepTomador = preg_replace("/[^0-9]/", "", $data->cepTomador);
+		
+return '
+<GerarNfseEnvio>
 	<DPS versao="1.01">
 		<infDPS Id="' . $dpsId . '">
-			<tpAmb>2</tpAmb>
-			<dhEmi>2026-05-02T10:19:01-03:00</dhEmi>
+			<tpAmb>' . $data->ambiente . '</tpAmb>
+			<dhEmi>' . $data->dataEmissao . '</dhEmi>
 			<verAplic>1.01</verAplic>
-			<serie>8</serie>
+			<serie>' . $data->serieDps . '</serie>
 			<nDPS>' . $data->numDps . '</nDPS>
-			<dCompet>2026-05-02</dCompet>
+			<dCompet>' . $data->dataCompetencia . '</dCompet>
 			<tpEmit>1</tpEmit>
-			<cLocEmi>5002704</cLocEmi>
+			<cLocEmi>' . $data->codigoMunicipio . '</cLocEmi>
 			<prest>
-				<CNPJ>22645177000188</CNPJ>
-				<IM>4048539</IM>
-				<fone>62991728787</fone>
-				<email>virlei79@gmail.com</email>
+				<CNPJ>' . $data->cnpjPrestador . '</CNPJ>
+				<IM>' . $data->imPrestador . '</IM>
 				<regTrib>
-					<opSimpNac>3</opSimpNac>
-					<regApTribSN>1</regApTribSN>
-					<regEspTrib>0</regEspTrib>
+					<opSimpNac>' . $data->opSimpNac . '</opSimpNac>
+					<regApTribSN>' . $data->regApTribSN . '</regApTribSN>
+					<regEspTrib>' . $data->regEspTrib . '</regEspTrib>
 				</regTrib>
 			</prest>
 			<toma>
-				<CNPJ>24685881000190</CNPJ>
-				<IM>79649</IM>
-				<xNome>Josue Camelo dos Santos Ferreira 01582713197</xNome>
+				<CNPJ>' . $data->cnpjTomador . '</CNPJ>
+				<xNome>' . $data->razaoTomador . '</xNome>
 				<end>
 					<endNac>
-						<cMun>5201108</cMun>
-						<CEP>75064350</CEP>
+						<cMun>' . $data->cMunTomador . '</cMun>
+						<CEP>' . $cepTomador . '</CEP>
 					</endNac>
-					<xLgr>Rua Carlinhos José Ribeiro</xLgr>
-					<nro>180</nro>
-					<xCpl>APT 402D</xCpl>
-					<xBairro>Vila Jaiara Setor Leste</xBairro>
+					<xLgr>' . $data->logradouroTomador . '</xLgr>
+					<nro>' . $data->numeroTomador . '</nro>
+					<xCpl>' . $data->complementoTomador . '</xCpl>
+					<xBairro>' . $data->bairroTomador . '</xBairro>
 				</end>
-				<fone>6237027225</fone>
-				<email>contato@josuecamelo.com</email>
 			</toma>
 			<serv>
 				<locPrest>
-					<cLocPrestacao>5002704</cLocPrestacao>
+					<cLocPrestacao>' . $data->localPrestacaoServico . '</cLocPrestacao>
 				</locPrest>
 				<cServ>
-					<cTribNac>010101</cTribNac>
-					<cTribMun>0000000004</cTribMun>
-					<xDescServ>Teste 1</xDescServ>
-					<cNBS>115021000</cNBS>
+					<cTribNac>' . $data->codigoTributacaoNacional . '</cTribNac>
+					<cTribMun>' . $data->codigoServico . '</cTribMun>
+					<xDescServ>' . $data->descricaoServico . '</xDescServ>
+					<cNBS>' . $data->nbs . '</cNBS>
 				</cServ>
 				<infoCompl>
-					<xInfComp>Teste - Texto Informativo</xInfComp>
+					<xInfComp>' . $data->complemento . '</xInfComp>
 				</infoCompl>
 			</serv>
 			<valores>
 				<vServPrest>
-					<vServ>1.00</vServ>
+					<vServ>' . $valorServico . '</vServ>
 				</vServPrest>
 				<trib>
 					<tribMun>
-						<tribISSQN>1</tribISSQN>
-						<tpRetISSQN>1</tpRetISSQN>
-						<pAliq>2.50</pAliq>
+						<tribISSQN>' . $data->tribISSQN . '</tribISSQN>
+						<tpRetISSQN>' . $data->tpRetISSQN . '</tpRetISSQN>
+						<pAliq>' . $tribMunAliq . '</pAliq>
 					</tribMun>
 					<tribFed>
 						<piscofins>
-							<CST>00</CST>
-							<tpRetPisCofins>0</tpRetPisCofins>
+							<CST>' . $data->tribFedCst . '</CST>
+							<tpRetPisCofins>' . $data->tpRetPisCofins . '</tpRetPisCofins>
 						</piscofins>
-						<vRetCP>0.12</vRetCP>
-						<vRetIRRF>0.01</vRetIRRF>
+						<vRetCP>' . $vRetCP . '</vRetCP>
+						<vRetIRRF>' . $vRetIRRF . '</vRetIRRF>
+						<vRetCSLL>' . $vRetCSLL . '</vRetCSLL>
 					</tribFed>
 					<totTrib>
-						<pTotTribSN>5.00</pTotTribSN>
+						<pTotTribSN>' . $pTotTribSN . '</pTotTribSN>
 					</totTrib>
 				</trib>
 			</valores>
 			<IBSCBS>
 				<finNFSe>0</finNFSe>
-				<cIndOp>100301</cIndOp>
+				<cIndOp>' . $data->cIndOp . '</cIndOp>
 				<indDest>0</indDest>
 				<valores>
 					<trib>
 						<gIBSCBS>
-							<CST>000</CST>
-							<cClassTrib>000001</cClassTrib>
+							<CST>' . $data->cstIbsCbs . '</CST>
+							<cClassTrib>' . $data->cClassTrib . '</cClassTrib>
 						</gIBSCBS>
 					</trib>
 				</valores>
@@ -121,7 +125,11 @@ class SimplesNacionalBuilder implements DPSBuilderInterface
 	public function buildRecepcionarLoteDpsSincrono(DPSDataDTO $data): string
 	{
 		$dpsId = $this->generateId($data);
-		
+
+		$tribMunAliq = number_format((float)$data->tribMunAliq, 2, '.', '');
+		$vRetCSLL = number_format((float)$data->vRetCSLL, 2, '.', '');
+		$valorServico = number_format((float)$data->valorServico, 2, '.', '');
+
 		return <<<XML
 		<EnviarLoteDpsSincronoEnvio xmlns="http://www.sped.fazenda.gov.br/nfse">
 			<LoteDps Id="L{$dpsId}" versao="1.01">
@@ -181,13 +189,13 @@ class SimplesNacionalBuilder implements DPSBuilderInterface
 							</serv>
 							<valores>
 								<vServPrest>
-									<vServ>{$data->valorServico}</vServ>
+									<vServ>{$valorServico}</vServ>
 								</vServPrest>
 								<trib>
 									<tribMun>
 										<tribISSQN>{$data->tribISSQN}</tribISSQN>
 										<tpRetISSQN>{$data->tpRetISSQN}</tpRetISSQN>
-										<pAliq>{$data->tribMunAliq}</pAliq>
+										<pAliq>{$tribMunAliq}</pAliq>
 									</tribMun>
 									<tribFed>
 										<piscofins>
@@ -196,7 +204,7 @@ class SimplesNacionalBuilder implements DPSBuilderInterface
 										</piscofins>
 										<vRetCP>{$data->vRetCP}</vRetCP>
 										<vRetIRRF>{$data->vRetIRRF}</vRetIRRF>
-										<vRetCSLL>{$data->vRetCSLL}</vRetCSLL>
+										<vRetCSLL>{$vRetCSLL}</vRetCSLL>
 									</tribFed>
 									<totTrib>
 										<pTotTribSN>{$data->pTotTribSN}</pTotTribSN>

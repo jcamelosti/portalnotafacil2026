@@ -84,7 +84,16 @@ class Utilitarios
             'txtAliq',
             'txtDeducaoBaseCalculo',
             'txtDescontoInCondicionado',
-            'txtDescontoCondicionado'
+            'txtDescontoCondicionado',
+            'txtAliquota',
+            'txtValorIRRF',
+            'txtValorCP',
+            'txtBaseCalc',
+            'txtPercentualTribSN',
+            'txtBaseCalcFederal',
+            'txtAliqPIS',
+            'txtAliqCOFINS',
+            'txtValorCSLL'
         ];
 
         $semPontuacao = [

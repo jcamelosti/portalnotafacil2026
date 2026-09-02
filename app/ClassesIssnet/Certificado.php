@@ -257,93 +257,79 @@ class Certificado{
     public function signXMLMod2($docxml, $tagid = '')
     {
         $objSSLPriKey = openssl_get_privatekey($this->priKey);
+
         if ($objSSLPriKey === false) {
             $msg = "Houve erro no carregamento da chave privada.";
             $this->zGetOpenSSLError($msg);
-            //while ($erro = openssl_error_string()) {
-            //    $msg .= $erro . "\n";
-            //}
-            //throw new Exception\RuntimeException($msg);
+            throw new \Exception($msg);
         }
+
         $xml = $docxml;
+
         if (is_file($docxml)) {
             $xml = file_get_contents($docxml);
         }
-        //remove sujeiras do xml
+
+        // Remove quebras e tabs desnecessários
         $order = array("\r\n", "\n", "\r", "\t");
         $xml = str_replace($order, '', $xml);
-        $xmldoc =  new \DOMDocument();
-        $xmldoc->loadXML($xml);
-        //coloca o node raiz em uma variável
-        $root = $xmldoc->documentElement;
-        
-        if($tagid != ''){
-           $root = $xmldoc->getElementsByTagName($tagid)->item(0);
+
+        $xmldoc = new \DOMDocument();
+        $xmldoc->preserveWhiteSpace = false;
+        $xmldoc->formatOutput = true;
+
+        if (!$xmldoc->loadXML($xml)) {
+            throw new \Exception("Não foi possível carregar o XML.");
         }
 
-        //extrair a tag com os dados a serem assinados
+        /*
+        * ---------------------------------------------------------
+        * NODE QUE SERÁ ASSINADO
+        * ---------------------------------------------------------
+        */
         $node = $xmldoc->getElementsByTagName($tagid)->item(0);
-        if (!isset($node)) {
+
+        if (!$node) {
             throw new \Exception(
-                "A tag < $tagid > não existe no XML!!"
+                "A tag <{$tagid}> não existe no XML!"
             );
         }
-        //$this->docId = $node->getAttribute('Id');
-        $xmlResp = $xml;
-        //if (! $this->zSignatureExists($xmldoc)) {
-            //executa a assinatura
-            $xmlResp = $this->zSignXML($xmldoc, $root, $node, $objSSLPriKey);
-        //}
-        //libera a chave privada
-        //openssl_free_key($objSSLPriKey);
-        return $xmlResp;
-    }
 
-    /*
-    Usado para substituição
-    */
-    public function signXMLMod3($docxml, $tagid = '')
-    {
-        $objSSLPriKey = openssl_get_privatekey($this->priKey);
-        if ($objSSLPriKey === false) {
-            $msg = "Houve erro no carregamento da chave privada.";
-            $this->zGetOpenSSLError($msg);
-            //while ($erro = openssl_error_string()) {
-            //    $msg .= $erro . "\n";
-            //}
-            //throw new Exception\RuntimeException($msg);
-        }
-        $xml = $docxml;
-        if (is_file($docxml)) {
-            $xml = file_get_contents($docxml);
-        }
-        //remove sujeiras do xml
-        $order = array("\r\n", "\n", "\r", "\t");
-        $xml = str_replace($order, '', $xml);
-        $xmldoc =  new \DOMDocument();
-        $xmldoc->loadXML($xml);
-        //coloca o node raiz em uma variável
-        $root = $xmldoc->documentElement;
-        
-        if($tagid != ''){
-           $root = $xmldoc->getElementsByTagName($tagid)->item(0);
-        }
+        /*
+        * ---------------------------------------------------------
+        * ELEMENTO PAI DO NODE ASSINADO
+        *
+        * Para:
+        *
+        * <DPS>
+        *     <infDPS>...</infDPS>
+        * </DPS>
+        *
+        * queremos que Signature seja irmã de infDPS.
+        * Portanto:
+        *
+        * $node       = infDPS
+        * $root       = DPS
+        * ---------------------------------------------------------
+        */
+        $root = $node->parentNode;
 
-        //extrair a tag com os dados a serem assinados
-        $node = $xmldoc->getElementsByTagName($tagid)->item(0);
-        if (!isset($node)) {
+        if (!$root) {
             throw new \Exception(
-                "A tag < $tagid > não existe no XML!!"
+                "Não foi possível localizar o elemento pai de <{$tagid}>."
             );
         }
-        //$this->docId = $node->getAttribute('Id');
-        $xmlResp = $xml;
-        //if (! $this->zSignatureExists($xmldoc)) {
-            //executa a assinatura - ex nota substituição
-            $xmlResp = $this->zSignXMLMod2($xmldoc, $root, $node, $objSSLPriKey);
-        //}
-        //libera a chave privada
-        //openssl_free_key($objSSLPriKey);
+
+        /*
+        * Executa a assinatura
+        */
+        $xmlResp = $this->zSignXML(
+            $xmldoc,
+            $root,
+            $node,
+            $objSSLPriKey
+        );
+
         return $xmlResp;
     }
 
@@ -391,7 +377,8 @@ class Certificado{
         //converter o hash para base64
         $digValue = base64_encode($hashValue);
         //cria o node <Signature>
-        $signatureNode = $xmldoc->createElementNS($nsDSIG, 'Signature');
+        //$signatureNode = $xmldoc->createElementNS($nsDSIG, 'Signature');
+        $signatureNode = $xmldoc->createElement('Signature');
         //adiciona a tag <Signature> ao node raiz
         $root->appendChild($signatureNode);
         //cria o node <SignedInfo>
@@ -503,8 +490,7 @@ class Certificado{
         $digValue  = base64_encode($hashValue);
 
         // Cria a estrutura <Signature>
-        $signatureNode = $xmldoc->createElementNS($nsDSIG, 'Signature');
-
+        $signatureNode = $xmldoc->createElementNS('$nsDSIG', 'Signature');
         // -------- SignedInfo --------
         $signedInfoNode = $xmldoc->createElement('SignedInfo');
         $signatureNode->appendChild($signedInfoNode);
@@ -576,7 +562,7 @@ class Certificado{
         return $xmldoc->saveXML();
     }
 
-     private function zSignXMLTeste($xmldoc, $root, $node, $objSSLPriKey)
+    /*private function zSignXMLTeste($xmldoc, $root, $node, $objSSLPriKey)
     {
         $nsDSIG = 'http://www.w3.org/2000/09/xmldsig#';
         $nsCannonMethod = 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315';
@@ -691,7 +677,7 @@ class Certificado{
         $xmlResp = $xmldoc->saveXML();
         //retorna o documento assinado
         return $xmlResp;
-    }
+    }*/
 
     public function assinarPadraoNacional($docxml, $tagid = ''){
         $objSSLPriKey = openssl_get_privatekey($this->priKey);

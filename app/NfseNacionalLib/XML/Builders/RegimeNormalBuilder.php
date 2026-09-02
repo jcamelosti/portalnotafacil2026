@@ -285,10 +285,11 @@ XML;
 
                                     <totTrib>
                                         <vTotTrib>
-                                            <vTotTribFed>1049.25</vTotTribFed>
-                                            <vTotTribEst>0.00</vTotTribEst>
-                                            <vTotTribMun>156.02</vTotTribMun>
+                                            <vTotTribFed>0</vTotTribFed>
+                                            <vTotTribEst>0</vTotTribEst>
+                                            <vTotTribMun>0</vTotTribMun>
                                         </vTotTrib>
+                                        <indTotTrib>0</indTotTrib>
                                     </totTrib>
                                 </trib>
                             </valores>
