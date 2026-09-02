@@ -20,41 +20,19 @@ class TesteNfeNacionalController extends Controller
     
     public function teste()
     {
-        $empresa = Empresa::find(361); // Substitua pelo ID da empresa que deseja testar
-     
-        /*
-        CONSULTA DADOS CADASTRAIS - ISSNET
-        */
-        
-        //Cloud Fender
+        $empresa = Empresa::find(444); // Substitua pelo ID da empresa que deseja testar
+   
         /*$consultarDadosCadastraisDTO = $this->nfse->consultarDadosCadastrais(
             'issnet',
-            361, // 🔥 empresa dinâmica - referencia para buscar certificado digital,
-            '22645177000188', // 🔥 cnpj dinâmico
-            '4048539' // 🔥 inscrição municipal dinâmica
+            444, // 🔥 empresa dinâmica - referencia para buscar certificado digital,
+            $empresa->cpf_cnpj, // 🔥 cnpj dinâmico
+            $empresa->inscricao_municipal // 🔥 inscrição municipal dinâmica
         );
 
-        dd($consultarDadosCadastraisDTO);**/
-
-        //Terceirize
-        /*$consultarDadosCadastraisDTO = $this->nfse->consultarDadosCadastrais(
-            'issnet',
-            346, // 🔥 empresa dinâmica - referencia para buscar certificado digital,
-            '53699630000162', // 🔥 cnpj dinâmico
-            '113317' // 🔥 inscrição municipal dinâmica
-        );*/
-
-        /*$consultarDadosCadastraisDTO = $this->nfse->consultarDadosCadastrais(
-            'issnet',
-            182, // 🔥 empresa dinâmica - referencia para buscar certificado digital,
-            '22958361000188', // 🔥 cnpj dinâmico
-            '79014' // 🔥 inscrição municipal dinâmica
-        );*/
-
-        //dd($consultarDadosCadastraisDTO);
+        dd($consultarDadosCadastraisDTO);*/
         
         //gerando xml DPS
-        $dataSN = new DPSDataDTO(
+        /*$dataSN = new DPSDataDTO(
             ambiente:2,
             dataEmissao: now()->format('Y-m-d\TH:i:sP'),
             serieDps: 8,
@@ -106,19 +84,19 @@ class TesteNfeNacionalController extends Controller
             cIndOp: $dados['cIndOp'] ?? '',
             cstIbsCbs: $dados['cstIbsCbs'] ?? '',
             cClassTrib: $dados['cClassTrib'] ?? '',
-        );
+        );*/
 
         /*$simplesNacionalDPS = DPSFactory::make($dataSN);
         dd($simplesNacionalDPS);*/
 
         //funcionando normalmente
-        $response = $this->nfse->gerarNfse(
+        /*$response = $this->nfse->gerarNfse(
             'issnet',
             $dataSN,
             361 // empresaId
         );
 
-        dd($response);
+        dd($response);*/
 
         
         //consultarUrlNfse - indisponivel em 08/05/2026
@@ -126,8 +104,6 @@ class TesteNfeNacionalController extends Controller
 
         //RecepcionarLoteDpsSincrono - Emitindo Normalmente
         //$this->nfse->recepcionarLoteDpsSincrono('issnet', $dataSN, $empresa->id);
-
-
 
         //Testes com Empresa do Regime Normal
         /*$dataRN = new DPSDataDTO(

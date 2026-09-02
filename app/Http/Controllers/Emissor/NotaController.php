@@ -195,9 +195,11 @@ class NotaController extends Controller
     }
 
     public function index(){
-        $temp = Temp::all();
+        /*$temp = Temp::all();
         $dados = $temp[count($temp) - 1]->dados;
-        $this->emitir($dados);        
+        $this->emitir($dados); */
+
+        dd("Index");
     }
 
     public function create(){
@@ -416,10 +418,11 @@ class NotaController extends Controller
             cstIbsCbs: $dados['ddlSituacaoTributaria'],
             cClassTrib: $dados['ddlClassificacaoTributaria'],
         );
-
-
+        
+        //Gerar NFSe
         $retorno = $this->nfse->gerarNfse('issnet', $dataSN, $empresa->id);
         if(isset($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno->MensagemRetorno)){
+             echo "Falha";
             dd($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno->MensagemRetorno);
         }else{
             dd($retorno);
@@ -440,22 +443,20 @@ class NotaController extends Controller
             //$dados = $this->notaBO->tratarDados($dados);
             $dados = $request->except('_token');
 
-            $temp = Temp::create([
+            /*$temp = Temp::create([
                 'dados' => $dados,
-            ]);
-
-
+            ]);*/
             $this->emitir($dados);
-            dd($dados);            
         }catch(\Exception $e){
-            DB::insert(
+            dd($e->getMessage());
+            /*DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
                     $empresaSessao->id,
                     $e->getMessage()
                 ]
             );
-            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');
+            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');*/
         }
 
         return redirect()->route('nota.index');
