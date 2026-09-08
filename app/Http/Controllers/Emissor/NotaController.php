@@ -22,12 +22,16 @@ use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
+use JCamelo\NfseNacionalLib\DTO\DPSDataSnDTO;
+use JCamelo\NfseNacionalLib\Manager\CertificateManager;
+use JCamelo\NfseNacionalLib\Security\DPSXmlSigner;
 //use JCamelo\NfseNacionalLib\Factories\DPSFactory;
 
 use JCamelo\NfseNacionalLib\Services\NFSeService;
-
+use JCamelo\NfseNacionalLib\XML\Builders\DPSSnXmlBuilder;
 use function PHPUnit\Framework\isNull;
 
 class NotaController extends Controller
@@ -367,7 +371,7 @@ class NotaController extends Controller
             $dados['ddlCidadePrestacao']
         );
         
-        $dataSN = new DPSDataDTO(
+        /*$dataSN = new DPSDataDTO(
             ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
             dataEmissao: Carbon::now()->format('Y-m-d\TH:i:sP'),
             serieDps: $empresa->serie_dps,
@@ -417,10 +421,66 @@ class NotaController extends Controller
             cIndOp: $dados['ddlIndicadorOperacao'],
             cstIbsCbs: $dados['ddlSituacaoTributaria'],
             cClassTrib: $dados['ddlClassificacaoTributaria'],
+            //indDest: 0,
+        );*/
+
+        //correção 08/09/2026
+        $dataSN = new DPSDataSnDTO(
+            ambiente: 2,
+            dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
+            serie: '8',
+            numDps: 1,
+            dataCompetencia: Carbon::now(
+                'America/Sao_Paulo'
+            )->format('Y-m-d'),
+            codigoMunicipio: '5002704',
+            cnpjPrestador: '22645177000188',
+            imPrestador: '4048539',
+            fonePrestador: '62991728787',
+            emailPrestador: 'virlei79@gmail.com',
+            opSimpNac: 3,
+            regApTribSN: 1,
+            regEspTrib: 0,
+            cnpjTomador: '24685881000190',
+            cpfTomador: null,
+            razaoTomador:
+               'Josue Camelo dos Santos Ferreira 01582713197',
+            codigoMunicipioTomador: '5201108',
+            cepTomador: '75064350',
+            logradouroTomador:
+               'Rua Carlinhos José Ribeiro',
+            numeroTomador: '180',
+            complementoTomador: 'APT 402D',
+            bairroTomador:
+               'Vila Jaiara Setor Leste',
+            foneTomador: '6237027225',
+            emailTomador:
+               'contato@josuecamelo.com',
+            codigoTributacaoNacional: '010101',
+            codigoServicoMunicipal: '4',
+            descricaoServico:
+               'Manutenção de computador; limpeza, formatação & instalação - R$ 350,00 (urgente)!',
+            codigoNbs: '115021000',
+            codigoMunicipioPrestacao: '5002704',
+            valorServico: '350.00',
+            tributaIss: 1,
+            tipoRetencaoIss: 1,
+            aliquotaIss: '2.50',
+            cstPisCofins: '00',
+            tipoRetencaoPisCofins: 0,
+            valorRetencaoCp: '0.12',
+            valorRetencaoIrrf: '0.01',
+            percentualTotalTributos: '5.00',
+            finNfse: 0,
+            cIndOp: '100301',
+            indDest: 0,
+            cstIbsCbs: '000',
+            cClassTrib: '000001',
         );
         
         //Gerar NFSe
         $retorno = $this->nfse->gerarNfse('issnet', $dataSN, $empresa->id);
+        
         if(isset($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno->MensagemRetorno)){
              echo "Falha";
             dd($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno->MensagemRetorno);
@@ -435,6 +495,87 @@ class NotaController extends Controller
     }
 
     public function store(Request $request){
+        /*$data = new DPSDataSnDTO(
+            ambiente: 2,
+            dataEmissao: Carbon::now(
+                'America/Sao_Paulo'
+            ),
+            serie: '8',
+            numDps: 1,
+            dataCompetencia: Carbon::now(
+                'America/Sao_Paulo'
+            ),
+            codigoMunicipio: '5002704',
+            cnpjPrestador: '22645177000188',
+            imPrestador: '4048539',
+            fonePrestador: '62991728787',
+            emailPrestador: 'virlei79@gmail.com',
+            opSimpNac: 3,
+            regApTribSN: 1,
+            regEspTrib: 0,
+            cnpjTomador: '24685881000190',
+            cpfTomador: null,
+            razaoTomador:
+               'Josue Camelo dos Santos Ferreira 01582713197',
+            codigoMunicipioTomador: '5201108',
+            cepTomador: '75064350',
+            logradouroTomador:
+               'Rua Carlinhos José Ribeiro',
+            numeroTomador: '180',
+            complementoTomador: 'APT 402D',
+            bairroTomador:
+               'Vila Jaiara Setor Leste',
+            foneTomador: '6237027225',
+            emailTomador:
+               'contato@josuecamelo.com',
+            codigoTributacaoNacional: '010101',
+            codigoServicoMunicipal: '0000000004',
+            descricaoServico:
+               'Manutenção de computador; limpeza, formatação & instalação - R$ 350,00 (urgente)!',
+            codigoNbs: '115021000',
+            codigoMunicipioPrestacao: '5002704',
+            valorServico: '350.00',
+            tributaIss: 1,
+            tipoRetencaoIss: 1,
+            aliquotaIss: '2.50',
+            cstPisCofins: '00',
+            tipoRetencaoPisCofins: 0,
+            valorRetencaoCp: '0.12',
+            valorRetencaoIrrf: '0.01',
+            percentualTotalTributos: '5.00',
+            finNfse: 0,
+            cIndOp: '100301',
+            indDest: 0,
+            cstIbsCbs: '000',
+            cClassTrib: '000001',
+        );
+
+        $builder = new DPSSnXmlBuilder();
+
+        $xml = $builder->build($data);
+
+        file_put_contents(
+            storage_path('app/dps-sem-assinatura.xml'),
+            $xml
+        );
+        
+        $cert = new CertificateManager();
+        $certificado = $cert->getCertificate(361);
+
+        //dd($certificado);
+
+        $signer = new DPSXmlSigner();
+        $xmlAssinado = $signer->sign(
+            $xml,
+            $certificado['pfx'],
+            $certificado['password']
+        );
+        Log::info($xmlAssinado);
+        echo "<pre>";
+        var_dump($xmlAssinado);
+        echo "Finalizado";
+        exit();*/
+
         try{
             $empresaSessao = request()->session()->get('empresa_selecionada');
             $empresaSessao = $this->empresaModel->find($empresaSessao);

@@ -22,7 +22,7 @@ class ISSNetService
         $cert = $this->certManager->getCertificate($empresaId);
         //Obter o Endpoint correto se produção ou homologação conforme campo ambiente_emissao do registro da empresa
         $ws = $this->wsManager->getWsUrl($empresaId);
-        
+     
         $response = $this->transport->send(
             $ws['url'],
             config('nfse.uri'),

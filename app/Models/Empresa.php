@@ -30,10 +30,6 @@ class Empresa extends Model
         'complemento',
         'bairro',
         'cidade_id',
-        'is_mei',
-        'is_optante_simples_nac',
-        'vig_ini_simples_nac',
-        'vig_fim_simples_nac',
         'permite_deducao',
         'permite_desc_incond',
         'permite_desc_cond',
@@ -56,7 +52,11 @@ class Empresa extends Model
         'regime_tributario',
         'op_simp_nac',
         'tp_regime_esp_trib_mun',
-        'tp_reg_apuracao_sn'
+        'tp_reg_apuracao_sn',
+        'regime',
+        'focunfe_id',
+        'focunfe_token_hmg',
+        'focunfe_token_prd',
     ];
 
     /*public function getCepAttribute($value)
@@ -129,6 +129,10 @@ class Empresa extends Model
     public function cidade()
     {
         return $this->belongsTo(Municipio::class, 'cidade_id', 'codigo');
+    }
+
+    public function certificado(){
+        return $this->hasOne(Certificado::class);
     }
 
     public function empresasList($userId = null){
@@ -216,6 +220,93 @@ class Empresa extends Model
 			'5' => 'Profissional Autônomo',
 			'6' => 'Sociedade de Profissionais'
         ];
+    }
+
+    //para Campo taxRegime - Spedy
+    public static function getRegimeTributario(){
+        return [
+            'simplesNacional' => 'Simples Nacional',
+            'simplesNacionalExcessoSublimite' => 'Simples Nacional - excesso de sublimite de receita bruta',
+            'regimeNormal' => 'Regime Normal (Lucro Presumido ou Lucro Real)',
+            'simplesNacionalMEI' => 'Simples Nacional — MEI'
+        ];
+    }
+
+    public function getRegimeEspecialTributacao(){
+        return [
+            1 => 'Microempresa Municipal',
+            2 => 'Estimativa',
+            3 => 'Sociedade de Profissionais',
+            4 => 'Cooperativa',
+            5 => 'Microempresário Individual (MEI)',
+            6 => 'Microempresa ou Empresa de Pequeno Porte (ME EPP)',
+        ];
+    }
+
+    //campo tax Regime
+    public function getRegimes(){
+        return [
+            'simplesNacional' => 'Simples Nacional',
+            'simplesNacionalExcessoSublimite' => 'Simples Nacional — Excesso de sublimite de receita bruta',
+            'regimeNormal' => 'Regime Normal (Lucro Presumido ou Lucro Real)',
+            'simplesNacionalMEI' => 'Simples Nacional — MEI'
+        ];
+    }
+
+    public function getRegimeEspecialTributacaoAttribute(){
+        $campo = $this->attributes['regime_esp_tributacao'];
+        $valorRetorno = '';
+
+        switch($campo){
+            case 1: //Microempresa Municipal
+                $valorRetorno = 'municipalMicroenterprise';
+                break;
+            case 2: //Estimativa
+                $valorRetorno = 'estimate';
+                break;
+            case 3: //Sociedade de Profissionais
+                $valorRetorno = 'societyOfProfessionals';
+                break;
+            case 4: //Cooperativa
+                $valorRetorno = 'cooperative';
+                break;
+            case 5: //Microempresário Individual (MEI)
+                $valorRetorno = 'individualMicroenterprise';
+                break;
+            case 6: //Microempresa ou Empresa de Pequeno Porte (ME EPP)
+                $valorRetorno = 'microenterpriseAndSmallBusiness';
+                break;
+            case 7: //Sem Regime Especial
+                $valorRetorno = 'noSpecialRegime';
+                break;
+            default:
+                $valorRetorno = 'others';
+                break;
+        }
+
+        return $valorRetorno;
+    }
+
+    public function getSimplesNacionalRegimeAttribute(){
+        $valorRetorno = 'federalAndMunicipalBySimplesNacional';
+        $campo = $this->attributes['tp_reg_apuracao_sn'];
+
+        switch($campo){
+            case 1: //Microempresa Municipal
+                $valorRetorno = 'federalAndMunicipalBySimplesNacional';
+                break;
+            case 2: //Estimativa
+                $valorRetorno = 'federalBySimplesAndIssqnByNfse';
+                break;
+            case 3: //Sociedade de Profissionais
+                $valorRetorno = 'federalAndMunicipalByNfse';
+                break;
+            default:
+                $valorRetorno = 'federalAndMunicipalBySimplesNacional';
+                break;
+        }
+
+        return $valorRetorno;
     }
 }
 

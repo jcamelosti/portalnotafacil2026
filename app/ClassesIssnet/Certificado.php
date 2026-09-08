@@ -254,7 +254,7 @@ class Certificado{
         return $xmlResp;
     }
 
-    public function signXMLMod2($docxml, $tagid = '')
+    public function efetuarAssinaturaXML($docxml, $tagid = '')
     {
         $objSSLPriKey = openssl_get_privatekey($this->priKey);
 
@@ -323,7 +323,7 @@ class Certificado{
         /*
         * Executa a assinatura
         */
-        $xmlResp = $this->zSignXML(
+        $xmlResp = $this->zSignXMLTeste(
             $xmldoc,
             $root,
             $node,
@@ -332,6 +332,375 @@ class Certificado{
 
         return $xmlResp;
     }
+
+    private function zSignXMLTeste(
+    $xmldoc,
+    $root,
+    $node,
+    $objSSLPriKey
+) {
+    $nsDSIG = 'http://www.w3.org/2000/09/xmldsig#';
+
+    $nsCannonMethod =
+        'http://www.w3.org/TR/2001/REC-xml-c14n-20010315';
+
+    $nsSignatureMethod =
+        'http://www.w3.org/2000/09/xmldsig#rsa-sha1';
+
+    $nsTransformMethod1 =
+        'http://www.w3.org/2000/09/xmldsig#enveloped-signature';
+
+    $nsTransformMethod2 =
+        'http://www.w3.org/TR/2001/REC-xml-c14n-20010315';
+
+    $nsDigestMethod =
+        'http://www.w3.org/2000/09/xmldsig#sha1';
+
+    /*
+     * Prefixo que queremos explicitamente:
+     *
+     * ns2:Signature
+     * ns2:SignedInfo
+     * ns2:Reference
+     * ...
+     */
+    $prefix = 'ns2';
+
+    /*
+     * Canonicalização usada pelo Signer.
+     */
+    $canonical = $this->canonical ?? [
+        true,
+        false,
+        null,
+        null
+    ];
+
+    /*
+     * ==========================================================
+     * ID DO ELEMENTO ASSINADO
+     * ==========================================================
+     */
+    $idSigned = trim(
+        $node->getAttribute('Id')
+    );
+
+    /*
+     * ==========================================================
+     * DIGEST
+     * ==========================================================
+     */
+    $dados = $node->C14N(
+        $canonical[0],
+        $canonical[1],
+        $canonical[2],
+        $canonical[3]
+    );
+
+    $hashValue = hash(
+        'sha1',
+        $dados,
+        true
+    );
+
+    $digValue = base64_encode($hashValue);
+
+    /*
+     * ==========================================================
+     * SIGNATURE
+     * ==========================================================
+     *
+     * IMPORTANTE:
+     *
+     * createElementNS(
+     *     namespace,
+     *     'ns2:Signature'
+     * )
+     *
+     * cria explicitamente o prefixo ns2.
+     */
+    $signatureNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':Signature'
+    );
+
+    /*
+     * Declara explicitamente:
+     *
+     * xmlns:ns2="http://www.w3.org/2000/09/xmldsig#"
+     */
+    $signatureNode->setAttributeNS(
+        'http://www.w3.org/2000/xmlns/',
+        'xmlns:' . $prefix,
+        $nsDSIG
+    );
+
+    /*
+     * Signature fica dentro da raiz DPS.
+     */
+    $root->appendChild(
+        $signatureNode
+    );
+
+    /*
+     * ==========================================================
+     * SIGNED INFO
+     * ==========================================================
+     */
+    $signedInfoNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':SignedInfo'
+    );
+
+    $signatureNode->appendChild(
+        $signedInfoNode
+    );
+
+    /*
+     * ==========================================================
+     * CANONICALIZATION METHOD
+     * ==========================================================
+     */
+    $canonicalNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':CanonicalizationMethod'
+    );
+
+    $canonicalNode->setAttribute(
+        'Algorithm',
+        $nsCannonMethod
+    );
+
+    $signedInfoNode->appendChild(
+        $canonicalNode
+    );
+
+    /*
+     * ==========================================================
+     * SIGNATURE METHOD
+     * ==========================================================
+     */
+    $signatureMethodNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':SignatureMethod'
+    );
+
+    $signatureMethodNode->setAttribute(
+        'Algorithm',
+        $nsSignatureMethod
+    );
+
+    $signedInfoNode->appendChild(
+        $signatureMethodNode
+    );
+
+    /*
+     * ==========================================================
+     * REFERENCE
+     * ==========================================================
+     */
+    $referenceNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':Reference'
+    );
+
+    $referenceNode->setAttribute(
+        'URI',
+        '#' . $idSigned
+    );
+
+    $signedInfoNode->appendChild(
+        $referenceNode
+    );
+
+    /*
+     * ==========================================================
+     * TRANSFORMS
+     * ==========================================================
+     */
+    $transformsNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':Transforms'
+    );
+
+    $referenceNode->appendChild(
+        $transformsNode
+    );
+
+    /*
+     * Transform enveloped
+     */
+    $transfNode1 = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':Transform'
+    );
+
+    $transfNode1->setAttribute(
+        'Algorithm',
+        $nsTransformMethod1
+    );
+
+    $transformsNode->appendChild(
+        $transfNode1
+    );
+
+    /*
+     * Transform C14N
+     */
+    $transfNode2 = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':Transform'
+    );
+
+    $transfNode2->setAttribute(
+        'Algorithm',
+        $nsTransformMethod2
+    );
+
+    $transformsNode->appendChild(
+        $transfNode2
+    );
+
+    /*
+     * ==========================================================
+     * DIGEST METHOD
+     * ==========================================================
+     */
+    $digestMethodNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':DigestMethod'
+    );
+
+    $digestMethodNode->setAttribute(
+        'Algorithm',
+        $nsDigestMethod
+    );
+
+    $referenceNode->appendChild(
+        $digestMethodNode
+    );
+
+    /*
+     * ==========================================================
+     * DIGEST VALUE
+     * ==========================================================
+     */
+    $digestValueNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':DigestValue',
+        $digValue
+    );
+
+    $referenceNode->appendChild(
+        $digestValueNode
+    );
+
+    /*
+     * ==========================================================
+     * CANONICALIZA SIGNEDINFO
+     * ==========================================================
+     */
+    $cnSignedInfoNode = $signedInfoNode->C14N(
+        $canonical[0],
+        $canonical[1],
+        $canonical[2],
+        $canonical[3]
+    );
+
+    /*
+     * ==========================================================
+     * ASSINATURA RSA-SHA1
+     * ==========================================================
+     */
+    $signature = '';
+
+    if (!openssl_sign(
+        $cnSignedInfoNode,
+        $signature,
+        $objSSLPriKey,
+        OPENSSL_ALGO_SHA1
+    )) {
+        $msg = "Houve erro durante a assinatura digital.\n";
+
+        $this->zGetOpenSSLError($msg);
+
+        throw new \RuntimeException($msg);
+    }
+
+    $signatureValue = base64_encode(
+        $signature
+    );
+
+    /*
+     * ==========================================================
+     * SIGNATURE VALUE
+     * ==========================================================
+     */
+    $signatureValueNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':SignatureValue',
+        $signatureValue
+    );
+
+    $signatureNode->appendChild(
+        $signatureValueNode
+    );
+
+    /*
+     * ==========================================================
+     * KEY INFO
+     * ==========================================================
+     */
+    $keyInfoNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':KeyInfo'
+    );
+
+    $signatureNode->appendChild(
+        $keyInfoNode
+    );
+
+    /*
+     * ==========================================================
+     * X509 DATA
+     * ==========================================================
+     */
+    $x509DataNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':X509Data'
+    );
+
+    $keyInfoNode->appendChild(
+        $x509DataNode
+    );
+
+    /*
+     * ==========================================================
+     * CERTIFICADO
+     * ==========================================================
+     */
+    $pubKeyClean = $this->zCleanPubKey();
+
+    $x509CertificateNode = $xmldoc->createElementNS(
+        $nsDSIG,
+        $prefix . ':X509Certificate',
+        $pubKeyClean
+    );
+
+    $x509DataNode->appendChild(
+        $x509CertificateNode
+    );
+
+    /*
+     * ==========================================================
+     * RETORNA XML SEM XML DECLARATION
+     * ==========================================================
+     */
+    return $xmldoc->saveXML(
+        $xmldoc->documentElement,
+        LIBXML_NOXMLDECL
+    );
+}
 
      /**
      * signatureExists
@@ -562,123 +931,6 @@ class Certificado{
         return $xmldoc->saveXML();
     }
 
-    /*private function zSignXMLTeste($xmldoc, $root, $node, $objSSLPriKey)
-    {
-        $nsDSIG = 'http://www.w3.org/2000/09/xmldsig#';
-        $nsCannonMethod = 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315';
-        $nsSignatureMethod = 'http://www.w3.org/2000/09/xmldsig#rsa-sha1';
-        $nsTransformMethod1 ='http://www.w3.org/2000/09/xmldsig#enveloped-signature';
-        $nsTransformMethod2 = 'http://www.w3.org/TR/2001/REC-xml-c14n-20010315';
-        $nsDigestMethod = 'http://www.w3.org/2000/09/xmldsig#sha1';
-        //pega o atributo id do node a ser assinado
-        $idSigned = trim($node->getAttribute("Id"));
-        //extrai os dados da tag para uma string na forma canonica
-        $dados = $node->C14N(true, false, null, null);
-        //calcular o hash dos dados
-        $hashValue = hash('sha1', $dados, true);
-        //converter o hash para base64
-        $digValue = base64_encode($hashValue);
-        //cria o node <Signature>
-        $signatureNode = $xmldoc->createElementNS($nsDSIG, 'Signature');
-        //adiciona a tag <Signature> ao node raiz
-        $root->appendChild($signatureNode);
-        //cria o node <SignedInfo>
-        $signedInfoNode = $xmldoc->createElementNS($nsDSIG, 'SignedInfo');//$xmldoc->createElement('SignedInfo');
-        //adiciona o node <SignedInfo> ao <Signature>
-        $signatureNode->appendChild($signedInfoNode);
-        //cria no node com o método de canonização dos dados
-        $canonicalNode = $xmldoc->createElementNS($nsDSIG, 'CanonicalizationMethod');
-        //adiona o <CanonicalizationMethod> ao node <SignedInfo>
-        $signedInfoNode->appendChild($canonicalNode);
-        //seta o atributo ao node <CanonicalizationMethod>
-        $canonicalNode->setAttribute('Algorithm', $nsCannonMethod);
-        //cria o node <SignatureMethod>
-        $signatureMethodNode = $xmldoc->createElementNS($nsDSIG, 'SignatureMethod');
-        //adiciona o node <SignatureMethod> ao node <SignedInfo>
-        $signedInfoNode->appendChild($signatureMethodNode);
-        //seta o atributo Algorithm ao node <SignatureMethod>
-        $signatureMethodNode->setAttribute('Algorithm', $nsSignatureMethod);
-        //cria o node <Reference>
-        $referenceNode = $xmldoc->createElementNS($nsDSIG, 'Reference');
-        //adiciona o node <Reference> ao node <SignedInfo>
-        $signedInfoNode->appendChild($referenceNode);
-        //seta o atributo URI a node <Reference>
-        $referenceNode->setAttribute('URI', '#'.$idSigned);
-        //cria o node <Transforms>
-        $transformsNode = $xmldoc->createElementNS($nsDSIG, 'Transforms');
-        //adiciona o node <Transforms> ao node <Reference>
-        $referenceNode->appendChild($transformsNode);
-        //cria o primeiro node <Transform> OBS: no singular
-        $transfNode1 = $xmldoc->createElementNS($nsDSIG, 'Transform');
-        //adiciona o primeiro node <Transform> ao node <Transforms>
-        $transformsNode->appendChild($transfNode1);
-        //set o atributo Algorithm ao primeiro node <Transform>
-        $transfNode1->setAttribute('Algorithm', $nsTransformMethod1);
-        //cria outro node <Transform> OBS: no singular
-        $transfNode2 = $xmldoc->createElementNS($nsDSIG, 'Transform');
-        //adiciona o segundo node <Transform> ao node <Transforms>
-        $transformsNode->appendChild($transfNode2);
-        //set o atributo Algorithm ao segundo node <Transform>
-        $transfNode2->setAttribute('Algorithm', $nsTransformMethod2);
-        //cria o node <DigestMethod>
-        $digestMethodNode = $xmldoc->createElementNS($nsDSIG, 'DigestMethod');
-        //adiciona o node <DigestMethod> ao node <Reference>
-        $referenceNode->appendChild($digestMethodNode);
-        //seta o atributo Algorithm ao node <DigestMethod>
-        $digestMethodNode->setAttribute('Algorithm', $nsDigestMethod);
-        //cria o node <DigestValue>
-        $digestValueNode = $xmldoc->createElementNS($nsDSIG, 'DigestValue', $digValue);
-        //adiciona o node <DigestValue> ao node <Reference>
-        $referenceNode->appendChild($digestValueNode);
-        //extrai node <SignedInfo> para uma string na sua forma canonica
-        $cnSignedInfoNode = $signedInfoNode->C14N(true, false, null, null);
-        //cria uma variavel vazia que receberá a assinatura
-        $signature = '';
-        //calcula a assinatura do node canonizado <SignedInfo>
-        //usando a chave privada em formato PEM
-        if (! openssl_sign($cnSignedInfoNode, $signature, $objSSLPriKey)) {
-            $msg = "Houve erro durante a assinatura digital.\n";
-            $this->zGetOpenSSLError($msg);
-            //while ($erro = openssl_error_string()) {
-            //    $msg .= $erro . "\n";
-            //}
-            //throw new Exception\RuntimeException($msg);
-        }
-        //converte a assinatura em base64
-        $signatureValue = base64_encode($signature);
-        //cria o node <SignatureValue>
-        //$signatureValueNode = $xmldoc->createElement('SignatureValue', $signatureValue);
-        $signatureValueNode = $xmldoc->createElementNS($nsDSIG, 'SignatureValue', $signatureValue);
-        //adiciona o node <SignatureValue> ao node <Signature>
-        $signatureNode->appendChild($signatureValueNode);
-        //cria o node <KeyInfo>
-        //$keyInfoNode = $xmldoc->createElement('KeyInfo');
-        $keyInfoNode = $xmldoc->createElementNS($nsDSIG, 'KeyInfo');
-        //adiciona o node <KeyInfo> ao node <Signature>
-        $signatureNode->appendChild($keyInfoNode);
-        //cria o node <X509Data>
-        //$x509DataNode = $xmldoc->createElement('X509Data');
-        $x509DataNode = $xmldoc->createElementNS($nsDSIG, 'X509Data');
-        //adiciona o node <X509Data> ao node <KeyInfo>
-        $keyInfoNode->appendChild($x509DataNode);
-        //remove linhas desnecessárias do certificado
-        $pubKeyClean = $this->zCleanPubKey();
-        //cria o node <X509Certificate>
-        //$x509CertificateNode = $xmldoc->createElement('X509Certificate', $pubKeyClean);
-        // <dsig:X509Certificate>
-        $x509CertificateNode = $xmldoc->createElementNS(
-            $nsDSIG,
-            'X509Certificate',
-            $pubKeyClean
-        );
-        //adiciona o node <X509Certificate> ao node <X509Data>
-        $x509DataNode->appendChild($x509CertificateNode);
-        //salva o xml completo em uma string
-        $xmlResp = $xmldoc->saveXML();
-        //retorna o documento assinado
-        return $xmlResp;
-    }*/
-
     public function assinarPadraoNacional($docxml, $tagid = ''){
         $objSSLPriKey = openssl_get_privatekey($this->priKey);
 
@@ -707,7 +959,7 @@ class Certificado{
 
         $root = $xmldoc->documentElement;
 
-        return $this->zSignXMLMod2($xmldoc, $root, $node, $objSSLPriKey);
+        return $this->zSignXMLTeste($xmldoc, $root, $node, $objSSLPriKey);
         //return $this->zSignXMLTeste($xmldoc, $root, $node, $objSSLPriKey);
     }
 

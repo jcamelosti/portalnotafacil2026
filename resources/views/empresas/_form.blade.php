@@ -281,6 +281,35 @@
 
     <div class="grid grid-cols-4 gap-1 mt-4">
         <label class="block text-sm">
+            <span class="text-gray-700 ">Regime Tributário</span>
+            {!! Form::select('regime', $regimes
+            ,$empresa->regime, ['required','class'=>'block w-full mt-1 text-sm  
+            form-select
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+            @if ($errors->has('regime'))
+                <span class="text-xs text-red-600 ">
+                <strong>{ { $errors->first('regime') }}</strong>
+            </span>
+            @endif
+        </label>
+
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Regime Especial de Tributação:</span>
+            {!! Form::select('regime_esp_tributacao', isset($reg_esp_trib) ? $reg_esp_trib : []
+            ,$empresa->regime_esp_tributacao, ['required','class'=>'block w-full mt-1 text-sm  
+            
+            form-select
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+            @if ($errors->has('regime_esp_tributacao'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('regime_esp_tributacao') }}</strong>
+            </span>
+            @endif
+        </label>
+    </div>
+
+    <div class="grid grid-cols-4 gap-1 mt-4">
+        <label class="block text-sm">
             <span class="text-gray-700 ">Situação Perante Simples Nacional</span>
             {!! Form::select('op_simp_nac', $situacao_simples_nacional
             ,$empresa->op_simp_nac, ['required','class'=>'block w-full mt-1 text-sm  

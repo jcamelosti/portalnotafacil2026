@@ -21,6 +21,7 @@
         "maatwebsite/excel": "^3.1",
         "maciejczyzewski/bottomline": "^0.2.0",
         "nfephp-org/sped-common": "^5.1",
+        "ramsey/uuid": "^4.9",
         "respect/validation": "^1.1",
         "robrichards/xmlseclibs": "^3.1"
     },

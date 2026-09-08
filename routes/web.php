@@ -6,6 +6,7 @@ use App\Http\Controllers\Emissor\DashboardController;
 use App\Http\Controllers\Emissor\NfseNacional;
 use App\Http\Controllers\Emissor\NotaController;
 use App\Http\Controllers\Emissor\ProtocoloController;
+use App\Http\Controllers\Emissor\TesteNfeNacionalController;
 use App\Http\Controllers\Empresas\CodTribMunCodTribNacController;
 use App\Http\Controllers\Empresas\EmpresasController;
 use App\Http\Controllers\Empresas\LicencasController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\InfinitePayWebHookController;
 use App\Http\Controllers\Irpj\RelatorioController;
 use App\Http\Controllers\MercadoPagoController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\TestSpedyController;
 use App\Http\Controllers\Tomadores\TomadoresController;
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +70,11 @@ Route::get('/foto/{hash}', function ($hash) {
     return response()->file($path);
 })->name('foto');
 
+
+//TESTES SPEDY
+Route::get('/testes/spedy', [TestSpedyController::class, 'index'])->name('spedy.testes');
+Route::get('/testes/focunfe', [TesteNfeNacionalController::class, 'cadastraEmpresaFocuNfe'])->name('focunfse.testes');
+
 Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', 'dados.faturamento']], function () {
     Route::group(['prefix' => 'c'], function() {
         /*Route::get('/pagamento-realizado', [DashboardController::class, 'pagamentoRealizado'])->name('pagamentoRealizado');
@@ -99,7 +106,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
 
             //novas rotas - 17/08/2026
             Route::get('nfse-nacional/testes', [\App\Http\Controllers\Emissor\TesteNfeNacionalController::class, 'teste']);
-
+            
             //pesquisar
             Route::get('/obter/tributacao-nacional/por-tributacao-mun', [NotaController::class, 'obterTributacaoNacionalPorAtividadeMun']);
             Route::get('/obter/nbs/por-empresa', [NotaController::class, 'obterNbs']);

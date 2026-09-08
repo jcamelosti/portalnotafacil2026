@@ -3,26 +3,30 @@ namespace JCamelo\NfseNacionalLib\Services;
 
 use Illuminate\Support\Facades\Log;
 use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
+use JCamelo\NfseNacionalLib\DTO\DPSDataSnDTO;
 use JCamelo\NfseNacionalLib\Factories\DPSFactory;
 use JCamelo\NfseNacionalLib\Factories\NFSeProviderFactory;
 use JCamelo\NfseNacionalLib\Factories\XmlFactory;
+use JCamelo\NfseNacionalLib\XML\Builders\DPSSnXmlBuilder;
 use JCamelo\NfseNacionalLib\XML\Signer\XmlSigner;
 
 class NFSeService
 {
-    public function gerarNfse(string $provider, DPSDataDTO $data, int $empresaId)
+    public function gerarNfse(string $provider, DPSDataSnDTO $data, int $empresaId)
     {
-        // 🔥 1. GERAR XML (usa seu Factory + Builders)
-        $xml = DPSFactory::make($data);
-
-        // 🔥 2. ASSINAR XML
+        $builder = new DPSSnXmlBuilder();
+        $xml = $builder->build($data);
         $assinador = app(XmlSigner::class);
-		$xml = $assinador->assinar($xml, 'infDPS', $empresaId);
-		$xml = str_replace('<?xml version="1.0"?>', '', $xml);
+        
+		$xml = $assinador->assinarRpsRepetidamenteApi($xml, 'infDPS', $data->cnpjPrestador);
+        $xml = str_replace('<?xml version="1.0"?>', '', $xml);
+
+        // 🔥 1. GERAR XML (usa seu Factory + Builders)
+        $xml = DPSFactory::make($data, $xml);
+        Log::info($xml);
 
         // 🔥 3. ESCOLHER PROVIDER
         $driver = NFSeProviderFactory::make($provider);
-
         // 🔥 4. ENVIAR
         return $driver->gerarNfse($xml, $empresaId);
     }
