@@ -74,7 +74,7 @@ class ISSNetService
         $soap = SoapBuilder::build('ConsultarUrlNfse', $xml);
         $cert = $this->certManager->getCertificate($empresaId);
         $ws = $this->wsManager->getWsUrl($empresaId);
-
+        
         $response = $this->transport->send(
             $ws['url'],
             config('nfse.uri'),
@@ -82,10 +82,11 @@ class ISSNetService
             $soap,
             $cert
         );
+        
         Log::info(__METHOD__);
         Log::info($response);
 
-        //dd($response);
+        dd($response);
         
         return $this->parse($response);
     }

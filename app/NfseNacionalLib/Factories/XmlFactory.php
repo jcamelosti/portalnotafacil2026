@@ -25,22 +25,12 @@ class XmlFactory
                 <CNPJ>{$cnpj}</CNPJ>
                 <IM>{$im}</IM>
             </Prestador>
-            <PeriodoEmissao>
-                <DataInicial>{$data_inicial}</DataInicial>
-                <DataFinal>{$data_final}</DataFinal>
-            </PeriodoEmissao>
             <Pagina>1</Pagina>
         </ConsultarUrlNfseEnvio>
         XML;*/
+
         return <<<XML
-        <ConsultarUrlNfseEnvio xmlns="http://www.sped.fazenda.gov.br/nfse">
-            <Prestador>
-                <CNPJ>{$cnpj}</CNPJ>
-                <IM>{$im}</IM>
-            </Prestador>
-            <NumeroNfse>{$numero_nfse}</NumeroNfse>
-            <Pagina>1</Pagina>
-        </ConsultarUrlNfseEnvio>
+        <ConsultarUrlNfseEnvio xmlns="http://www.sped.fazenda.gov.br/nfse"><Prestador><CNPJ>{$cnpj}</CNPJ><IM>{$im}</IM></Prestador><NumeroNfse>{$numero_nfse}</NumeroNfse><Pagina>1</Pagina></ConsultarUrlNfseEnvio>
         XML;
     }
 }

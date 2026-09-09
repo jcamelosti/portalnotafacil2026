@@ -1,0 +1,80 @@
+SimpleXMLElement {#1493 ▼
+  +"sBody": SimpleXMLElement {#1494 ▼
+    +"GerarNfseResponse": SimpleXMLElement {#1507 ▼
+      +"GerarNfseResposta": SimpleXMLElement {#1508 ▼
+        +"ListaNfse": SimpleXMLElement {#1474 ▼
+          +"CompNfse": SimpleXMLElement {#1471 ▼
+            +"NFSe": SimpleXMLElement {#1513 ▼
+              +"@attributes": array:1 [▶]
+              +"infNFSe": SimpleXMLElement {#1495 ▼
+                +"@attributes": array:1 [▼
+                  "Id" => "NFS50027041222645177000188000000000001126091788968379"
+                ]
+                +"xLocEmi": "Campo Grande"
+                +"xLocPrestacao": "Campo Grande"
+                +"nNFSe": "11"
+                +"cLocIncid": "5208707"
+                +"xLocIncid": "Goiânia"
+                +"xTribNac": "Análise e desenvolvimento de sistemas."
+                +"xTribMun": "Atividade  2.5 %"
+                +"xNBS": "Serviços de projeto, desenvolvimento e instalação de aplicativos e programas não personalizados (não customizados)"
+                +"verAplic": "WS NC 1.01"
+                +"ambGer": "1"
+                +"tpEmis": "2"
+                +"cStat": "100"
+                +"dhProc": "2026-09-09T12:39:40-03:00"
+                +"nDFSe": "11"
+                +"emit": SimpleXMLElement {#1499 ▼
+                  +"CNPJ": "22645177000188"
+                  +"IM": "4048539"
+                  +"xNome": "Virlei G. de Oliveira Ltda"
+                  +"xFant": "Cloudfender Tecnologia em Nuvem"
+                  +"enderNac": SimpleXMLElement {#1511 ▶}
+                  +"fone": "62991728787"
+                  +"email": "virlei79@gmail.com"
+                }
+                +"valores": SimpleXMLElement {#1512 ▼
+                  +"vBC": "350.00"
+                  +"pAliqAplic": "2.50"
+                  +"vISSQN": "8.75"
+                  +"vTotalRet": "0.13"
+                  +"vLiq": "349.87"
+                }
+                +"xOutInf": "I - "DOCUMENTO EMITIDO POR ME OU EPP OPTANTE PELO SIMPLES NACIONAL"; e  |  II - "NÃO GERA DIREITO A CRÉDITO FISCAL DE IPI."<br>NFSE EMITIDA EM AMBIENTE DE HOMOL ▶"
+                +"IBSCBS": SimpleXMLElement {#1496 ▼
+                  +"cLocalidadeIncid": "5201108"
+                  +"xLocalidadeIncid": "Anápolis"
+                  +"valores": SimpleXMLElement {#1518 ▶}
+                  +"totCIBS": SimpleXMLElement {#1519 ▼
+                    +"vTotNF": "349.87"
+                    +"gIBS": SimpleXMLElement {#1529 ▼
+                      +"vIBSTot": "0.34"
+                      +"gIBSUFTot": SimpleXMLElement {#1544 ▼
+                        +"vIBSUF": "0.34"
+                      }
+                      +"gIBSMunTot": SimpleXMLElement {#1545 ▼
+                        +"vIBSMun": "0.00"
+                      }
+                    }
+                    +"gCBS": SimpleXMLElement {#1530 ▼
+                      +"vCBS": "3.07"
+                    }
+                  }
+                }
+                +"DPS": SimpleXMLElement {#1503 ▼
+                  +"@attributes": array:1 [▶]
+                  +"infDPS": SimpleXMLElement {#1521 ▶}
+                  +"Signature": SimpleXMLElement {#1522 ▼
+                    +"SignedInfo": SimpleXMLElement {#1538 ▶}
+                    +"SignatureValue": "HCvNJcSpAS3KjodLJCM2fVrv5SHw9TY6h5Pjik33zVEcDR++RfWP8M2emV9WkUIGFJLi+y+cnDJwui3qG5SB5ZvQEAkqWvk1YnCM1nOBLwgiyvrRW8omEG7wiN2uUkrEzOgkiyK2H8k55aBWe4ggpLkphnWLJUWN ▶"
+                    +"KeyInfo": SimpleXMLElement {#1539 ▶}
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

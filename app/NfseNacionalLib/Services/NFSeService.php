@@ -55,8 +55,10 @@ class NFSeService
     public function consultarUrlNfse(string $provider, int $empresaId, string $cnpj, string $im, int $numero_nfse, string $data_inicial, string $data_final)
     {
         $xml = XmlFactory::gerarXmlConsultaUrlNfse($cnpj, $im, $numero_nfse, $data_inicial, $data_final);
-        
+
         $driver = NFSeProviderFactory::make($provider);
+
+        Log::info($xml);
 
         return $driver->consultarUrlNfse($xml, $empresaId);
     }

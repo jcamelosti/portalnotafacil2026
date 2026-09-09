@@ -34,63 +34,12 @@ class TesteNfeNacionalController extends Controller
 
         dd($consultarDadosCadastraisDTO);*/
         
-        //gerando xml DPS
-        /*$dataSN = new DPSDataDTO(
-            ambiente:2,
-            dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
-            serieDps: 8,
-            numDps: 7,
-            cnpjPrestador: '22645177000188',
-            imPrestador: '4048539',
-
-            cnpjTomador: '24685881000190',
-            razaoTomador: "24.685.881 JOSUE CAMELO DOS SANTOS",
-            cMunTomador: 5201108,
-            cepTomador: '75072150',
-            logradouroTomador: 'Rua Oscar Soares Azevedo',
-            numeroTomador: '0',
-            complementoTomador: 'Quadra 14;LOTE 03',
-            bairroTomador: 'Jardim dos Ipes',
-            cPaisTomadorExterior: '',
-            cEndPostTomador: '',
-            xCidadeTomador: '',
-
-            localPrestacaoServico: '5201108',
-
-            codigoMunicipio: '5002704',            
-            codigoTributacaoNacional: '4',
-            codigoServico: '010302',
-            descricaoServico: 'Serviço de desenvolvimento de programas de computador sob encomenda',
-            valorServico:  100.00,
-            dataCompetencia:  now()->format('Y-m-d'),
-            nbs: '115090000',
-            complemento: '',
-            opSimpNac: 3,
-            regApTribSN: 1,
-            regEspTrib: 0,
-
-            tribISSQN: 1, //ddlTribISSQN
-            tpRetISSQN:  1, //ddlTipoRetencao
-
-            tribMunAliq:  2.50,
-            tribFedCst: '00',//ddlSitTribFederal
-            tpRetPisCofins: '0', //ddlTipoRetFederal
-
-            vRetCP: 0.00,
-            vRetIRRF: 0.00,
-            vRetCSLL: 0.00,
-
-            pTotTribSN: 0.0,
-            cIndOp: '100302',
-            cstIbsCbs: '000' ,
-            cClassTrib: '000001',
-        );*/
-
-        $dataSN = new DPSDataSnDTO(
+        //nfse gerarnfse notacontrol funcionando 09/09/2026
+        /*$dataSN = new DPSDataSnDTO(
             ambiente: 2,
             dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
             serie: '8',
-            numDps: 1,
+            numDps: 13,
             dataCompetencia: Carbon::now(
                 'America/Sao_Paulo'
             )->format('Y-m-d'),
@@ -99,7 +48,7 @@ class TesteNfeNacionalController extends Controller
             imPrestador: '4048539',
             fonePrestador: '62991728787',
             emailPrestador: 'virlei79@gmail.com',
-            opSimpNac: 3,
+            opSimpNac: 3,//campo importante para saber qual tipo de xml deve ser gerado no factory
             regApTribSN: 1,
             regEspTrib: 0,
             cnpjTomador: '24685881000190',
@@ -146,7 +95,34 @@ class TesteNfeNacionalController extends Controller
             361 // empresaId
         );
 
+        dd($response);*/
+
+
+        //string $provider, int $empresaId, string $cnpj, string $im, int $numero_nfse, string $data_inicial, string $data_final
+        $response = $this->nfse->consultarUrlNfse(
+            'issnet',
+            $empresa->id,
+            $empresa->cpf_cnpj,//cnpj            
+            $empresa->inscricao_municipal, //im,
+            11, //nNFSe,
+            '',//dt ini
+            ''//dt fim
+        );
+
         dd($response);
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         //$integrationId = 'DPS-' . $dataSN->numDps . '-' . $dataSN->serieDps;
         $payload = [
@@ -446,214 +422,64 @@ class TesteNfeNacionalController extends Controller
         $empresa = Empresa::find(361);
         $service = new \App\Services\FocuNfe\NotaService($empresa);
 
-        /*$payloadNacional = [
-            'ref' => 'NFSE-TESTE-01',
-            'data_emissao' => '2026-08-01T00:00:00-03:00',
-            'data_competencia' => '2026-08-01',
-
-            'codigo_municipio_emissora' => 5002704,
-
-            'cnpj_prestador' => '22645177000188',
-            'inscricao_municipal_prestador' => '4048539',
-            'codigo_opcao_simples_nacional' => 3,
-            'regime_especial_tributacao' => 0,
-
-            //dados tomador
-            'cnpj_tomador' => '37268448000109',
-            'razao_social_tomador' => 'CEL ENGENHARIA LTDA',
+        $payload = [
+            'ref' => 'NFSE-TESTE-1',
+            'data_emissao' => '2026-08-07T07:34:56-0300',
+            'data_competencia' => '2026-08-07',
+            
+            'prestador' =>[
+                'codigo_municipio' => 5208707,
+                'codigo_municipio_emissora' => 5208707,
+                //'cnpj_prestador' => '22645177000188',
+                'cnpj'=> '22645177000188',
+                'inscricao_municipal_prestador' => '4048539',
+                'codigo_opcao_simples_nacional' => 3,//SIMPLES NACIONAL, 1 NÃO OPTANTE(REGIME NORMAL)
+                'regime_especial_tributacao' => 0, //NENHUM - regime_especial_tributacao Tag XML regEspTrib
+            ],
+            'cnpj_tomador' => '24685881000190',
+            'razao_social_tomador' => 'Josue Camelo dos Santos Ferreira 01582713197',
             'codigo_municipio_tomador' => 5208707,
-            'cep_tomador' => '74711120',
-            'logradouro_tomador' => 'ESTRADA D',
-            'numero_tomador' => '88',
-            'complemento_tomador' => 'QUADRACH LOTE 36',
-            'bairro_tomador' => 'CHACARAS BOTAFOGO',
-
-            // O XML não possui telefone do tomador
-            //'telefone_tomador' => null,
-            //'email_tomador' => 'lazaro@cel.eng.br',
-            'codigo_municipio_prestacao' => 5208707,
-            'codigo_tributacao_nacional_iss' => '010302',
-            'descricao_servico' => 'TESTE API Portal Nota Fácil',
-            'valor_servico' => 10.00,
+            'cep_tomador' => '75.064-350',
+            'logradouro_tomador' => 'Rua Carlinhos José Ribeiro',
+            'numero_tomador' => 'S/N',
+            'complemento_tomador' => 'Apto 402 D',
+            'bairro_tomador' => 'Vila Jaiara',
+            'telefone_tomador' => '62984018589',
+            //'email_tomador' => 'josueprg@gmail.com',
+            
+            'servico' =>['codigo_municipio_prestacao' => 5208707,
+            'codigo_tributacao_nacional_iss' => '010101',
+            'codigo_tributacao_municipal_iss' => '4',
+            'descricao_servico' => 'Teste NFSe reforma tributaria API',
+            'valor_servico' => 1.0,
             'tributacao_iss' => 1,
             'tipo_retencao_iss' => 1,
-            'codigo_nbs' => '115090000',
-            'codigo_tributacao_municipal_iss' => '4',
-            'percentual_total_tributos_simples_nacional' => '0.00',
+            'codigo_nbs' => '115021000',
+            'percentual_total_tributos_simples_nacional' => '5',],
+
             'codigo_indicador_operacao' => '100301',
             'ibs_cbs_situacao_tributaria' => '000',
             'ibs_cbs_classificacao_tributaria' => '000001',
+
             'finalidade_emissao' => 0,
-            'consumidor_final' => 0,
-            'indicador_destinatario' => 0,
-        ];*/
+            'consumidor_final' => 1,
+            'indicador_destinatario' => 1,
 
-        $payload = [
-            'ref' => 'NFSE-TESTE-02',
-            'data_emissao' => '2026-08-01T00:00:00-03:00',
+            /*'inscricao_imobiliaria' => '000',
+            'codigo_municipio_obra' => 5208707,
+            'cep_obra' => '74223-042',
+            'logradouro_obra' => 'Rua Fictícia',
+            'numero_obra' => '1234',
+            'complemento_obra' => 'ap02',
+            'bairro_obra' => 'CENTRO',*/
 
-            'prestador' => [
-                'cnpj' => '22645177000188',
-                'inscricao_municipal' => '4048539',
-                'codigo_municipio' => 5208707,
-                'regime_tributario' => [
-                    'opcao_simples_nacional' => 3,
-                    'regime_apuracao_tributos_simples_nacional' => 1,
-                    'regime_especial_tributacao' => 0,
-                ],
-            ],
-
-            'tomador' => [
-                'cnpj' => '37268448000109',
-                'razao_social' => 'CEL ENGENHARIA LTDA',
-
-                'endereco' => [
-                    'logradouro' => 'ESTRADA D',
-                    'numero' => '88',
-                    'complemento' => 'QUADRACH LOTE 36',
-                    'bairro' => 'CHACARAS BOTAFOGO',
-                    'codigo_municipio' => '5208707',
-                    'uf' => 'GO',
-                    'cep' => '74711120',
-                ],
-
-                //'email' => 'lazaro@cel.eng.br',
-            ],
-
-            'servico' => [
-                'local_prestacao' => [
-                    'codigo_municipio' => '5208707',
-                ],
-
-                'codigo_tributacao_nacional' => '010302',
-                'codigo_tributacao_municipal' => '4',
-                'discriminacao' => 'TESTE',
-                'codigo_nbs' => '115090000',
-                'item_lista_servico' => '1.03',
-
-                'valor' => [
-                    'servico' => 10.00,
-                ],
-
-                'tributacao' => [
-                    'issqn' => [
-                        'tributacao' => 1,
-                        'retencao' => 1,
-                    ],
-
-                    'pis_cofins' => [
-                        'cst' => '08',
-                        'tipo_retencao' => 0,
-                    ],
-                ],
-            ],
-
-            'tributacao' => [
-                'total_tributos' => [
-                    'percentual_simples_nacional' => 2.50,
-                ],
-            ],
-
-            'ibs_cbs' => [
-                'finalidade_nfe' => 0,
-                'consumidor_final' => 0,
-                'codigo_indicador_operacao' => '100301',
-                'indicador_destinatario' => 0,
-
-                'tributacao' => [
-                    'cst' => '000',
-                    'classificacao_tributaria' => '000001',
-                ],
-            ],
-        ];
-
-        $payload = [
-            'ref' => 'NFSE-TESTE-02',
-
-            'data_emissao' => '2026-08-07T07:34:56-03:00',
-
-            'data_competencia' => '2026-08-07',
-
-            'prestador' => [
-                'cnpj' => '22645177000188',
-                'inscricao_municipal' => '4048539',
-                'codigo_municipio' => 5208707,
-
-                'regime_tributario' => [
-                    'opcao_simples_nacional' => 1,
-                    'regime_apuracao_tributos_simples_nacional' => null,
-                    'regime_especial_tributacao' => 0,
-                ],
-            ],
-
-            'tomador' => [
-                'cnpj' => '37268448000109',
-                'razao_social' => 'CEL ENGENHARIA LTDA',
-
-                'endereco' => [
-                    'logradouro' => 'Rua Fictícia',
-                    'numero' => '1234',
-                    'complemento' => 'ap02',
-                    'bairro' => 'CENTRO',
-                    'codigo_municipio' => 5208707,
-                    'uf' => 'GO',
-                    'cep' => '74223042',
-                ],
-
-                'telefone' => '1111111111',
-                'email' => 'test@example.com',
-            ],
-
-            'servico' => [
-                'local_prestacao' => [
-                    'codigo_municipio' => 5208707,
-                ],
-
-                'codigo_tributacao_nacional' => '070501',
-                'codigo_tributacao_municipal' => '705',
-
-                'discriminacao' => 'Teste NFSe reforma tributaria',
-
-                'codigo_nbs' => '101011100',
-
-                'item_lista_servico' => '07.05',
-
-                'valor' => [
-                    'servico' => 1.00,
-                ],
-
-                'tributacao' => [
-                    'issqn' => [
-                        'tributacao' => 1,
-                        'retencao' => 1,
-                    ],
-
-                    'pis_cofins' => [
-                        'cst' => null,
-                        'tipo_retencao' => null,
-                    ],
-                ],
-            ],
-
-            'tributacao' => [
-                'total_tributos' => [
-                    'percentual_simples_nacional' => 10.00,
-                ],
-            ],
-
-            'ibs_cbs' => [
-                'finalidade_nfe' => 0,
-                'consumidor_final' => 1,
-
-                'codigo_indicador_operacao' => '020201',
-
-                'indicador_destinatario' => 1,
-
-                'tributacao' => [
-                    'cst' => '200',
-                    'classificacao_tributaria' => '200046',
-                ],
-            ],
+            /*'inscricao_imobiliaria_imovel' => 456,
+            'codigo_municipio_imovel' => 5208707,
+            'cep_imovel' => '74223-042',
+            'logradouro_imovel' => 'Rua Fictícia',
+            'numero_imovel' => '1234',
+            'complemento_imovel' => 'ap02',
+            'bairro_imovel' => 'CENTRO',*/
         ];
 
         //echo "<pre>";
@@ -662,7 +488,7 @@ class TesteNfeNacionalController extends Controller
         //Log::info(json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         //echo "</pre>";
         //exit;
-        //dd($service->emitirNfse($payload));
-        //dd($service->consultarNfse('NFSE-TESTE-02'));
+        dd($service->emitirNfse($payload));
+        dd($service->consultarNfse('NFSE-TESTE-02'));
     }
 }
