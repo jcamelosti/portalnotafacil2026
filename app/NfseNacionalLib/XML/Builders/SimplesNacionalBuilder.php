@@ -32,8 +32,7 @@ class SimplesNacionalBuilder implements DPSBuilderInterface
 		$pTotTribSN = number_format((float)$data->pTotTribSN, 2, '.', '');
 		$cepTomador = preg_replace("/[^0-9]/", "", $data->cepTomador);*/
 		
-		return '<GerarNfseEnvio xmlns="http://www.sped.fazenda.gov.br/nfse" xmlns:ns2="http://www.w3.org/2000/09/xmldsig#">'
-		.$xml.'</GerarNfseEnvio>';
+		return '<GerarNfseEnvio xmlns="http://www.sped.fazenda.gov.br/nfse">'.$xml.'</GerarNfseEnvio>';
     }
 
 	/*public function buildRecepcionarLoteDpsSincrono(DPSDataDTO $data): string

@@ -31,6 +31,14 @@ class ISSNetService
             $cert
         );
 
+        /*$resposta = $this->transport->enviarRequisicao(
+            $ws['url'],
+            config('nfse.uri'),
+            'GerarNfse',
+            $soap,
+            $cert
+        );*/
+
         $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
         $retorno = simplexml_load_string( $response );
         return $retorno;

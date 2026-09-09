@@ -627,6 +627,13 @@ class DPSSnXmlBuilder
      */
     private function generateId(DPSDataSnDTO $data): string
     {
+        /*$string = 'DPS';
+        $string .= substr($data->codigoMunicipio, 0, 7); //Cód.Mun. (7) + //seria código do municipio do emitente
+        $string .= (strlen($data->cnpjPrestador) === 14) ? 2 : 1; //Tipo de Inscrição Federal (1) +
+        $string .= str_pad($data->cnpjPrestador, 14, 0, STR_PAD_LEFT); //Inscrição Federal (14 - CPF completar com 000 à esquerda) +
+        $string .= str_pad('8', 5, 0, STR_PAD_LEFT); //Série DPS (5) +
+        $string .= str_pad($data->numDps, 15, 0, STR_PAD_LEFT); //Série DPS (5) +*/
+       
         $municipio = preg_replace(
             '/\D/',
             '',
@@ -645,7 +652,7 @@ class DPSSnXmlBuilder
          */
         if (!empty($data->cnpjPrestador)) {
 
-            $tipoInscricao = '1';
+            $tipoInscricao = '2';
 
             $documento = preg_replace(
                 '/\D/',
@@ -655,7 +662,7 @@ class DPSSnXmlBuilder
 
         } else {
 
-            $tipoInscricao = '2';
+            $tipoInscricao = '1';
 
             $documento = preg_replace(
                 '/\D/',
@@ -691,7 +698,7 @@ class DPSSnXmlBuilder
             '0',
             STR_PAD_LEFT
         );
-
+        
         return 'DPS'
             . $municipio
             . $tipoInscricao

@@ -16,17 +16,29 @@ class NFSeService
     {
         $builder = new DPSSnXmlBuilder();
         $xml = $builder->build($data);
+        Log::info('Log Xml Única Linha');
+        Log::info($xml);
+        
         $assinador = app(XmlSigner::class);
         
-		$xml = $assinador->assinarRpsRepetidamenteApi($xml, 'infDPS', $data->cnpjPrestador);
-        $xml = str_replace('<?xml version="1.0"?>', '', $xml);
+        //$xml = $assinador->sign($empresaId, $xml, 'infDPS', '', 'DPS');
+        //Log::info('Xml Assinado');
+        //Log::info($xml);
 
         // 🔥 1. GERAR XML (usa seu Factory + Builders)
         $xml = DPSFactory::make($data, $xml);
+        
+        Log::info('XML Completo para Envio');
         Log::info($xml);
-
+                
         // 🔥 3. ESCOLHER PROVIDER
         $driver = NFSeProviderFactory::make($provider);
+
+
+        $xml = $assinador->sign($empresaId, $xml, 'infDPS', '', 'DPS');
+        Log::info('Xml Assinado');
+        Log::info($xml);
+        
         // 🔥 4. ENVIAR
         return $driver->gerarNfse($xml, $empresaId);
     }
