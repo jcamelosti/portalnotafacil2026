@@ -76,10 +76,27 @@ class TesteNfeNacionalController extends Controller
             tributaIss: 1,
             tipoRetencaoIss: 1,
             aliquotaIss: '2.50',
+            
             cstPisCofins: '00',
+            
+            / *
+            //vBCPisCofins
+            baseCalculoPisCofins: $dados['txtBaseCalcFederal'],
+            //pAliqPis
+            aliquotaPis: $dados['txtBaseCalcFederal'],
+            //pAliqCofins
+            aliquotaCofins: $dados['txtBaseCalcFederal'],
+            //vPis
+            valorPis: $dados['txtBaseCalcFederal'],
+            //vCofins
+            valorCofins: $dados['txtBaseCalcFederal'],* /
+
             tipoRetencaoPisCofins: 0,
+
             valorRetencaoCp: '0.12',
             valorRetencaoIrrf: '0.01',
+            valorRetencaoCsll: '0.12',
+
             percentualTotalTributos: '5.00',
             finNfse: 0,
             cIndOp: '100301',
@@ -99,7 +116,7 @@ class TesteNfeNacionalController extends Controller
 
 
         //string $provider, int $empresaId, string $cnpj, string $im, int $numero_nfse, string $data_inicial, string $data_final
-        $response = $this->nfse->consultarUrlNfse(
+        /*$response = $this->nfse->consultarUrlNfse(
             'issnet',
             $empresa->id,
             $empresa->cpf_cnpj,//cnpj            
@@ -109,7 +126,7 @@ class TesteNfeNacionalController extends Controller
             ''//dt fim
         );
 
-        dd($response);
+        dd($response);*/
 
 
 
@@ -123,6 +140,9 @@ class TesteNfeNacionalController extends Controller
 
 
 
+
+        echo "Abaixo implementações FOCUNF E SPEDY";
+        exit;
 
         //$integrationId = 'DPS-' . $dataSN->numDps . '-' . $dataSN->serieDps;
         $payload = [

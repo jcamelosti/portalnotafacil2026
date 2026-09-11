@@ -34,7 +34,6 @@ class NFSeService
         // 🔥 3. ESCOLHER PROVIDER
         $driver = NFSeProviderFactory::make($provider);
 
-
         $xml = $assinador->sign($empresaId, $xml, 'infDPS', '', 'DPS');
         Log::info('Xml Assinado');
         Log::info($xml);

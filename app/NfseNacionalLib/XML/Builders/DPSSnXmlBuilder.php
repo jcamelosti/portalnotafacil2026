@@ -373,8 +373,8 @@ class DPSSnXmlBuilder
          */
         if (!empty($data->informacaoComplementar)) {
 
-            $infoCompl = $dom->createElementNS(
-                self::NS_NFSE,
+            $infoCompl = $dom->createElement(
+                //self::NS_NFSE,
                 'infoCompl'
             );
 
@@ -486,6 +486,44 @@ class DPSSnXmlBuilder
             $data->cstPisCofins
         );
 
+        /*
+            Regra se os campos de aliquota foram preenchidos fazer os calculos e preencher
+        */
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'vBCPisCofins',
+            $data->baseCalculoPisCofins
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'pAliqPis',
+            $data->aliquotaPis
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'pAliqCofins',
+            $data->aliquotaCofins
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'vPis',
+            $data->valorPis
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'vCofins',
+            $data->valorCofins
+        );
+
         $this->appendOptionalText(
             $dom,
             $piscofins,
@@ -510,12 +548,14 @@ class DPSSnXmlBuilder
             $this->decimal($data->valorRetencaoIrrf)
         );
 
-        /*$this->appendOptionalText(
-            $dom,
-            $tribFed,
-            'vRetCSLL',
-            $this->decimal($data->valorRetencaoCsll)
-        );*/
+        if((float) $this->decimal($data->valorRetencaoCsll) > 0.0){
+            $this->appendOptionalText(
+                $dom,
+                $tribFed,
+                'vRetCSLL',
+                $this->decimal($data->valorRetencaoCsll)
+            );
+        }
 
         /*
          * =========================================================

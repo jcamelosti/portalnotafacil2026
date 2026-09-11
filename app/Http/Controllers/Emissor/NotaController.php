@@ -32,6 +32,8 @@ use JCamelo\NfseNacionalLib\Security\DPSXmlSigner;
 
 use JCamelo\NfseNacionalLib\Services\NFSeService;
 use JCamelo\NfseNacionalLib\XML\Builders\DPSSnXmlBuilder;
+use ZipStream\Test\Util;
+
 use function PHPUnit\Framework\isNull;
 
 class NotaController extends Controller
@@ -328,7 +330,10 @@ class NotaController extends Controller
         $indOpIbsCbs = $this->indOperModel->indicadorOperacoes();
         $cstIbsCsb = $this->cstIbsCsbModel->listar();
 
+        $dados_cadastrais = json_decode($empresa->dados_cadastrais, true);
+ 
         return view('emissor.create', [
+            'dados_cadastrais' => $dados_cadastrais,
             'data_competencia' => $data_competencia,
             'tomador' => $tomador,
             'empresa' => $empresa,
@@ -424,58 +429,104 @@ class NotaController extends Controller
             //indDest: 0,
         );*/
 
+        $totalNfse = (float)$dados['txtTotal'];
+
+        //Calculos PIs e Cofins
+        if(isset($dados['txtBaseCalcFederal']) && !empty($dados['txtBaseCalcFederal'])){
+            $base = (float) $dados['txtBaseCalcFederal'];
+            $aliqPis = (float) $dados['txtAliqPIS'];
+            $aliqCofins = (float) $dados['txtAliqCOFINS'];
+            $valorPis = round($base * ($aliqPis / 100), 2);
+            $valorCofins = round($base * ($aliqCofins / 100), 2);
+            $resultadoCalcPisCofins = [
+                'baseCalculoFederal' => number_format($base, 2, '.', ''),
+                'aliqPis' => number_format($aliqPis, 2, '.', ''),
+                'aliqCofins' => number_format($aliqCofins, 2, '.', ''),
+                'valorPis' => number_format($valorPis, 2, '.', ''),
+                'valorCofins' => number_format($valorCofins, 2, '.', ''),
+            ];
+        }else{
+            $resultadoCalcPisCofins = [
+                'baseCalculoFederal' => null,
+                'aliqPis' => null,
+                'aliqCofins' => null,
+                'valorPis' => null,
+                'valorCofins' => null,
+            ];
+        }       
+
         //correção 08/09/2026
         $dataSN = new DPSDataSnDTO(
-            ambiente: 2,
+            ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
             dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
-            serie: '8',
-            numDps: 1,
+            serie: $empresa->serie_dps,
+            numDps: ($empresa->num_ultimo_dps + 1),
             dataCompetencia: Carbon::now(
                 'America/Sao_Paulo'
             )->format('Y-m-d'),
-            codigoMunicipio: '5002704',
-            cnpjPrestador: '22645177000188',
-            imPrestador: '4048539',
-            fonePrestador: '62991728787',
-            emailPrestador: 'virlei79@gmail.com',
-            opSimpNac: 3,
-            regApTribSN: 1,
-            regEspTrib: 0,
-            cnpjTomador: '24685881000190',
-            cpfTomador: null,
-            razaoTomador:
-               'Josue Camelo dos Santos Ferreira 01582713197',
-            codigoMunicipioTomador: '5201108',
-            cepTomador: '75064350',
-            logradouroTomador:
-               'Rua Carlinhos José Ribeiro',
-            numeroTomador: '180',
-            complementoTomador: 'APT 402D',
-            bairroTomador:
-               'Vila Jaiara Setor Leste',
-            foneTomador: '6237027225',
-            emailTomador:
-               'contato@josuecamelo.com',
-            codigoTributacaoNacional: '010101',
-            codigoServicoMunicipal: '4',
-            descricaoServico:
-               'Manutenção de computador; limpeza, formatação & instalação - R$ 350,00 (urgente)!',
-            codigoNbs: '115021000',
-            codigoMunicipioPrestacao: '5002704',
-            valorServico: '350.00',
-            tributaIss: 1,
-            tipoRetencaoIss: 1,
-            aliquotaIss: '2.50',
-            cstPisCofins: '00',
-            tipoRetencaoPisCofins: 0,
-            valorRetencaoCp: '0.12',
-            valorRetencaoIrrf: '0.01',
-            percentualTotalTributos: '5.00',
+            codigoMunicipio: $dados['ddlCidadePrestacao'],
+            //prestador
+            cnpjPrestador: $empresa->cpf_cnpj,
+            imPrestador: $empresa->inscricao_municipal,
+            fonePrestador: preg_replace('/[^0-9]/', '', $empresa->telefone1) ?? null,
+            emailPrestador: $empresa->email ?? null,
+
+            //Regime da Empresa
+            opSimpNac: $empresa->op_simp_nac,
+            regApTribSN: $empresa->tp_reg_apuracao_sn,//só quando for do simples
+            regEspTrib: $empresa->tp_regime_esp_trib_mun,
+
+            //dados tomador - quando não for no exterior
+            cnpjTomador: strlen($tomador->cpf_cnpj) == 14 ? $tomador->cpf_cnpj : null,
+            cpfTomador: strlen($tomador->cpf_cnpj) < 14 ? $tomador->cpf_cnpj : null,
+            razaoTomador: $tomador->razao_social,
+            codigoMunicipioTomador: $tomador->cidade()->first()->codigo,
+            cepTomador: preg_replace('/[^0-9]/', '', $tomador->cep) ?? null,
+            logradouroTomador: $tomador->logradouro,
+            numeroTomador: $tomador->numero ?? null,
+            complementoTomador: $tomador->complemento ?? null,
+            bairroTomador: $tomador->bairro ?? null,
+            foneTomador: preg_replace('/[^0-9]/', '', $empresa->telefone1) ?? null,
+            emailTomador: $tomador->email ?? null,
+            
+            //dados sobre o serviço
+            codigoTributacaoNacional: $dados['cTribNac'],
+            codigoServicoMunicipal: $dados['empresa_atividade_id'],
+            descricaoServico: $dados['txtDescServicos'],
+            codigoNbs: $dados['nbs'],
+            codigoMunicipioPrestacao: $localPrestacao, //Local da Prestação de Serviço
+            valorServico: number_format($totalNfse, 2, '.', ''),
+                        
+            //issqn
+            tributaIss: $dados['ddlTribISSQN'],
+            tipoRetencaoIss: $dados['ddlTipoRetencao'],
+            aliquotaIss: $dados['txtAliquota'],//string '2.5'
+            
+            cstPisCofins: $dados['ddlSitTribFederal'],
+            //vBCPisCofins
+            baseCalculoPisCofins: $resultadoCalcPisCofins['baseCalculoFederal'],
+            //pAliqPis
+            aliquotaPis: $resultadoCalcPisCofins['aliqPis'],
+            //pAliqCofins
+            aliquotaCofins: $resultadoCalcPisCofins['aliqCofins'],
+            //vPis
+            valorPis: $resultadoCalcPisCofins['valorPis'],
+            //vCofins
+            valorCofins: $resultadoCalcPisCofins['valorCofins'],
+            tipoRetencaoPisCofins: $dados['ddlTipoRetFederal'],
+
+            //Cp, Irrf, Csll
+            valorRetencaoCp: number_format($dados['txtValorCP'] ?? null, 2, '.', ''),
+            valorRetencaoIrrf: number_format($dados['txtValorIRRF'] ?? null, 2, '.', ''),
+            valorRetencaoCsll: number_format($dados['txtValorCSLL'] ?? null, 2, '.', ''),
+            percentualTotalTributos: number_format($dados['txtPercentualTribSN'], 2, '.', ''),
+
             finNfse: 0,
-            cIndOp: '100301',
+            cIndOp: $dados['ddlIndicadorOperacao'],
             indDest: 0,
-            cstIbsCbs: '000',
-            cClassTrib: '000001',
+            cstIbsCbs: $dados['ddlSituacaoTributaria'],
+            cClassTrib: $dados['ddlClassificacaoTributaria'],
+            informacaoComplementar: $dados['txtInfoComplementares'] ?? null,
         );
         
         //Gerar NFSe
@@ -495,87 +546,6 @@ class NotaController extends Controller
     }
 
     public function store(Request $request){
-        /*$data = new DPSDataSnDTO(
-            ambiente: 2,
-            dataEmissao: Carbon::now(
-                'America/Sao_Paulo'
-            ),
-            serie: '8',
-            numDps: 1,
-            dataCompetencia: Carbon::now(
-                'America/Sao_Paulo'
-            ),
-            codigoMunicipio: '5002704',
-            cnpjPrestador: '22645177000188',
-            imPrestador: '4048539',
-            fonePrestador: '62991728787',
-            emailPrestador: 'virlei79@gmail.com',
-            opSimpNac: 3,
-            regApTribSN: 1,
-            regEspTrib: 0,
-            cnpjTomador: '24685881000190',
-            cpfTomador: null,
-            razaoTomador:
-               'Josue Camelo dos Santos Ferreira 01582713197',
-            codigoMunicipioTomador: '5201108',
-            cepTomador: '75064350',
-            logradouroTomador:
-               'Rua Carlinhos José Ribeiro',
-            numeroTomador: '180',
-            complementoTomador: 'APT 402D',
-            bairroTomador:
-               'Vila Jaiara Setor Leste',
-            foneTomador: '6237027225',
-            emailTomador:
-               'contato@josuecamelo.com',
-            codigoTributacaoNacional: '010101',
-            codigoServicoMunicipal: '0000000004',
-            descricaoServico:
-               'Manutenção de computador; limpeza, formatação & instalação - R$ 350,00 (urgente)!',
-            codigoNbs: '115021000',
-            codigoMunicipioPrestacao: '5002704',
-            valorServico: '350.00',
-            tributaIss: 1,
-            tipoRetencaoIss: 1,
-            aliquotaIss: '2.50',
-            cstPisCofins: '00',
-            tipoRetencaoPisCofins: 0,
-            valorRetencaoCp: '0.12',
-            valorRetencaoIrrf: '0.01',
-            percentualTotalTributos: '5.00',
-            finNfse: 0,
-            cIndOp: '100301',
-            indDest: 0,
-            cstIbsCbs: '000',
-            cClassTrib: '000001',
-        );
-
-        $builder = new DPSSnXmlBuilder();
-
-        $xml = $builder->build($data);
-
-        file_put_contents(
-            storage_path('app/dps-sem-assinatura.xml'),
-            $xml
-        );
-        
-        $cert = new CertificateManager();
-        $certificado = $cert->getCertificate(361);
-
-        //dd($certificado);
-
-        $signer = new DPSXmlSigner();
-        $xmlAssinado = $signer->sign(
-            $xml,
-            $certificado['pfx'],
-            $certificado['password']
-        );
-        Log::info($xmlAssinado);
-        echo "<pre>";
-        var_dump($xmlAssinado);
-        echo "Finalizado";
-        exit();*/
-
         try{
             $empresaSessao = request()->session()->get('empresa_selecionada');
             $empresaSessao = $this->empresaModel->find($empresaSessao);

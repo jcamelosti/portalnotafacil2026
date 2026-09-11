@@ -117,14 +117,14 @@
                                 @endif
                             </label>
                             
-                            <label class="block text-sm">
+                            <label style="{{ $dados_cadastrais['permiteDescontoCondicionado'] == 2 ? 'display: none' : '' }}" class="block text-sm">
                                 <span class="text-gray-700 ">Desconto Condic. *:</span>
                                 <input name="txtDescontoCondicionado" type="text" maxlength="20" placeholder="0,00" id="txtDescontoCondicionado" class="block w-full mt-1 text-sm  
               focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
               :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
                             </label>
 
-                            <label class="block text-sm">
+                            <label style="{{ $dados_cadastrais['permiteDescontoIncondicionado'] == 2 ? 'display: none' : '' }}" class="block text-sm">
                                 <span class="text-gray-700 ">Desconto Incondic. *:</span>
                                 <input name="txtDescontoInCondicionado" type="text" maxlength="20" id="txtDescontoInCondicionado" placeholder="0,00" class="block w-full mt-1 text-sm  
               focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 

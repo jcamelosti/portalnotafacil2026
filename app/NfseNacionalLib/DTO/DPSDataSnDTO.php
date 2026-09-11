@@ -58,11 +58,23 @@ class DPSDataSnDTO
 
         // PIS/COFINS
         public readonly ?string $cstPisCofins = null,
+        //vBCPisCofins
+        public readonly ?string $baseCalculoPisCofins = null,
+        //pAliqPis
+        public readonly ?string $aliquotaPis = null,
+        //pAliqCofins
+        public readonly ?string $aliquotaCofins = null,
+        //vPis
+        public readonly ?string $valorPis = null,
+        //vCofins
+        public readonly ?string $valorCofins = null,
+
         public readonly ?int $tipoRetencaoPisCofins = null,
 
         // Retenções
         public readonly ?string $valorRetencaoCp = null,
         public readonly ?string $valorRetencaoIrrf = null,
+        public readonly ?string $valorRetencaoCsll = null,
 
         // Total tributos
         public readonly ?string $percentualTotalTributos = null,
@@ -73,6 +85,8 @@ class DPSDataSnDTO
         public readonly ?int $indDest = null,
         public readonly ?string $cstIbsCbs = null,
         public readonly ?string $cClassTrib = null,
+        
+        public readonly string $informacaoComplementar,
 
         // Versão
         public readonly string $versao = '1.01',
