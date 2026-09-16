@@ -30,13 +30,22 @@ class NFSeService
         
         Log::info('XML Completo para Envio');
         Log::info($xml);
-                
+  
         // 🔥 3. ESCOLHER PROVIDER
         $driver = NFSeProviderFactory::make($provider);
 
         $xml = $assinador->sign($empresaId, $xml, 'infDPS', '', 'DPS');
         Log::info('Xml Assinado');
         Log::info($xml);
+
+        
+        //formatando xml para Log
+        $domxml = new \DOMDocument('1.0');
+        $domxml->preserveWhiteSpace = false;
+        $domxml->formatOutput = true;
+        $domxml->loadXML($xml);
+        Log::info($domxml->saveXML());
+        //exit();
         
         // 🔥 4. ENVIAR
         return $driver->gerarNfse($xml, $empresaId);

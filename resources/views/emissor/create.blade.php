@@ -23,7 +23,9 @@
                 };
             });
         </script>
-
+        <script>
+            const tomadorExterior = @js($tomador->cidade()->first()->codigo == 99999);
+        </script>
         <script src="{{ asset('js/fn_geral.js') }}"></script>
         <script src="{{ asset('js/calculos_geral.js?'.time()) }}"></script>
         <script src="{{ asset('js/tela_nfse.js?'.time()) }}"></script>

@@ -88,7 +88,8 @@ class Utilitarios
             'txtBaseCalcFederal',
             'txtAliqPIS',
             'txtAliqCOFINS',
-            'txtValorCSLL'
+            'txtValorCSLL',
+            'comex_vserv_moeda'
         ];
 
         $semPontuacao = [

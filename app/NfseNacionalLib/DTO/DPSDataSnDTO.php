@@ -31,7 +31,7 @@ class DPSDataSnDTO
         public readonly ?string $cpfTomador = null,
         public readonly ?string $razaoTomador = null,
 
-        // Endereço tomador
+        // Endereço tomador Brasil/Exterior
         public readonly ?string $codigoMunicipioTomador = null,
         public readonly ?string $cepTomador = null,
         public readonly ?string $logradouroTomador = null,
@@ -40,6 +40,18 @@ class DPSDataSnDTO
         public readonly ?string $bairroTomador = null,
         public readonly ?string $foneTomador = null,
         public readonly ?string $emailTomador = null,
+
+        public readonly ?string $nif = null,
+        public readonly ?string $nao_nif = null,
+
+        public readonly int $endNoExterior = 2,//Nâo = 2, Sim = 1
+        public readonly ?string $pais = null,
+        public readonly ?string $endPostal = null,
+        public readonly ?string $cidade = null,
+        public readonly ?string $provincia = null,
+
+        //Nó ComExt
+        public readonly ?ComExtDTO $comExt = null,
 
         // Serviço
         public readonly string $codigoTributacaoNacional,

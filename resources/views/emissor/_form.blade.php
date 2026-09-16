@@ -643,6 +643,186 @@
                             </label>
                         </div>
 
+                        <div id="containerComEx" style="display: none;">
+                            <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
+                               Informações sobre transações entre residentes ou domiciliados no brasil com residentes ou domiciliados no exterior
+                            </h4>
+                            
+                            <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Modo de Prestação*:</span>
+                                        <select required name="comex_modo_prestacao" onchange="" language="javascript" id="comex_modo_prestacao" 
+                                        class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
+                                            <option selected="selected" value="">Selecione</option>
+                                            <option value="1">1 - Transfronteiriço</option>
+                                            <option value="2">2 - Consumo no Brasil</option>
+                                            <option value="3">3 - Movimento Temporário de Pessoas Físicas</option>
+                                            <option value="4">4 - Consumo no Exterior</option>
+                                        </select>
+                                        @if ($errors->has('comex_modo_prestacao'))
+                                            <span class="text-xs text-red-600 ">
+                                            <strong>{{ $errors->first('comex_modo_prestacao') }}</strong>
+                                        </span>
+                                        @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Vínculo entre as partes no negócio*:</span>
+                                        <select required name="comex_vinc_prest" onchange="" language="javascript" id="comex_vinc_prest" 
+                                        class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
+                                            <option selected="selected" value="">Selecione</option>
+                                            <option value="1">1 - Controlada</option>
+                                            <option value="2">2 - Controladora</option>
+                                            <option value="3">3 - Coligada</option>
+                                            <option value="4">4 - Matriz</option>
+                                            <option value="5">5 - Filial ou sucursal</option>
+                                            <option value="6">6 - Outro vínculo</option>
+                                        </select>
+                                        @if ($errors->has('comex_vinc_prest'))
+                                            <span class="text-xs text-red-600 ">
+                                            <strong>{{ $errors->first('comex_vinc_prest') }}</strong>
+                                        </span>
+                                        @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Tipo de Moeda*</span>
+                                    <input required name="comex_tipo_moeda" type="text" maxlength="10" id="comex_tipo_moeda" placeholder="USD" class="block w-full mt-1 text-sm  
+                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                :shadow-outline-gray form-input" onkeypress="SoNumeros(event); onpaste="return false;" onblur="">
+                                </label>
+
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Valor do Serviços na Moeda Especificada(*):</span>
+                                            {!! Form::text('comex_vserv_moeda',null, [
+                                                'placeholder'=> "0,00",
+                                                'name'=>'comex_vserv_moeda',
+                                                'required',
+                                                'type'=>"text", 'maxlength'=>"50", 'id'=>"comex_vserv_moeda", 'class'=>"block w-full mt-1 text-sm  
+                                        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                        :shadow-outline-gray form-input",
+                                                'onkeypress'=>"SoNumeros(event); FormataMoeda(this.name,event);",
+                                                'onpaste'=>"return false;",
+                                                'onblur'=>""
+                                        ])
+                                    !!}
+                                    @if ($errors->has('comex_vserv_moeda'))
+                                        <span class="text-xs text-red-600 ">
+                                            <strong>{{ $errors->first('comex_vserv_moeda') }}</strong>
+                                        </span>
+                                    @endif
+                                </label>
+                            </div>
+                            <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Mec. de apoio/fomento ao Com. Exterior(Prestador)*:</span>
+                                        <select required name="comex_mec_af_comexp" onchange="" language="javascript" id="comex_mec_af_comexp" 
+                                        class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
+                                            <option selected="selected" value="">Selecione</option>
+                                            <option value="01">01 - Nenhum</option>
+                                            <option value="02">02 - ACC - Adiantamento sobre Contrato de Câmbio – Redução a Zero do IR e do IOF</option>
+                                            <option value="03">03 - ACE - Adiantamento sobre Cambiais Entregues - Redução a Zero do IR e do IOF</option>
+                                            <option value="04">04 - BNDES-Exim Pós-Embarque – Serviços</option>
+                                            <option value="05">05 - BNDES-Exim Pré-Embarque - Serviços</option>
+                                            <option value="06">06 - FGE - Fundo de Garantia à Exportação</option>
+                                            <option value="07">07 - PROEX - EQUALIZAÇÃO</option>
+                                            <option value="08">08 - PROEX - Financiamento</option>
+                                        </select>
+                                        @if ($errors->has('comex_mec_af_comexp'))
+                                            <span class="text-xs text-red-600 ">
+                                            <strong>{{ $errors->first('comex_mec_af_comexp') }}</strong>
+                                        </span>
+                                        @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Mec. de apoio/fomento ao Com. Exterior(Tomador)*:</span>
+                                        <select required name="comex_mec_af_comext" onchange="" language="javascript" id="comex_mec_af_comext" 
+                                        class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
+                                            <option selected="selected" value="">Selecione</option>
+                                            <option value="01">01 - Nenhum</option>
+                                            <option value="02">02 - Adm. Pública e Repr. Internacional</option>
+                                            <option value="03">03 - Alugueis e Arrend. Mercantil de maquinas, equip., embarc. e aeronaves</option>
+                                            <option value="04">04 - Arrendamento Mercantil de aeronave para empresa de transporte aéreo público</option>
+                                            <option value="05">05 - Comissão a agentes externos na exportação</option>
+                                            <option value="06">06 - Despesas de armazenagem, mov. e transporte de carga no exterior</option>
+                                            <option value="07">07 - Eventos FIFA (subsidiária)</option>
+                                            <option value="08">08 - Eventos FIFA</option>
+                                            <option value="09">09 - Fretes, arrendamentos de embarcações ou aeronaves e outros</option>
+                                            <option value="10">10 - Material Aeronáutico</option>
+                                            <option value="11">11 - Promoção de Bens no Exterior</option>
+                                            <option value="12">12 - Promoção de Dest. Turísticos Brasileiros</option>
+                                            <option value="13">13 - Promoção do Brasil no Exterior</option>
+                                            <option value="14">14 - Promoção Serviços no Exterior</option>
+                                            <option value="15">15 - RECINE</option>
+                                            <option value="16">16 - RECOPA</option>
+                                            <option value="17">17 - Registro e Manutenção de marcas, patentes e cultivares</option>
+                                            <option value="18">18 - REICOMP</option>
+                                            <option value="19">19 - REIDI</option>
+                                            <option value="20">20 - REPENEC</option>
+                                            <option value="21">21 - REPES</option>
+                                            <option value="22">22 - RETAERO</option>
+                                            <option value="23">23 - RETID</option>
+                                            <option value="24">24 - Royalties, Assistência Técnica, Científica e Assemelhados</option>
+                                            <option value="25">25 - Serviços de avaliação da conformidade vinculados aos Acordos da OMC</option>
+                                            <option value="26">26 - ZPE</option>
+                                        </select>
+                                        @if ($errors->has('comex_mec_af_comext'))
+                                            <span class="text-xs text-red-600 ">
+                                            <strong>{{ $errors->first('comex_mec_af_comext') }}</strong>
+                                        </span>
+                                        @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Vínc. da Oper. à Mov. Temp. de Bens*:</span>
+                                        <select required name="comex_mov_temp_bens" onchange="" language="javascript" id="comex_mov_temp_bens" 
+                                        class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
+                                            <option selected="selected" value="">Selecione</option>
+                                            <option value="1">1 - Não</option>
+                                            <option value="2">2 - Vinculada - Declaração de Importação</option>
+                                            <option value="3">3 - Vinculada - Declaração de Exportação</option>
+                                        </select>
+                                        @if ($errors->has('comex_mov_temp_bens'))
+                                            <span class="text-xs text-red-600 ">
+                                            <strong>{{ $errors->first('comex_mov_temp_bens') }}</strong>
+                                        </span>
+                                        @endif
+                                </label>
+                            </div>
+
+                            <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                                 <label class="block text-sm">
+                                    <span class="text-gray-700 ">Núm. da Dec. de Imp. (DI/DSI/DA/DRI-E) averbado</span>
+                                    <input name="comex_ndi" type="text" maxlength="50" id="comex_ndi" placeholder="00000000" class="block w-full mt-1 text-sm  
+                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                :shadow-outline-gray form-input" onpaste="return false;" onblur="">
+                                </label>
+
+                                 <label class="block text-sm">
+                                    <span class="text-gray-700 ">Núm. do Reg. de Exp. (RE) averbado</span>
+                                    <input name="comex_nre" type="text" maxlength="50" id="comex_nre" placeholder="00000000" class="block w-full mt-1 text-sm  
+                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                :shadow-outline-gray form-input" onpaste="return false;" onblur="">
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Disponibilizar a NFS-e ao MDIC*:</span>
+                                        <select required name="comex_mdic" onchange="" language="javascript" id="comex_mdic" 
+                                        class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
+                                            <option selected="selected" value="">Selecione</option>
+                                            <option value="0">0 - Não enviar para o MDIC</option>
+                                            <option value="1">1 - Enviar para o MDIC</option>
+                                        </select>
+                                        @if ($errors->has('comex_mdic'))
+                                            <span class="text-xs text-red-600 ">
+                                            <strong>{{ $errors->first('comex_mdic') }}</strong>
+                                        </span>
+                                        @endif
+                                </label>
+                            </div>
+                        </div>
 
                         <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
                             Tributação Federal

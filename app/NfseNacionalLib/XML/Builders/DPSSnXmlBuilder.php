@@ -225,6 +225,22 @@ class DPSSnXmlBuilder
             );
         }
 
+        if(is_null($data->nao_nif) || empty($data->nao_nif)){
+            $this->appendOptionalText(
+                $dom,
+                $toma,
+                'NIF',
+                $data->nif
+            );
+        }else{
+             $this->appendOptionalText(
+                $dom,
+                $toma,
+                'cNaoNIF',
+                $data->nao_nif
+            );
+        }
+
         $this->appendOptionalText(
             $dom,
             $toma,
@@ -241,25 +257,64 @@ class DPSSnXmlBuilder
 
         $toma->appendChild($end);
 
-        $endNac = $dom->createElement(
-            'endNac'
-        );
+        if($data->endNoExterior == 2){
+            $endNac = $dom->createElement(
+                'endNac'
+            );
 
-        $end->appendChild($endNac);
+            $end->appendChild($endNac);
 
-        $this->appendOptionalText(
-            $dom,
-            $endNac,
-            'cMun',
-            $data->codigoMunicipioTomador
-        );
+            $this->appendOptionalText(
+                $dom,
+                $endNac,
+                'cMun',
+                $data->codigoMunicipioTomador
+            );
 
-        $this->appendOptionalText(
-            $dom,
-            $endNac,
-            'CEP',
-            $data->cepTomador
-        );
+            $this->appendOptionalText(
+                $dom,
+                $endNac,
+                'CEP',
+                $data->cepTomador
+            );
+        }else{
+            $endExt = $dom->createElement(
+                'endExt'
+            );
+
+            $end->appendChild($endExt);
+
+            //cPais
+            $this->appendOptionalText(
+                $dom,
+                $endExt,
+                'cPais',
+                $data->pais
+            );
+
+            //cEndPost
+            $this->appendOptionalText(
+                $dom,
+                $endExt,
+                'cEndPost',
+                $data->endPostal
+            );
+
+            //xCidade
+            $this->appendOptionalText(
+                $dom,
+                $endExt,
+                'xCidade',
+                $data->cidade
+            );
+            //xEstProvReg
+            $this->appendOptionalText(
+                $dom,
+                $endExt,
+                'xEstProvReg',
+                $data->provincia
+            );
+        }
 
         $this->appendOptionalText(
             $dom,
@@ -367,6 +422,97 @@ class DPSSnXmlBuilder
             'cNBS',
             $data->codigoNbs
         );
+
+        /*
+         * comExt
+         */
+        if(!is_null($data->comExt)){
+            $comExt = $dom->createElement(
+                'comExt'
+            );
+
+            $serv->appendChild($comExt);
+
+            //mdPrestacao
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'mdPrestacao',
+                $data->comExt->mdPrestacao
+            );
+
+            //vincPrest
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'vincPrest',
+                $data->comExt->vincPrest
+            );
+
+            //tpMoeda
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'tpMoeda',
+                $data->comExt->tpMoeda
+            );
+
+            //vServMoeda
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'vServMoeda',
+                $data->comExt->vServMoeda
+            );
+
+            //mecAFComexP
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'mecAFComexP',
+                $data->comExt->mecAFComexP
+            );
+
+            //mecAFComexT
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'mecAFComexT',
+                $data->comExt->mecAFComexT
+            );
+
+            //movTempBens
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'movTempBens',
+                $data->comExt->movTempBens
+            );
+
+            //nDI
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'nDI',
+                $data->comExt->nDI
+            );
+
+            //nRE
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'nRE',
+                $data->comExt->nRE
+            );
+
+            //mdic
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'mdic',
+                $data->comExt->mdic
+            );
+        }
 
         /*
          * infoCompl

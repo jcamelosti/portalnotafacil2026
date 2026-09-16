@@ -7,6 +7,7 @@ use App\Http\Requests\TomadorCreateRequest;
 use App\Http\Requests\TomadorUpdateRequest;
 use App\Models\Empresa;
 use App\Models\Municipio;
+use App\Models\Pais;
 use App\Models\Tomador;
 use App\Models\Uf;
 use App\Utilitarios\Utilitarios;
@@ -18,12 +19,14 @@ class TomadoresController extends Controller
     private $tomadorModel;
     private $estadoModel;
     private $municipioModel;
+    private $paisesModel;
    
-    public function __construct(Tomador $tomadorModel, Uf $estadoModel, Municipio $municipioModel)
+    public function __construct(Tomador $tomadorModel, Uf $estadoModel, Municipio $municipioModel, Pais $paisesModel)
     {
         $this->tomadorModel = $tomadorModel;
         $this->estadoModel = $estadoModel;
         $this->municipioModel = $municipioModel;
+        $this->paisesModel = $paisesModel;
     }
 
     /**
@@ -99,12 +102,15 @@ class TomadoresController extends Controller
         $tomador->cidade_id = '99999';
         $estados = [28 => "Exterior"];
         $cidades = $this->municipioModel->municipios(28);
-              
+
+        $paises = $this->paisesModel->paises();
+                      
         return view('tomadores.criar_exterior')->with([
             'empresa' => $tomador,
             'estados' => $estados,
             'cidades' => $cidades,
-            'uf_id' => !empty($estado) ? $estado->id : 9
+            'uf_id' => !empty($estado) ? $estado->id : 28,
+            'paises' => $paises
         ]);
     }
 
@@ -231,13 +237,16 @@ class TomadoresController extends Controller
         $uf_id = $tomador->cidade()->first()->estado()->first()->id;
         $cidades = $this->municipioModel->municipios($uf_id);
 
+        $paises = $this->paisesModel->paises();
+        
         return view('tomadores.editar')->with([
             'estados' => $estados,
             'empresa' => $tomador,
             'tomador' => $tomador,
             'uf_id' => $uf_id,
             'cidade' => $cidade,
-            'cidades' => $cidades
+            'cidades' => $cidades,
+            'paises' => $paises
         ]);
     }
 

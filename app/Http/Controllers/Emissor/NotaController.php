@@ -24,6 +24,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use JCamelo\NfseNacionalLib\DTO\ComExtDTO;
 use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
 use JCamelo\NfseNacionalLib\DTO\DPSDataSnDTO;
 use JCamelo\NfseNacionalLib\Manager\CertificateManager;
@@ -283,7 +284,7 @@ class NotaController extends Controller
 			4 => 'Não Incidência',
         ];
 
-        if(isset($dadosCadastrais['tributacoesPermitidas']['tribISSQN']) && $dadosCadastrais['tributacoesPermitidas']['tribISSQN'] == 1){
+        /*if(isset($dadosCadastrais['tributacoesPermitidas']['tribISSQN']) && $dadosCadastrais['tributacoesPermitidas']['tribISSQN'] == 1){
             unset($tributacaoIssqnList[2]);
             unset($tributacaoIssqnList[3]);
             unset($tributacaoIssqnList[4]);
@@ -291,7 +292,7 @@ class NotaController extends Controller
             unset($tributacaoIssqnList[2]);
             unset($tributacaoIssqnList[3]);
             unset($tributacaoIssqnList[4]);
-        }
+        }*/
 
         $tiposImunidadeList = [
             null => 'Selecione',
@@ -375,61 +376,9 @@ class NotaController extends Controller
             $dados['ddlCidadePrestacao'],
             $dados['ddlCidadePrestacao']
         );
-        
-        /*$dataSN = new DPSDataDTO(
-            ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
-            dataEmissao: Carbon::now()->format('Y-m-d\TH:i:sP'),
-            serieDps: $empresa->serie_dps,
-            numDps: ($empresa->num_ultimo_dps + 1),
-
-            cnpjPrestador: $empresa->cpf_cnpj,
-            imPrestador: $empresa->inscricao_municipal,
-            
-            razaoTomador: $empresa->razao_social,
-            cnpjTomador: $tomador->cpf_cnpj,     
-            
-            cMunTomador: $tomador->cidade()->first()->codigo,
-            cepTomador: preg_replace('/[^\d\-]/', '', $tomador->cep),
-            logradouroTomador: $tomador->logradouro,
-            numeroTomador: $tomador->numero,
-            complementoTomador: $tomador->complemento,
-            bairroTomador: $tomador->bairro,
-            cPaisTomadorExterior: '',
-            cEndPostTomador: '',
-            xCidadeTomador: '',      
-            
-            localPrestacaoServico: $localPrestacao,
-
-            codigoMunicipio: $dados['ddlCidadePrestacao'], //municipio do prestado - cLocEmi
-            codigoTributacaoNacional: $dados['cTribNac'],
-            codigoServico: $dados['empresa_atividade_id'],
-            descricaoServico: $dados['txtDescServicos'],
-            valorServico: $this->numero($dados['txtTotal']),
-            dataCompetencia: date('Y-m-d'),
-            nbs: $dados['nbs'],
-            complemento: $dados['txtInfoComplementares'],
-
-            opSimpNac: $empresa->op_simp_nac,
-            regApTribSN: $empresa->tp_reg_apuracao_sn,//só quando for do simples
-            regEspTrib: $empresa->tp_regime_esp_trib_mun,
-            tribISSQN: $dados['ddlTribISSQN'],
-            tpRetISSQN: $dados['ddlTipoRetencao'],
-            tribMunAliq: (float)$this->numero($dados['txtAliquota']),
-            
-            tribFedCst: $dados['ddlSitTribFederal'],
-            tpRetPisCofins: $dados['ddlTipoRetFederal'],
-            vRetCP: $this->numero($dados['txtValorCP']),
-            vRetIRRF: $this->numero($dados['txtValorIRRF']),
-            vRetCSLL: isset($dados['txtValorCSLL']) ? $this->numero($dados['txtValorCSLL']) : 0.00,
-
-            pTotTribSN: $this->numero($dados['txtPercentualTribSN']),
-            cIndOp: $dados['ddlIndicadorOperacao'],
-            cstIbsCbs: $dados['ddlSituacaoTributaria'],
-            cClassTrib: $dados['ddlClassificacaoTributaria'],
-            //indDest: 0,
-        );*/
-
+    
         $totalNfse = (float)$dados['txtTotal'];
+        $totalComex = isset($dados['comex_vserv_moeda']) ? $dados['comex_vserv_moeda'] : null;
 
         //Calculos PIs e Cofins
         if(isset($dados['txtBaseCalcFederal']) && !empty($dados['txtBaseCalcFederal'])){
@@ -456,6 +405,24 @@ class NotaController extends Controller
         }       
 
         //correção 08/09/2026
+        $comExt = null;
+        if($tomador->cidade()->first()->codigo == '99999' || $dados['ddlTribISSQN'] == 3){
+            $totalComex = (float) $totalComex;
+
+            $comExt = new ComExtDTO(
+                mdPrestacao: $dados['comex_modo_prestacao'],
+                vincPrest: $dados['comex_vinc_prest'],
+                tpMoeda: $dados['comex_tipo_moeda'],
+                vServMoeda: number_format($totalComex, 2, '.', ''),
+                mecAFComexP: '01',
+                mecAFComexT: '01',
+                movTempBens: 1,
+                nDI: null,
+                nRE: null,
+                mdic: 0,
+            );
+        }
+
         $dataSN = new DPSDataSnDTO(
             ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
             dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
@@ -486,9 +453,24 @@ class NotaController extends Controller
             numeroTomador: $tomador->numero ?? null,
             complementoTomador: $tomador->complemento ?? null,
             bairroTomador: $tomador->bairro ?? null,
-            foneTomador: preg_replace('/[^0-9]/', '', $empresa->telefone1) ?? null,
+            foneTomador: preg_replace('/[^0-9]/', '', $tomador->telefone1) ?? null,
             emailTomador: $tomador->email ?? null,
             
+            //dados nif
+            nif: $tomador->nif,
+            nao_nif: $tomador->nao_nif,
+
+            //endereço exterior
+            endNoExterior: ($tomador->cidade()->first()->codigo = '99999') ? 1 : 2,
+            pais: ($tomador->cidade()->first()->codigo = '99999') ? $tomador->pais : null,
+            endPostal: ($tomador->cidade()->first()->codigo = '99999') ? $tomador->cep : null,
+            cidade: ($tomador->cidade()->first()->codigo = '99999') ? $tomador->cidade : null,
+            provincia: ($tomador->cidade()->first()->codigo = '99999') ? $tomador->provincia : null,
+            //final endereço exterior
+
+            //Campos ComExt - Tipo Operaçao Exportação ou quando informando o campo de endereço no exterior
+            comExt: $comExt,            
+
             //dados sobre o serviço
             codigoTributacaoNacional: $dados['cTribNac'],
             codigoServicoMunicipal: $dados['empresa_atividade_id'],
@@ -528,12 +510,15 @@ class NotaController extends Controller
             cClassTrib: $dados['ddlClassificacaoTributaria'],
             informacaoComplementar: $dados['txtInfoComplementares'] ?? null,
         );
+
+        //dd($dados, $comExt, $dataSN);
         
         //Gerar NFSe
         $retorno = $this->nfse->gerarNfse('issnet', $dataSN, $empresa->id);
         
         if(isset($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno->MensagemRetorno)){
              echo "Falha";
+            Log::info(json_encode($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno, true));
             dd($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno->MensagemRetorno);
         }else{
             dd($retorno);

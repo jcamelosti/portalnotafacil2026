@@ -1,9 +1,9 @@
 $(document).ready(function () {
+    validarTomadorExterior();
 
     // ==========================================
     // CAMPOS TRIBUTÁRIOS FEDERAIS
     // ==========================================
-
     const $empresaAtividade = $('#empresa_atividade_id');
     const $sitTribFederal   = $('#ddlSitTribFederal');
     const $tipoRetFederal   = $('#ddlTipoRetFederal');
@@ -574,10 +574,25 @@ $(document).ready(function () {
 
     $tributacaoIssqn.on('change', function ( event ) {
         event.preventDefault();
+        valorCampo = $(this).val();
 
         habilitarCampo($regimeEspTrib);
         habilitarCampo($txtDeducaoBaseCalculo);
+
+        if(tomadorExterior || valorCampo == 3){
+            $('#containerComEx').show();
+        }else{
+            $('#containerComEx').hide();
+        }
     });    
+
+    function validarTomadorExterior(){
+        if(tomadorExterior){
+            $('#containerComEx').show();
+        }else{
+            $('#containerComEx').hide();
+        }
+    }
 
     $regimeEspTrib.on('change', function ( event ) {
         event.preventDefault();
