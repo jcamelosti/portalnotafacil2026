@@ -130,6 +130,10 @@
 
                             <!-- AÇÕES -->
                             <div class="mt-4 md:mt-0 flex flex-wrap gap-2 md:justify-end">
+                                <a href="{{ route('notas.show', $nota->id) }}"
+                                class="px-3 py-1 text-xs font-semibold text-white bg-teal-500 rounded hover:bg-teal-600">
+                                    Visualizar
+                                </a>
 
                                 <!--a target="_blank"
                                 href="{{ route('notas.visualizacao-publica', [base64_encode(strrev(substr($nota->tomador->cpf_cnpj,0,5))), base64_encode($nota->id)]) }}"
@@ -144,14 +148,14 @@
 
                                 @if($nota->cancelada == '0')
                                     @if($nota->can_cancel)
-                                        <a href="{{ route('notas.cancelar-issnet', $nota->id) }}"
+                                        <!--a href="{{ route('notas.cancelar-issnet', $nota->id) }}"
                                         class="px-3 py-1 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
                                             Cancelar
-                                        </a>
+                                        </a-->
                                     @else
-                                        <span class="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-200 rounded">
+                                        <!--span class="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-200 rounded">
                                             Indisponível
-                                        </span>
+                                        </span-->
                                     @endif
                                 @else
                                     <span class="px-3 py-1 text-xs font-semibold text-white bg-red-800 rounded">

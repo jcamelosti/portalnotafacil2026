@@ -114,6 +114,17 @@
                             {{ $nota->created_at?->format('d/m/Y H:i:s') ?? '-' }}
                         </dd>
                     </div>
+
+                    <!-- Data de emissão -->
+                    <div>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                            Data de Cancelamento
+                        </dt>
+
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {{ $nota->data_cancelamento?->format('d/m/Y H:i:s') ?? '-' }}
+                        </dd>
+                    </div>
                 </div>
             </div>
         </div>  

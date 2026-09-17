@@ -380,7 +380,6 @@ class NotaController extends Controller
     }
 
     public function visualizarXmlNota(NotaEmitida $nota){  
-        $empresaSessao = Session::get('empresa_selecionada');
         $empresa = $this->empresaModel->find($nota->empresa->id);
 
         if($nota->empresa_id != Session::get('empresa_selecionada')){

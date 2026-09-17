@@ -25,17 +25,20 @@ class TesteNfeNacionalController extends Controller
         {
         $empresa = Empresa::find(361); // Substitua pelo ID da empresa que deseja testar
         //string $provider, int $empresaId, string $cnpj, string $im, int $numero_nfse, string $data_inicial, string $data_final
-        /*$response = $this->nfse->consultarUrlNfse(
+        $response = $this->nfse->consultarUrlNfse(
             'issnet',
             $empresa->id,
             $empresa->cpf_cnpj,//cnpj            
             $empresa->inscricao_municipal, //im,
-            15, //nNFSe,
+            34, //nNFSe,
             '',//dt ini
             ''//dt fim
-        );*/
+        );
 
-        $response = $this->nfse->consultarXml(
+        dd($response);
+
+        //Consulta do XML
+        /*$response = $this->nfse->consultarXml(
             'issnet',
             $empresa->id,
             $empresa->cpf_cnpj,//cnpj            
@@ -64,8 +67,9 @@ class TesteNfeNacionalController extends Controller
         );
         $xml = $domxml->saveXML($domxml->documentElement);
         $xml =  str_replace('<?xml version="1.0"?>', '', $xml);
-        dd($xml);
-        
+        dd($xml);*/
+
+                
 
 
 
