@@ -259,7 +259,7 @@ class NotaController extends Controller
     }
 
     public function store(Request $request){
-        try{
+        //try{
             $empresaSessao = request()->session()->get('empresa_selecionada');
             $empresaSessao = $this->empresaModel->find($empresaSessao);
             
@@ -270,25 +270,25 @@ class NotaController extends Controller
             //$this->emitir($dados);
             
             $this->emissorService->emitir($dados);
-        } catch (\Throwable $e) {
+        /*} catch (\Throwable $e) {
             session()->flash('danger', $e->getMessage());
             return back()
                 ->withInput();
-                /*->with(
+                / *->with(
                     'error',
                     $e->getMessage()
-                );*/
+                );* /
         }catch(\Exception $e){
             dd($e->getMessage());
-            /*DB::insert(
+            / *DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
                     $empresaSessao->id,
                     $e->getMessage()
                 ]
             );
-            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');*/
-        }
+            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');* /
+        }*/
 
         return redirect()->route('nota.index');
     }

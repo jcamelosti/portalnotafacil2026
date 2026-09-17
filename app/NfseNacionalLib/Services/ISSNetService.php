@@ -38,6 +38,29 @@ class ISSNetService
         return $retorno;
     }
 
+    public function consultarXml(string $xml, int $empresaId){
+        $xml =  str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);
+        
+        $soap = SoapBuilder::build('ConsultarNfseServicoPrestado', $xml);
+        $cert = $this->certManager->getCertificate($empresaId);
+
+        //Obter o Endpoint correto se produção ou homologação conforme campo ambiente_emissao do registro da empresa
+        $ws = $this->wsManager->getWsUrl($empresaId);
+
+         $response = $this->transport->send(
+            $ws['url'],
+            config('nfse.uri'),
+            'ConsultarNfseServicoPrestado',
+            $soap,
+            $cert
+        );
+
+        $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
+        $retorno = simplexml_load_string( $response );
+        
+        return $retorno;
+    }
+
     public function gerarNfse(string $xml, int $empresaId)
     {
         $xml =  str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);

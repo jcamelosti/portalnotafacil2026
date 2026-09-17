@@ -90,6 +90,16 @@ class NFSeService
         return $driver->consultarUrlNfse($xml, $empresaId);
     }
 
+    public function consultarXml(string $provider, int $empresaId, string $cnpj, string $im, int $numero_nfse, string $data_inicial, string $data_final){
+        $xml = XmlFactory::consultarXml($cnpj, $im, $numero_nfse, $data_inicial, $data_final);
+
+        $driver = NFSeProviderFactory::make($provider);
+        
+        Log::info($xml);
+
+        return $driver->consultarXml($xml, $empresaId);
+    }
+
     public function recepcionarLoteDpsSincrono(string $provider, DPSDataDTO $data, int $empresaId)
     {
         

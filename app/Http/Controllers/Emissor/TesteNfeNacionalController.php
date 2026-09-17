@@ -24,109 +24,46 @@ class TesteNfeNacionalController extends Controller
     public function teste()
     {
         $empresa = Empresa::find(361); // Substitua pelo ID da empresa que deseja testar
-        /*$consultarDadosCadastraisDTO = $this->nfse->consultarDadosCadastrais(
-            'issnet',
-            444, // 🔥 empresa dinâmica - referencia para buscar certificado digital,
-            $empresa->cpf_cnpj, // 🔥 cnpj dinâmico
-            $empresa->inscricao_municipal // 🔥 inscrição municipal dinâmica
-        );
-        exit;
-
-        dd($consultarDadosCadastraisDTO);*/
-        
-        //nfse gerarnfse notacontrol funcionando 09/09/2026
-        /*$dataSN = new DPSDataSnDTO(
-            ambiente: 2,
-            dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
-            serie: '8',
-            numDps: 13,
-            dataCompetencia: Carbon::now(
-                'America/Sao_Paulo'
-            )->format('Y-m-d'),
-            codigoMunicipio: '5002704',
-            cnpjPrestador: '22645177000188',
-            imPrestador: '4048539',
-            fonePrestador: '62991728787',
-            emailPrestador: 'virlei79@gmail.com',
-            opSimpNac: 3,//campo importante para saber qual tipo de xml deve ser gerado no factory
-            regApTribSN: 1,
-            regEspTrib: 0,
-            cnpjTomador: '24685881000190',
-            cpfTomador: null,
-            razaoTomador:
-               'Josue Camelo dos Santos Ferreira 01582713197',
-            codigoMunicipioTomador: '5201108',
-            cepTomador: '75064350',
-            logradouroTomador:
-               'Rua Carlinhos José Ribeiro',
-            numeroTomador: '180',
-            complementoTomador: 'APT 402D',
-            bairroTomador:
-               'Vila Jaiara Setor Leste',
-            foneTomador: '6237027225',
-            emailTomador:
-               'contato@josuecamelo.com',
-            codigoTributacaoNacional: '010101',
-            codigoServicoMunicipal: '4',
-            descricaoServico:
-               'Manutenção de computador; limpeza, formatação & instalação - R$ 350,00 (urgente)!',
-            codigoNbs: '115021000',
-            codigoMunicipioPrestacao: '5002704',
-            valorServico: '350.00',
-            tributaIss: 1,
-            tipoRetencaoIss: 1,
-            aliquotaIss: '2.50',
-            
-            cstPisCofins: '00',
-            
-            / *
-            //vBCPisCofins
-            baseCalculoPisCofins: $dados['txtBaseCalcFederal'],
-            //pAliqPis
-            aliquotaPis: $dados['txtBaseCalcFederal'],
-            //pAliqCofins
-            aliquotaCofins: $dados['txtBaseCalcFederal'],
-            //vPis
-            valorPis: $dados['txtBaseCalcFederal'],
-            //vCofins
-            valorCofins: $dados['txtBaseCalcFederal'],* /
-
-            tipoRetencaoPisCofins: 0,
-
-            valorRetencaoCp: '0.12',
-            valorRetencaoIrrf: '0.01',
-            valorRetencaoCsll: '0.12',
-
-            percentualTotalTributos: '5.00',
-            finNfse: 0,
-            cIndOp: '100301',
-            indDest: 0,
-            cstIbsCbs: '000',
-            cClassTrib: '000001',
-        );
-
-        //funcionando normalmente
-        $response = $this->nfse->gerarNfse(
-            'issnet',
-            $dataSN,
-            361 // empresaId
-        );
-
-        dd($response);*/
-
-
         //string $provider, int $empresaId, string $cnpj, string $im, int $numero_nfse, string $data_inicial, string $data_final
         /*$response = $this->nfse->consultarUrlNfse(
             'issnet',
             $empresa->id,
             $empresa->cpf_cnpj,//cnpj            
             $empresa->inscricao_municipal, //im,
-            11, //nNFSe,
+            15, //nNFSe,
+            '',//dt ini
+            ''//dt fim
+        );*/
+
+        $response = $this->nfse->consultarXml(
+            'issnet',
+            $empresa->id,
+            $empresa->cpf_cnpj,//cnpj            
+            $empresa->inscricao_municipal, //im,
+            15, //nNFSe,
             '',//dt ini
             ''//dt fim
         );
 
-        dd($response);*/
+        $xml = $response->
+            sBody->
+            ConsultarNfseServicoPrestadoResponse->
+            ConsultarNfseServicoPrestadoResposta
+            ->asXml();
+        
+        $domxml = new \DOMDocument('1.0', 'UTF-8');
+        $domxml->preserveWhiteSpace = false;
+        $domxml->formatOutput = true;
+        $domxml->loadXML($xml);
+        $root = $domxml->documentElement;
+        $root->setAttribute(
+            'xmlns',
+            'http://www.sped.fazenda.gov.br/nfse'
+        );
+        $xml = $domxml->saveXML();
+        $xml =  str_replace('<?xml version="1.0"?>', '', $xml);
+        dd($xml);
+        
 
 
 

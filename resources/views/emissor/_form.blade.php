@@ -56,7 +56,7 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Atividade Municipal:</span>
                                 {!! Form::select('empresa_atividade_id', isset($atividades) ? $atividades : []
-                                ,old('empresa_atividade_id'), ['required','class'=>'block w-full mt-1 text-sm  
+                                ,null, ['required','class'=>'block w-full mt-1 text-sm  
                                 px-3 py-1.5
                                 form-select
                                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray', 'id'=>"empresa_atividade_id"]) !!}

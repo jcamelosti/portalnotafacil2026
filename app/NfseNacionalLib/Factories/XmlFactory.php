@@ -33,4 +33,10 @@ class XmlFactory
         <ConsultarUrlNfseEnvio xmlns="http://www.sped.fazenda.gov.br/nfse"><Prestador><CNPJ>{$cnpj}</CNPJ><IM>{$im}</IM></Prestador><NumeroNfse>{$numero_nfse}</NumeroNfse><Pagina>1</Pagina></ConsultarUrlNfseEnvio>
         XML;
     }
+
+    public static function consultarXml(string $cnpj, string $im, int $numero_nfse, string $data_inicial, string $data_final): string{
+        return <<<XML
+        <ConsultarNfseServicoPrestadoEnvio xmlns="http://www.sped.fazenda.gov.br/nfse"><Prestador><CNPJ>{$cnpj}</CNPJ><IM>{$im}</IM></Prestador><NumeroNfse>{$numero_nfse}</NumeroNfse><Pagina>1</Pagina></ConsultarNfseServicoPrestadoEnvio>
+        XML;
+    }
 }

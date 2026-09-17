@@ -9,6 +9,7 @@ use JCamelo\NfseNacionalLib\DTO\DPSDataSnDTO;
 use JCamelo\NfseNacionalLib\Services\NFSeService;
 
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class EmissorNotaService
@@ -306,42 +307,85 @@ class EmissorNotaService
         
         //Gerar NFSe
         $retorno = $this->nfse->gerarNfse($empresa->sigla_provedor, $dataSN, $empresa->id);
+        
+        if(isset($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno)){
+            $retornoLista = $retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno;
+            $mensagens = [];
+            $mensagemTexto = '<center><h1>ATENÇÃO:</h1></center><br />';
 
-        $retornoLista = $retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno;
-        $mensagens = [];
-        $mensagemTexto = '<center><h1>ATENÇÃO:</h1></center><br />';
+            foreach ($retornoLista->MensagemRetorno as $retorno) {
+                $mensagens[] = [
+                    'codigo'   => (string) $retorno->Codigo,
+                    'mensagem' => (string) $retorno->Mensagem,
+                    'correcao' => (string) $retorno->Correcao,
+                ];
 
-        foreach ($retornoLista->MensagemRetorno as $retorno) {
-            $mensagens[] = [
-                'codigo'   => (string) $retorno->Codigo,
-                'mensagem' => (string) $retorno->Mensagem,
-                'correcao' => (string) $retorno->Correcao,
-            ];
+                $mensagemTexto .= '<b>'.(string) $retorno->Codigo. '</b> - ' . (string) $retorno->Mensagem.'<br />';
+                $mensagemTexto .= '<b>Solução</b>: Para Corrigir o Erro ' . (string) $retorno->Correcao.'<br />';
+                $mensagemTexto .= '<br />';
 
-            $mensagemTexto .= '<b>'.(string) $retorno->Codigo. '</b> - ' . (string) $retorno->Mensagem.'<br />';
-            $mensagemTexto .= '<b>Solução</b>: Para Corrigir o Erro ' . (string) $retorno->Correcao.'<br />';
-            $mensagemTexto .= '<br />';
+                DB::insert(
+                    'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                    [
+                        $empresa->id,
+                        (string) $retorno->Codigo . ' - ' . $retorno->Mensagem . ' - ' . $retorno->Correcao
+                    ]
+                );
+            }
 
-            DB::insert(
-                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
-                [
-                    $empresa->id,
-                    (string) $retorno->Codigo . ' - ' . $retorno->Mensagem . ' - ' . $retorno->Correcao
-                ]
-            );
+            if(!empty($mensagens)){
+                throw new \DomainException($mensagemTexto);
+            }
         }
+        
+        $nNfse = (int)$retorno
+            ->sBody
+            ->GerarNfseResponse
+            ->GerarNfseResposta
+            ->ListaNfse
+            ->CompNfse
+            ->NFSe
+            ->infNFSe
+            ->nNFSe;
 
-        if(!empty($mensagens)){
-            throw new \DomainException($mensagemTexto);
-        }else{
-            echo "deu certo";
-            dd($retorno);
-        }  
+        $empresa->num_ultimo_dps = (int)$nNfse;
+        $empresa->save();
+
+        $xmlNfse = $this->obterXml($empresa, $nNfse);
+
+        Log::info($xmlNfse);
+        dd($xmlNfse);
+    }
+
+    protected function obterXml(Empresa $empresa, $nNfse){
+        $response = $this->nfse->consultarXml(
+            $empresa->sigla_provedor,
+            $empresa->id,
+            $empresa->cpf_cnpj,//cnpj            
+            $empresa->inscricao_municipal, //im,
+            $nNfse, //nNFSe,
+            '',//dt ini
+            ''//dt fim
+        );
+
+        $xml = $response->
+            sBody->
+            ConsultarNfseServicoPrestadoResponse->
+            ConsultarNfseServicoPrestadoResposta
+            ->asXml();
         
+        $domxml = new \DOMDocument('1.0', 'UTF-8');
+        $domxml->preserveWhiteSpace = false;
+        $domxml->formatOutput = true;
+        $domxml->loadXML($xml);
+        $root = $domxml->documentElement;
+        $root->setAttribute(
+            'xmlns',
+            'http://www.sped.fazenda.gov.br/nfse'
+        );
+        $xml = $domxml->saveXML();
+        $xml =  str_replace('<?xml version="1.0"?>', '', $xml);
         
-        /*$nfse = $retorno['ListaNfse']['CompNfse']['Nfse']['infNFSe'];
-        $protocolo = $retorno['Protocolo'];
-        $data_recebimento = date('Y-m-d', strtotime((string)  $retorno['DataRecebimento']));//data recebimento lote
-        $valorServico = $nfse['DPS']['infDPS']['valores']['vServPrest']['vServ'];*/
+        return $xml;
     }
 }
