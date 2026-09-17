@@ -11,10 +11,10 @@
 
         <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row">
             <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
-                <a href="{{ route('sincnotasempresa', 0) }}"
+                <!--a href="{ { route('sincnotasempresa', 0) }}"
                    class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-white text-base leading-6 font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
                     Sincronizar Notas
-                </a>
+                </a-->
             </span>
         </div>
 
@@ -107,21 +107,21 @@
                                     <div>
                                         <p class="text-xs text-gray-500">Data</p>
                                         <p class="font-semibold text-sm">
-                                            {{ $nota->data_emissao_nfse }}
+                                            {{ $nota->created_at->format('d/m/Y G:i:s') }}
                                         </p>
                                     </div>
 
                                     <div>
-                                        <p class="text-xs text-gray-500">RPS</p>
+                                        <p class="text-xs text-gray-500">Núm. NFSE</p>
                                         <p class="font-semibold text-sm">
-                                            {{ $nota->numero_rps }}
+                                            {{ $nota->num_nfse }}
                                         </p>
                                     </div>
 
                                     <div>
                                         <p class="text-xs text-gray-500">Valor</p>
                                         <p class="font-bold text-green-600 text-sm">
-                                            R$ {{ $nota->valor_nota }}
+                                            R$ {{ number_format($nota->valor, 2, ',', '.')}}
                                         </p>
                                     </div>
 
@@ -131,11 +131,11 @@
                             <!-- AÇÕES -->
                             <div class="mt-4 md:mt-0 flex flex-wrap gap-2 md:justify-end">
 
-                                <a target="_blank"
+                                <!--a target="_blank"
                                 href="{{ route('notas.visualizacao-publica', [base64_encode(strrev(substr($nota->tomador->cpf_cnpj,0,5))), base64_encode($nota->id)]) }}"
                                 class="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
                                     PDF
-                                </a>
+                                </a-->
 
                                 <a href="{{ route('notas.visualizar-xml', $nota->id) }}"
                                 class="px-3 py-1 text-xs font-semibold text-white bg-green-500 rounded hover:bg-green-600">
@@ -160,19 +160,18 @@
                                 @endif
 
                                 @if($nota->cancelada == '0')
-                                    <a href="{{ route('notas.substitucao', $nota->id) }}"
+                                    <!--a href="{{ route('notas.substitucao', $nota->id) }}"
                                     class="px-3 py-1 text-xs font-semibold text-white bg-orange-600 rounded hover:bg-orange-700">
                                         Substituir
-                                    </a>
+                                    </a-->
                                 @endif
 
                                 @if(!empty($nota->dados_emissao_json))
-                                    <a href="{{ route('notas.duplicar', base64_encode($nota->id)) }}"
+                                    <!--a href="{{ route('notas.duplicar', base64_encode($nota->id)) }}"
                                     class="px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
                                         Duplicar
-                                    </a>
+                                    </a-->
                                 @endif
-
                             </div>
                         </div>
                     @endforeach

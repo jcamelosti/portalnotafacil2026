@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Models\Empresa;
+use App\Models\NotaEmitida;
 use App\Models\Tomador;
 use Illuminate\Support\Facades\DB;
 use JCamelo\NfseNacionalLib\DTO\ComExtDTO;
@@ -190,7 +191,7 @@ class EmissorNotaService
                 mdic: 0,
             );
         }
-        //$empresa->num_ultimo_dps = 14;
+        
         $dataSN = new DPSDataSnDTO(
             ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
             dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
@@ -292,10 +293,10 @@ class EmissorNotaService
         
         //validar Xml
         $validacaoRet = $this->nfse->validarXml($empresa->sigla_provedor, $dataSN, $empresa->id);
+
         if(!isset($validacaoRet->sBody->ValidarXmlResponse->ValidarXmlResposta->ListaMensagemRetorno->MensagemRetorno->Codigo) 
             && (string)$validacaoRet->sBody->ValidarXmlResponse->ValidarXmlResposta->ListaMensagemRetorno->MensagemRetorno->Codigo != 'S000'){
-            /*Log::info('FALHA - AVISO VALIDAÇÃO XML');
-            Log::info(json_encode($validacaoRet->sBody->ValidarXmlResponse->ValidarXmlResposta->ListaMensagemRetorno, true));*/
+
             DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
@@ -353,8 +354,20 @@ class EmissorNotaService
 
         $xmlNfse = $this->obterXml($empresa, $nNfse);
 
-        Log::info($xmlNfse);
-        dd($xmlNfse);
+        $ne = NotaEmitida::create([
+            'empresa_id' => $empresa->id,
+            'tomador_id' => $tomador->id,
+            'nfse_xml'   => $xmlNfse,
+            'num_nfse'   => $nNfse,
+            'valor'      => $totalNfse,
+            'dados_emissao' => $dados
+        ]);
+
+        return [
+            'error' => false,
+            'Mensagem' => 'Nota Nº: '. $nNfse .' Emitida com Sucesso',
+            'registro' => $ne
+        ];
     }
 
     protected function obterXml(Empresa $empresa, $nNfse){
@@ -378,12 +391,16 @@ class EmissorNotaService
         $domxml->preserveWhiteSpace = false;
         $domxml->formatOutput = true;
         $domxml->loadXML($xml);
+
+        // FORÇA a codificação depois do loadXML()
+        $domxml->encoding = 'UTF-8';
+        
         $root = $domxml->documentElement;
         $root->setAttribute(
             'xmlns',
             'http://www.sped.fazenda.gov.br/nfse'
         );
-        $xml = $domxml->saveXML();
+        $xml = $domxml->saveXML($domxml->documentElement);
         $xml =  str_replace('<?xml version="1.0"?>', '', $xml);
         
         return $xml;

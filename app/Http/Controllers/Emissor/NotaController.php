@@ -14,33 +14,25 @@ use App\Models\EmpresaNbs;
 use App\Models\IndOpIbsCbs;
 use App\Models\Municipio;
 use App\Models\Nbs;
+use App\Models\NotaEmitida;
 use App\Models\Temp;
 use App\Models\Tomador;
 use App\Models\Uf;
 use App\Services\EmissorNotaService;
-use App\Traits\IssnetTrait;
-use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
-use JCamelo\NfseNacionalLib\DTO\ComExtDTO;
-use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
-use JCamelo\NfseNacionalLib\DTO\DPSDataSnDTO;
-use JCamelo\NfseNacionalLib\Manager\CertificateManager;
-use JCamelo\NfseNacionalLib\Security\DPSXmlSigner;
-//use JCamelo\NfseNacionalLib\Factories\DPSFactory;
+use Illuminate\Support\Facades\Storage;
 
 use JCamelo\NfseNacionalLib\Services\NFSeService;
-use JCamelo\NfseNacionalLib\XML\Builders\DPSSnXmlBuilder;
-use ZipStream\Test\Util;
+
 
 use function PHPUnit\Framework\isNull;
 
 class NotaController extends Controller
 {
-    use IssnetTrait;
     private $empresaModel;
     private $tomadorModel;
     private $estadoModel;
@@ -49,11 +41,10 @@ class NotaController extends Controller
     private $atividadeModel;
     private $indOperModel;
     private $cstIbsCsbModel;
-    private $classificacaoTributariaModel;  
-    private $tempModel;  
+    private $classificacaoTributariaModel;   
     private $notaBO;
+    private $notasEmitidas;
 
-    private NFSeService $nfse;
     private EmissorNotaService $emissorService;
     
     public function __construct(Empresa $empresaModel, Tomador $tomadorModel, 
@@ -61,7 +52,7 @@ class NotaController extends Controller
         EmpresaAtividade $atividadeModel,
         Nbs $nbsModel, IndOpIbsCbs $indOperModel, CstIbsCbs $cstIbsCsbModel, 
         ClassificacaoTributaria $classificacaoTributariaModel, Temp $tempModel,
-        NFSeService $nfse, EmissorNotaService $emissorService
+        NFSeService $nfse, EmissorNotaService $emissorService, NotaEmitida $notasEmitidas
     ){
         //$this->notaBO = NotasBO::newInstance();
         $this->empresaModel = $empresaModel;
@@ -74,39 +65,55 @@ class NotaController extends Controller
         $this->indOperModel = $indOperModel;
         $this->cstIbsCsbModel = $cstIbsCsbModel;
         $this->classificacaoTributariaModel = $classificacaoTributariaModel;
-        $this->tempModel = $tempModel;
-
         $this->notaBO = NotasBO::newInstance();
-
-        $this->nfse = $nfse;
         $this->emissorService = $emissorService;
+
+        $this->notasEmitidas = $notasEmitidas;
     }
-
-    private static function numero(mixed $valor): string
-    {
-        if ($valor === null || $valor === '') {
-            return '0.00';
-        }
-
-        if (is_string($valor)) {
-            $valor = trim($valor);
-
-            // Formato brasileiro: 1.500,99
-            if (str_contains($valor, ',')) {
-                $valor = str_replace('.', '', $valor);
-                $valor = str_replace(',', '.', $valor);
-            }
-        }
-
-        return number_format((float) $valor, 2, '.', '');
-    }
-
     public function index(){
-        /*$temp = Temp::all();
-        $dados = $temp[count($temp) - 1]->dados;
-        $this->emitir($dados); */
+        $campos = request()->all();
+        $empresaSelecionada = Session::get('empresa');
 
-        dd("Index");
+        $data = [
+            'data_inicio' => request()->data_inicio ?? Carbon::today()->subDays(30)->format('Y-m-d'),
+            'data_fim'    => request()->data_fim ?? Carbon::today()->format('Y-m-d'),
+        ];
+
+        // converter para Carbon
+        $inicio = Carbon::parse($data['data_inicio']);
+        $fim    = Carbon::parse($data['data_fim']);
+
+        // validação
+        if ($inicio->diffInDays($fim) > 30) {
+            session()->flash('danger', 'Opss! O período máximo permitido é de 30 dias.');
+            return redirect()->route('nota.index');
+        }
+
+        $notas = $this->notasEmitidas
+            ->where('empresa_id', Session::get('empresa_selecionada'))
+            ->when(!empty($data['data_inicio']) && !empty($data['data_fim']), function ($query) use ($data) {
+                $query->whereBetween('created_at', [
+                    $data['data_inicio'].' 00:00:00',
+                    $data['data_fim'].' 23:59:59'
+                ]);
+            })
+            ->where(function($query) use($campos) {
+                if(isset($campos['tomador_id']) && $campos['tomador_id'] != '0'){
+                    $query->where('tomador_id', $campos['tomador_id']);
+                }
+            })
+            ->orderBy('num_nfse', 'desc')
+            ->paginate(10);
+
+        $tomadoresList = $this->tomadorModel
+            ->tomadoresList(Session::get('empresa_selecionada'));
+        
+        return view('emissor.listagem_notas', [
+            'notas' => $notas, 
+            'empresa' => $empresaSelecionada,
+            'data' => $data,
+            'tomadoresList' => $tomadoresList
+        ]);
     }
 
     public function create(){
@@ -259,7 +266,7 @@ class NotaController extends Controller
     }
 
     public function store(Request $request){
-        //try{
+        try{
             $empresaSessao = request()->session()->get('empresa_selecionada');
             $empresaSessao = $this->empresaModel->find($empresaSessao);
             
@@ -269,28 +276,30 @@ class NotaController extends Controller
             $dados = $this->notaBO->tratarDados($dados);
             //$this->emitir($dados);
             
-            $this->emissorService->emitir($dados);
-        /*} catch (\Throwable $e) {
+            $retorno = $this->emissorService->emitir($dados);
+
+            return redirect()->route('nota.show', $retorno['registro']->id);
+        } catch (\Throwable $e) {
             session()->flash('danger', $e->getMessage());
             return back()
                 ->withInput();
-                / *->with(
+                /*->with(
                     'error',
                     $e->getMessage()
-                );* /
+                );*/
         }catch(\Exception $e){
-            dd($e->getMessage());
-            / *DB::insert(
+            session()->flash('danger', $e->getMessage());
+            /*DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
                     $empresaSessao->id,
                     $e->getMessage()
                 ]
             );
-            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');* /
-        }*/
-
-        return redirect()->route('nota.index');
+            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');*/
+            return back()
+                ->withInput();
+        }
     }
 
     /* Pesquisas */
@@ -357,5 +366,33 @@ class NotaController extends Controller
             ->get();
 
         return response()->json($classificacoes,200,[],JSON_UNESCAPED_UNICODE);
+    }
+
+    public function show(NotaEmitida $nota){
+        if($nota->empresa_id != Session::get('empresa_selecionada')){
+            session()->flash('danger', 'Acesso negado.');
+            return redirect()->route('nota.index');
+        }
+
+        return view('emissor.exibir')->with([
+            'nota' => $nota
+        ]);
+    }
+
+    public function visualizarXmlNota(NotaEmitida $nota){  
+        $empresaSessao = Session::get('empresa_selecionada');
+        $empresa = $this->empresaModel->find($nota->empresa->id);
+
+        if($nota->empresa_id != Session::get('empresa_selecionada')){
+            session()->flash('danger', 'Acesso negado.');
+            return redirect()->route('nota.index');
+        }
+
+        $nomeArquivo = $empresa->inscricao_municipal . '_NotaFiscaldeServicoEletronicaNFSe_' . str_pad($nota->num_nfse, 8, '0', STR_PAD_LEFT) . '.xml';
+        Storage::disk('local')->put('public/' . $empresa->id . '/' . $nomeArquivo, $nota->nfse_xml);
+        $caminhoDownload = storage_path() . '/app/public/' . $empresa->id . '/' . $nomeArquivo;
+        header('Content-disposition: attachment; filename="' . $nomeArquivo . '"');
+        header('Content-type: "text/xml"; charset="utf8"');
+        readfile($caminhoDownload);
     }
 }

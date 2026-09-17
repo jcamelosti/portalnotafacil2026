@@ -22,7 +22,7 @@ class TesteNfeNacionalController extends Controller
     }
     
     public function teste()
-    {
+        {
         $empresa = Empresa::find(361); // Substitua pelo ID da empresa que deseja testar
         //string $provider, int $empresaId, string $cnpj, string $im, int $numero_nfse, string $data_inicial, string $data_final
         /*$response = $this->nfse->consultarUrlNfse(
@@ -40,7 +40,7 @@ class TesteNfeNacionalController extends Controller
             $empresa->id,
             $empresa->cpf_cnpj,//cnpj            
             $empresa->inscricao_municipal, //im,
-            15, //nNFSe,
+            34, //nNFSe,
             '',//dt ini
             ''//dt fim
         );
@@ -55,12 +55,14 @@ class TesteNfeNacionalController extends Controller
         $domxml->preserveWhiteSpace = false;
         $domxml->formatOutput = true;
         $domxml->loadXML($xml);
+        // FORÇA a codificação depois do loadXML()
+        $domxml->encoding = 'UTF-8';
         $root = $domxml->documentElement;
         $root->setAttribute(
             'xmlns',
             'http://www.sped.fazenda.gov.br/nfse'
         );
-        $xml = $domxml->saveXML();
+        $xml = $domxml->saveXML($domxml->documentElement);
         $xml =  str_replace('<?xml version="1.0"?>', '', $xml);
         dd($xml);
         

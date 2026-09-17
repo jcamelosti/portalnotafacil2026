@@ -87,22 +87,23 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             Route::get('nota/listagem', [\App\Http\Controllers\Emissor\NotaController::class, 'index'])->name('nota.index');
             Route::get('nota/criar', [\App\Http\Controllers\Emissor\NotaController::class, 'create'])->name('nota.emitir');
             Route::post('nota/salvar', [\App\Http\Controllers\Emissor\NotaController::class, 'store'])->name('notas.store');
+            Route::get('nota/show/{nota}', [\App\Http\Controllers\Emissor\NotaController::class, 'show'])->name('nota.show');
             
             Route::get('nota/imprimir/pdf/{prestador}/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'imprimirNota'])->name('notas.pdf');
             Route::get('nota/imprimir/xml/{prestador}/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'baixarXml'])->name('notas.xml');
             Route::get('nota/cancelar/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'cancelarNota'])->name('notas.cancelar');
             Route::get('notas/emitidas',  [\App\Http\Controllers\Emissor\NotaController::class, 'listarNotaEmitidas'])->name('notas.emitidas-listagem');
-            Route::get('nota/print/xml/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'visualizarXmlNota'])->name('notas.visualizar-xml');
+            Route::get('nota/print/xml/{nota}', [\App\Http\Controllers\Emissor\NotaController::class, 'visualizarXmlNota'])->name('notas.visualizar-xml');
             Route::any('nota/cancelar/{id}/issnet', [\App\Http\Controllers\Emissor\NotaController::class, 'cancelarNotaIssNet'])->name('notas.cancelar-issnet');
             Route::get('nota/duplicar/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'duplicar'])->name('notas.duplicar');
 
             //confirmação transmissao notas
-            Route::get('nota/transmissao/ok', [\App\Http\Controllers\Emissor\NotaController::class, 'confirmacaoTransmissao'])->name('notas.confirmacao-transmissao');
+            //Route::get('nota/transmissao/ok', [\App\Http\Controllers\Emissor\NotaController::class, 'confirmacaoTransmissao'])->name('notas.confirmacao-transmissao');
 
             Route::get('nota/substuicao/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'substituirNota'])->name('notas.substitucao');
             Route::post('nota/substituicao/salvar', [\App\Http\Controllers\Emissor\NotaController::class, 'store_substituicao'])->name('notas.store-substituicao');
 
-            Route::get('teste/nfse-nacional', [\App\Http\Controllers\Emissor\NfseNacional::class, 'teste']);
+            //Route::get('teste/nfse-nacional', [\App\Http\Controllers\Emissor\NfseNacional::class, 'teste']);
 
             //novas rotas - 17/08/2026
             Route::get('nfse-nacional/testes', [\App\Http\Controllers\Emissor\TesteNfeNacionalController::class, 'teste']);
