@@ -256,7 +256,7 @@ class DPSSnXmlBuilder
         );
 
         $toma->appendChild($end);
-
+        
         if($data->endNoExterior == 2){
             $endNac = $dom->createElement(
                 'endNac'
@@ -385,6 +385,13 @@ class DPSSnXmlBuilder
             'cLocPrestacao',
             $data->codigoMunicipioPrestacao ?? $data->codigoMunicipio
         );
+
+        /*$this->appendText(
+            $dom,
+            $locPrest,
+            'cPaisPrestacao',
+            'US'
+        );*/
 
         /*
          * cServ
@@ -597,12 +604,14 @@ class DPSSnXmlBuilder
             $data->tipoRetencaoIss
         );
 
-        $this->appendOptionalText(
-            $dom,
-            $tribMun,
-            'pAliq',
-            $this->decimal($data->aliquotaIss)
-        );
+        if( ((float)$data->aliquotaIss > 0.0) && $data->opSimpNac != 1){
+            $this->appendOptionalText(
+                $dom,
+                $tribMun,
+                'pAliq',
+                $this->decimal($data->aliquotaIss)
+            );
+        }
 
         /*
          * =========================================================
@@ -715,12 +724,79 @@ class DPSSnXmlBuilder
 
         $trib->appendChild($totTrib);
 
-        $this->appendOptionalText(
-            $dom,
-            $totTrib,
-            'pTotTribSN',
-            $this->decimal($data->percentualTotalTributos)
-        );
+        if($data->opSimpNac == 1){
+            if($data->tipoInfoTributos == 1){
+                $vTotTrib = $dom->createElement(
+                    'vTotTrib'
+                );
+                $totTrib->appendChild($vTotTrib);
+
+                $this->appendOptionalText(
+                    $dom,
+                    $vTotTrib,
+                    'vTotTribFed',
+                    $this->decimal($data->percentualTribFederal)
+                );
+
+                $this->appendOptionalText(
+                    $dom,
+                    $vTotTrib,
+                    'vTotTribEst',
+                    $this->decimal($data->percentualTribEstadual)
+                );
+
+                $this->appendOptionalText(
+                    $dom,
+                    $vTotTrib,
+                    'vTotTribMun',
+                    $this->decimal($data->percentualTribMunicipal)
+                );
+            }else{
+                $pTotTrib = $dom->createElement(
+                    'pTotTrib'
+                );
+                $totTrib->appendChild($pTotTrib);
+
+                $this->appendOptionalText(
+                    $dom,
+                    $pTotTrib,
+                    'pTotTribFed',
+                    $this->decimal($data->valorTribFederal)
+                );
+
+                $this->appendOptionalText(
+                    $dom,
+                    $pTotTrib,
+                    'pTotTribEst',
+                    $this->decimal($data->valorTribEstadual)
+                );
+
+                $this->appendOptionalText(
+                    $dom,
+                    $pTotTrib,
+                    'pTotTribMun',
+                    $this->decimal($data->valorTribMunicipal)
+                );
+            }
+        }
+
+        if(isset($data->indicadorTotalTributos) && !empty($data->indicadorTotalTributos)){
+            $this->appendOptionalText(
+                $dom,
+                $totTrib,
+                'indTotTrib',
+                $data->indicadorTotalTributos //valor possível 0
+            );
+        }
+
+        if($data->opSimpNac != 1){
+            $this->appendOptionalText(
+                $dom,
+                $totTrib,
+                'pTotTribSN',
+                $this->decimal($data->percentualTotalTributos)
+            );
+        }
 
         /*
          * =========================================================
@@ -745,7 +821,7 @@ class DPSSnXmlBuilder
             $dom,
             $ibscbs,
             'indFinal',
-            $data->indFinal
+            $data->indFinal ?? 0
         );*/
 
         $this->appendOptionalText(

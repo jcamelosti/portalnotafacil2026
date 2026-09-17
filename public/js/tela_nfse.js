@@ -1,6 +1,4 @@
 $(document).ready(function () {
-    validarTomadorExterior();
-
     // ==========================================
     // CAMPOS TRIBUTÁRIOS FEDERAIS
     // ==========================================
@@ -42,6 +40,16 @@ $(document).ready(function () {
     $ddlImunidade           = $('#ddlImunidade');
     $txtProcExig            = $('#txtProcExig');
 
+    //comext
+    const $comexModoPrestacao   = $('#comex_modo_prestacao');
+    const $comexVincPrest       = $('#comex_vinc_prest');
+    const $comexTipoMoeda       = $('#comex_tipo_moeda');
+    const $comexVservMoeda      = $('#comex_vserv_moeda');
+    const $comexMecAfComexp     = $('#comex_mec_af_comexp');
+    const $comexMecAfComext     = $('#comex_mec_af_comext');
+    const $comexMovTempBens     = $('#comex_mov_temp_bens');
+    const $comexMdic            = $('#comex_mdic');
+
     // ==========================================
     // CONTAINERS
     // ==========================================
@@ -68,6 +76,8 @@ $(document).ready(function () {
     // ==========================================
     // INICIALIZAÇÃO
     // ==========================================
+
+    validarTomadorExterior();
     
     $tipoRetFederal.closest('label').hide();
     $divBaseCalcFederal.closest('label').hide()
@@ -589,7 +599,25 @@ $(document).ready(function () {
     function validarTomadorExterior(){
         if(tomadorExterior){
             $('#containerComEx').show();
+
+            campoObrigatorio($comexModoPrestacao);
+            campoObrigatorio($comexVincPrest);
+            campoObrigatorio($comexTipoMoeda);
+            campoObrigatorio($comexVservMoeda);
+            campoObrigatorio($comexMecAfComexp);
+            campoObrigatorio($comexMecAfComext);
+            campoObrigatorio($comexMovTempBens);
+            campoObrigatorio($comexMdic);
         }else{
+            /*campoNaoObrigatorio($comexModoPrestacao);
+            campoNaoObrigatorio($comexVincPrest);
+            campoNaoObrigatorio($comexTipoMoeda);
+            campoNaoObrigatorio($comexVservMoeda);
+            campoNaoObrigatorio($comexMecAfComexp);
+            campoNaoObrigatorio($comexMecAfComext);
+            campoNaoObrigatorio($comexMovTempBens);
+            campoNaoObrigatorio($comexMdic);*/
+
             $('#containerComEx').hide();
         }
     }
@@ -883,6 +911,14 @@ $(document).ready(function () {
 
     function ocultarCampo($campo) {
         $campo.closest('label').hide();
+    }
+
+    function campoObrigatorio($campo){
+        $campo.prop('required', true);
+    }
+
+    function campoNaoObrigatorio($campo){
+        $campo.prop('required', false);
     }
 
     function habilitarCampo($campo) {

@@ -17,6 +17,7 @@ use App\Models\Nbs;
 use App\Models\Temp;
 use App\Models\Tomador;
 use App\Models\Uf;
+use App\Services\EmissorNotaService;
 use App\Traits\IssnetTrait;
 use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
@@ -53,13 +54,14 @@ class NotaController extends Controller
     private $notaBO;
 
     private NFSeService $nfse;
+    private EmissorNotaService $emissorService;
     
     public function __construct(Empresa $empresaModel, Tomador $tomadorModel, 
         Uf $estadoModel, Municipio $municipioModel,
         EmpresaAtividade $atividadeModel,
         Nbs $nbsModel, IndOpIbsCbs $indOperModel, CstIbsCbs $cstIbsCsbModel, 
         ClassificacaoTributaria $classificacaoTributariaModel, Temp $tempModel,
-        NFSeService $nfse, 
+        NFSeService $nfse, EmissorNotaService $emissorService
     ){
         //$this->notaBO = NotasBO::newInstance();
         $this->empresaModel = $empresaModel;
@@ -77,6 +79,7 @@ class NotaController extends Controller
         $this->notaBO = NotasBO::newInstance();
 
         $this->nfse = $nfse;
+        $this->emissorService = $emissorService;
     }
 
     private static function numero(mixed $valor): string
@@ -96,109 +99,6 @@ class NotaController extends Controller
         }
 
         return number_format((float) $valor, 2, '.', '');
-    }
-
-    public function definirMunicipioIncidencia(
-        string $cTribNac,
-        string $tributacaoIssqn,
-        bool $exigibilidadeSuspensa,
-        bool $regimeEspecial,
-        string $municipioPrestador,
-        string $municipioTomador,
-        string $municipioPrestacao,
-        string $localPrestacao
-    ): ?string {
-        // Não informar cLocIncid
-        if (
-            in_array($tributacaoIssqn, [2, 3,4])
-            || $exigibilidadeSuspensa
-            || $regimeEspecial
-        ) {
-            return null;
-        }
-
-        // Águas Marítimas
-        if (
-            $cTribNac !== '200101'
-            && $localPrestacao === 'AGUAS_MARITIMAS'
-        ) {
-            return $municipioPrestador;
-        }
-
-        // Serviços cujo município é o local da prestação
-        $codigosLocalPrestacao = [
-            '030401',
-            '030402',
-            '030403',
-            '030501',
-            '070201',
-            '070202',
-            '070401',
-            '070501',
-            '070502',
-            '070901',
-            '070902',
-            '071001',
-            '071002',
-            '071101',
-            '071102',
-            '071201',
-            '071601',
-            '071701',
-            '071801',
-            '071901',
-            '110101',
-            '110102',
-            '110201',
-            '110401',
-            '110402',
-            '120101',
-            '120201',
-            '120301',
-            '120401',
-            '120501',
-            '120601',
-            '120701',
-            '120801',
-            '120901',
-            '120902',
-            '120903',
-            '121001',
-            '121101',
-            '121201',
-            '121401',
-            '121501',
-            '121601',
-            '121701',
-            '141401',
-            '141402',
-            '141403',
-            '141404',
-            '160101',
-            '160102',
-            '160103',
-            '160104',
-            '160201',
-            '171001',
-            '171002',
-            '200101',
-            '200102',
-            '200201',
-            '200301',
-            '220101',
-        ];
-
-        if (in_array($cTribNac, $codigosLocalPrestacao)) {
-            return $municipioPrestacao;
-        }
-
-        // Código 170501
-        if ($cTribNac === '170501') {
-            return $municipioTomador;
-        }
-
-        // Demais códigos
-        return $municipioPrestador;
     }
 
     public function index(){
@@ -284,7 +184,7 @@ class NotaController extends Controller
 			4 => 'Não Incidência',
         ];
 
-        /*if(isset($dadosCadastrais['tributacoesPermitidas']['tribISSQN']) && $dadosCadastrais['tributacoesPermitidas']['tribISSQN'] == 1){
+        if(isset($dadosCadastrais['tributacoesPermitidas']['tribISSQN']) && $dadosCadastrais['tributacoesPermitidas']['tribISSQN'] == 1){
             unset($tributacaoIssqnList[2]);
             unset($tributacaoIssqnList[3]);
             unset($tributacaoIssqnList[4]);
@@ -292,7 +192,7 @@ class NotaController extends Controller
             unset($tributacaoIssqnList[2]);
             unset($tributacaoIssqnList[3]);
             unset($tributacaoIssqnList[4]);
-        }*/
+        }
 
         $tiposImunidadeList = [
             null => 'Selecione',
@@ -358,191 +258,26 @@ class NotaController extends Controller
         ]);
     }
 
-    private function emitir($dados){
-        $dados = $this->notaBO->tratarDados($dados);
-
-        $empresa = $this->empresaModel->with(['atividadesEmpresa'])
-            ->find(Session::get('empresa_selecionada'));
-
-        $tomador = $this->tomadorModel->find($dados['tomador_id']);
-
-        $localPrestacao = $this->definirMunicipioIncidencia(
-            $dados['cTribNac'],
-            $dados['ddlTribISSQN'],
-            0,//bool $exigibilidadeSuspensa,
-            0,//bool $regimeEspecial,
-            $empresa->cidade()->first()->codigo,
-            $tomador->cidade()->first()->codigo,
-            $dados['ddlCidadePrestacao'],
-            $dados['ddlCidadePrestacao']
-        );
-    
-        $totalNfse = (float)$dados['txtTotal'];
-        $totalComex = isset($dados['comex_vserv_moeda']) ? $dados['comex_vserv_moeda'] : null;
-
-        //Calculos PIs e Cofins
-        if(isset($dados['txtBaseCalcFederal']) && !empty($dados['txtBaseCalcFederal'])){
-            $base = (float) $dados['txtBaseCalcFederal'];
-            $aliqPis = (float) $dados['txtAliqPIS'];
-            $aliqCofins = (float) $dados['txtAliqCOFINS'];
-            $valorPis = round($base * ($aliqPis / 100), 2);
-            $valorCofins = round($base * ($aliqCofins / 100), 2);
-            $resultadoCalcPisCofins = [
-                'baseCalculoFederal' => number_format($base, 2, '.', ''),
-                'aliqPis' => number_format($aliqPis, 2, '.', ''),
-                'aliqCofins' => number_format($aliqCofins, 2, '.', ''),
-                'valorPis' => number_format($valorPis, 2, '.', ''),
-                'valorCofins' => number_format($valorCofins, 2, '.', ''),
-            ];
-        }else{
-            $resultadoCalcPisCofins = [
-                'baseCalculoFederal' => null,
-                'aliqPis' => null,
-                'aliqCofins' => null,
-                'valorPis' => null,
-                'valorCofins' => null,
-            ];
-        }       
-
-        //correção 08/09/2026
-        $comExt = null;
-        if($tomador->cidade()->first()->codigo == '99999' || $dados['ddlTribISSQN'] == 3){
-            $totalComex = (float) $totalComex;
-
-            $comExt = new ComExtDTO(
-                mdPrestacao: $dados['comex_modo_prestacao'],
-                vincPrest: $dados['comex_vinc_prest'],
-                tpMoeda: $dados['comex_tipo_moeda'],
-                vServMoeda: number_format($totalComex, 2, '.', ''),
-                mecAFComexP: '01',
-                mecAFComexT: '01',
-                movTempBens: 1,
-                nDI: null,
-                nRE: null,
-                mdic: 0,
-            );
-        }
-
-        $dataSN = new DPSDataSnDTO(
-            ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
-            dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
-            serie: $empresa->serie_dps,
-            numDps: ($empresa->num_ultimo_dps + 1),
-            dataCompetencia: Carbon::now(
-                'America/Sao_Paulo'
-            )->format('Y-m-d'),
-            codigoMunicipio: $dados['ddlCidadePrestacao'],
-            //prestador
-            cnpjPrestador: $empresa->cpf_cnpj,
-            imPrestador: $empresa->inscricao_municipal,
-            fonePrestador: preg_replace('/[^0-9]/', '', $empresa->telefone1) ?? null,
-            emailPrestador: $empresa->email ?? null,
-
-            //Regime da Empresa
-            opSimpNac: $empresa->op_simp_nac,
-            regApTribSN: $empresa->tp_reg_apuracao_sn,//só quando for do simples
-            regEspTrib: $empresa->tp_regime_esp_trib_mun,
-
-            //dados tomador - quando não for no exterior
-            cnpjTomador: strlen($tomador->cpf_cnpj) == 14 ? $tomador->cpf_cnpj : null,
-            cpfTomador: strlen($tomador->cpf_cnpj) < 14 ? $tomador->cpf_cnpj : null,
-            razaoTomador: $tomador->razao_social,
-            codigoMunicipioTomador: $tomador->cidade()->first()->codigo,
-            cepTomador: preg_replace('/[^0-9]/', '', $tomador->cep) ?? null,
-            logradouroTomador: $tomador->logradouro,
-            numeroTomador: $tomador->numero ?? null,
-            complementoTomador: $tomador->complemento ?? null,
-            bairroTomador: $tomador->bairro ?? null,
-            foneTomador: preg_replace('/[^0-9]/', '', $tomador->telefone1) ?? null,
-            emailTomador: $tomador->email ?? null,
-            
-            //dados nif
-            nif: $tomador->nif,
-            nao_nif: $tomador->nao_nif,
-
-            //endereço exterior
-            endNoExterior: ($tomador->cidade()->first()->codigo = '99999') ? 1 : 2,
-            pais: ($tomador->cidade()->first()->codigo = '99999') ? $tomador->pais : null,
-            endPostal: ($tomador->cidade()->first()->codigo = '99999') ? $tomador->cep : null,
-            cidade: ($tomador->cidade()->first()->codigo = '99999') ? $tomador->cidade : null,
-            provincia: ($tomador->cidade()->first()->codigo = '99999') ? $tomador->provincia : null,
-            //final endereço exterior
-
-            //Campos ComExt - Tipo Operaçao Exportação ou quando informando o campo de endereço no exterior
-            comExt: $comExt,            
-
-            //dados sobre o serviço
-            codigoTributacaoNacional: $dados['cTribNac'],
-            codigoServicoMunicipal: $dados['empresa_atividade_id'],
-            descricaoServico: $dados['txtDescServicos'],
-            codigoNbs: $dados['nbs'],
-            codigoMunicipioPrestacao: $localPrestacao, //Local da Prestação de Serviço
-            valorServico: number_format($totalNfse, 2, '.', ''),
-                        
-            //issqn
-            tributaIss: $dados['ddlTribISSQN'],
-            tipoRetencaoIss: $dados['ddlTipoRetencao'],
-            aliquotaIss: $dados['txtAliquota'],//string '2.5'
-            
-            cstPisCofins: $dados['ddlSitTribFederal'],
-            //vBCPisCofins
-            baseCalculoPisCofins: $resultadoCalcPisCofins['baseCalculoFederal'],
-            //pAliqPis
-            aliquotaPis: $resultadoCalcPisCofins['aliqPis'],
-            //pAliqCofins
-            aliquotaCofins: $resultadoCalcPisCofins['aliqCofins'],
-            //vPis
-            valorPis: $resultadoCalcPisCofins['valorPis'],
-            //vCofins
-            valorCofins: $resultadoCalcPisCofins['valorCofins'],
-            tipoRetencaoPisCofins: $dados['ddlTipoRetFederal'],
-
-            //Cp, Irrf, Csll
-            valorRetencaoCp: number_format($dados['txtValorCP'] ?? null, 2, '.', ''),
-            valorRetencaoIrrf: number_format($dados['txtValorIRRF'] ?? null, 2, '.', ''),
-            valorRetencaoCsll: number_format($dados['txtValorCSLL'] ?? null, 2, '.', ''),
-            percentualTotalTributos: number_format($dados['txtPercentualTribSN'], 2, '.', ''),
-
-            finNfse: 0,
-            cIndOp: $dados['ddlIndicadorOperacao'],
-            indDest: 0,
-            cstIbsCbs: $dados['ddlSituacaoTributaria'],
-            cClassTrib: $dados['ddlClassificacaoTributaria'],
-            informacaoComplementar: $dados['txtInfoComplementares'] ?? null,
-        );
-
-        //dd($dados, $comExt, $dataSN);
-        
-        //Gerar NFSe
-        $retorno = $this->nfse->gerarNfse('issnet', $dataSN, $empresa->id);
-        
-        if(isset($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno->MensagemRetorno)){
-             echo "Falha";
-            Log::info(json_encode($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno, true));
-            dd($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno->MensagemRetorno);
-        }else{
-            dd($retorno);
-        }        
-
-        /*$nfse = $retorno['ListaNfse']['CompNfse']['Nfse']['infNFSe'];
-        $protocolo = $retorno['Protocolo'];
-        $data_recebimento = date('Y-m-d', strtotime((string)  $retorno['DataRecebimento']));//data recebimento lote
-        $valorServico = $nfse['DPS']['infDPS']['valores']['vServPrest']['vServ'];*/
-    }
-
     public function store(Request $request){
         try{
             $empresaSessao = request()->session()->get('empresa_selecionada');
             $empresaSessao = $this->empresaModel->find($empresaSessao);
             
             $dados = $request->all();
-            //$dados = $this->notaBO->tratarDados($dados);
             $dados = $request->except('_token');
 
-            /*$temp = Temp::create([
-                'dados' => $dados,
-            ]);*/
-            $this->emitir($dados);
+            $dados = $this->notaBO->tratarDados($dados);
+            //$this->emitir($dados);
+            
+            $this->emissorService->emitir($dados);
+        } catch (\Throwable $e) {
+            session()->flash('danger', $e->getMessage());
+            return back()
+                ->withInput();
+                /*->with(
+                    'error',
+                    $e->getMessage()
+                );*/
         }catch(\Exception $e){
             dd($e->getMessage());
             /*DB::insert(

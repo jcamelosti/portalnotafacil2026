@@ -45,10 +45,29 @@ class NFSeService
         $domxml->formatOutput = true;
         $domxml->loadXML($xml);
         Log::info($domxml->saveXML());
-        //exit();
-        
+                        
         // 🔥 4. ENVIAR
         return $driver->gerarNfse($xml, $empresaId);
+    }
+
+    public function validarXml(string $provider, DPSDataSnDTO $data, int $empresaId){
+        $builder = new DPSSnXmlBuilder();
+        $xml = $builder->build($data);
+        Log::info('Log Xml Única Linha - Validação');
+        Log::info($xml);
+        
+        $assinador = app(XmlSigner::class);
+        
+        // 🔥 1. GERAR XML (usa seu Factory + Builders)
+        $xml = DPSFactory::make($data, $xml);
+
+        // 🔥 3. ESCOLHER PROVIDER
+        $driver = NFSeProviderFactory::make($provider);
+
+        $xml = $assinador->sign($empresaId, $xml, 'infDPS', '', 'DPS');
+        
+        // 🔥 4. ENVIAR
+        return $driver->validarXml($xml, $empresaId);
     }
     
     public function consultarDadosCadastrais(string $provider, int $empresaId, string $cnpj, string $im)

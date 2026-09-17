@@ -89,7 +89,16 @@ class DPSDataSnDTO
         public readonly ?string $valorRetencaoCsll = null,
 
         // Total tributos
-        public readonly ?string $percentualTotalTributos = null,
+        public readonly ?string $tipoInfoTributos = null,
+        public readonly ?string $percentualTotalTributos = null,//para simples nacional campo pTotTribSN
+
+        public readonly ?string $percentualTribFederal = null,
+        public readonly ?string $percentualTribEstadual = null,
+        public readonly ?string $percentualTribMunicipal = null,
+
+        public readonly ?string $valorTribFederal = null,
+        public readonly ?string $valorTribEstadual = null,
+        public readonly ?string $valorTribMunicipal = null,
 
         // IBS/CBS
         public readonly ?int $finNfse = null,

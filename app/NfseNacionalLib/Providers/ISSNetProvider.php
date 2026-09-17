@@ -12,6 +12,11 @@ class ISSNetProvider implements NFSeProviderInterface
             ->gerarNfse($xml, $empresaId);
     }
 
+    public function validarXml(string $xml, int $empresaId){
+        return app(ISSNetService::class)
+            ->validarXml($xml, $empresaId);
+    }
+
     public function cancelarNfse(string $xml)
     {
         return app(ISSNetService::class)->cancelarNfse($xml);

@@ -1,4 +1,5 @@
-{{--@include('components.mensagens')--}}
+@include('components.mensagens')
+
 <div class="flex flex-wrap" id="tabs-id">
     <div class="w-full h-full">
         <div class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded">
@@ -558,7 +559,7 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Regimes Especiais de Tributação*</span>
                                 {!! Form::select('ddlRegimeEspecial', $tipos_regime_esp_trib_mun
-                                ,null, ['id'=> 'ddlRegimeEspecial','disabled','class'=>'block w-full mt-1 text-sm  
+                                ,null, ['required','id'=> 'ddlRegimeEspecial','disabled','class'=>'block w-full mt-1 text-sm  
                                 form-select
                                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
                                 @if ($errors->has('ddlRegimeEspecial'))
@@ -571,7 +572,7 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Tipo de Retenção do ISSQN</span>
                                 {!! Form::select('ddlTipoRetencao', $tipos_retencoes
-                                ,null, ['id'=> 'ddlTipoRetencao','disabled','class'=>'block w-full mt-1 text-sm  
+                                ,null, ['required','id'=> 'ddlTipoRetencao','disabled','class'=>'block w-full mt-1 text-sm  
                                 form-select
                                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
                                 @if ($errors->has('ddlTipoRetencao'))
@@ -651,7 +652,7 @@
                             <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
                                 <label class="block text-sm">
                                     <span class="text-gray-700 ">Modo de Prestação*:</span>
-                                        <select required name="comex_modo_prestacao" onchange="" language="javascript" id="comex_modo_prestacao" 
+                                        <select name="comex_modo_prestacao" onchange="" language="javascript" id="comex_modo_prestacao" 
                                         class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
                                             <option selected="selected" value="">Selecione</option>
                                             <option value="1">1 - Transfronteiriço</option>
@@ -668,7 +669,7 @@
 
                                 <label class="block text-sm">
                                     <span class="text-gray-700 ">Vínculo entre as partes no negócio*:</span>
-                                        <select required name="comex_vinc_prest" onchange="" language="javascript" id="comex_vinc_prest" 
+                                        <select name="comex_vinc_prest" onchange="" language="javascript" id="comex_vinc_prest" 
                                         class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
                                             <option selected="selected" value="">Selecione</option>
                                             <option value="1">1 - Controlada</option>
@@ -687,7 +688,7 @@
 
                                 <label class="block text-sm">
                                     <span class="text-gray-700 ">Tipo de Moeda*</span>
-                                    <input required name="comex_tipo_moeda" type="text" maxlength="10" id="comex_tipo_moeda" placeholder="USD" class="block w-full mt-1 text-sm  
+                                    <input name="comex_tipo_moeda" type="text" maxlength="10" id="comex_tipo_moeda" placeholder="200 para Dólar(USD)" class="block w-full mt-1 text-sm  
                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                 :shadow-outline-gray form-input" onkeypress="SoNumeros(event); onpaste="return false;" onblur="">
                                 </label>
@@ -698,7 +699,6 @@
                                             {!! Form::text('comex_vserv_moeda',null, [
                                                 'placeholder'=> "0,00",
                                                 'name'=>'comex_vserv_moeda',
-                                                'required',
                                                 'type'=>"text", 'maxlength'=>"50", 'id'=>"comex_vserv_moeda", 'class'=>"block w-full mt-1 text-sm  
                                         focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                                         :shadow-outline-gray form-input",
@@ -717,7 +717,7 @@
                             <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
                                 <label class="block text-sm">
                                     <span class="text-gray-700 ">Mec. de apoio/fomento ao Com. Exterior(Prestador)*:</span>
-                                        <select required name="comex_mec_af_comexp" onchange="" language="javascript" id="comex_mec_af_comexp" 
+                                        <select name="comex_mec_af_comexp" onchange="" language="javascript" id="comex_mec_af_comexp" 
                                         class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
                                             <option selected="selected" value="">Selecione</option>
                                             <option value="01">01 - Nenhum</option>
@@ -738,7 +738,7 @@
 
                                 <label class="block text-sm">
                                     <span class="text-gray-700 ">Mec. de apoio/fomento ao Com. Exterior(Tomador)*:</span>
-                                        <select required name="comex_mec_af_comext" onchange="" language="javascript" id="comex_mec_af_comext" 
+                                        <select name="comex_mec_af_comext" onchange="" language="javascript" id="comex_mec_af_comext" 
                                         class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
                                             <option selected="selected" value="">Selecione</option>
                                             <option value="01">01 - Nenhum</option>
@@ -777,7 +777,7 @@
 
                                 <label class="block text-sm">
                                     <span class="text-gray-700 ">Vínc. da Oper. à Mov. Temp. de Bens*:</span>
-                                        <select required name="comex_mov_temp_bens" onchange="" language="javascript" id="comex_mov_temp_bens" 
+                                        <select name="comex_mov_temp_bens" onchange="" language="javascript" id="comex_mov_temp_bens" 
                                         class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
                                             <option selected="selected" value="">Selecione</option>
                                             <option value="1">1 - Não</option>
@@ -809,7 +809,7 @@
 
                                 <label class="block text-sm">
                                     <span class="text-gray-700 ">Disponibilizar a NFS-e ao MDIC*:</span>
-                                        <select required name="comex_mdic" onchange="" language="javascript" id="comex_mdic" 
+                                        <select  name="comex_mdic" onchange="" language="javascript" id="comex_mdic" 
                                         class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
                                             <option selected="selected" value="">Selecione</option>
                                             <option value="0">0 - Não enviar para o MDIC</option>
@@ -970,7 +970,7 @@
                             Valores Aproximados dos Tributos
                         </h4>
 
-                        <div class="grid md:grid-cols-2 gap-1 mt-4 mb-4">
+                        <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Escolha o Tipo de Informação:</span>
                                     <select name="ddlTipoInfo" onchange="" language="javascript" id="ddlTipoInfo" 
@@ -985,6 +985,7 @@
                                     @endif
                             </label>
 
+                            @if($empresa->op_simp_nac == 3 || $empresa->op_simp_nac == 2)
                             <div id="divPercentualTribSN">
                                 <label class="block text-sm">
                                         <span class="text-gray-700">Percentual Tot. Tributos - SN*</span>
@@ -993,6 +994,30 @@
                         :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                 </label>
                             </div>
+                            @else
+                                
+                                    <label class="block text-sm">
+                                        <span class="text-gray-700">Federal*</span>
+                                        <input required placeholder="0,00" name="txtFederal" type="text" maxlength="22" onchange="" language="javascript" id="txtFederal" class="block w-full mt-1 text-sm  
+                        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                        :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
+                                    </label>
+
+                                     <label class="block text-sm">
+                                        <span class="text-gray-700">Estadual*</span>
+                                        <input required placeholder="0,00" name="txtEstadual" type="text" maxlength="22" onchange="" language="javascript" id="txtEstadual" class="block w-full mt-1 text-sm  
+                        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                        :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
+                                    </label>
+
+                                     <label class="block text-sm">
+                                        <span class="text-gray-700">Municipal*</span>
+                                        <input required placeholder="0,00" name="txtMunicipal" type="text" maxlength="22" onchange="" language="javascript" id="txtMunicipal" class="block w-full mt-1 text-sm  
+                        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                        :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
+                                    </label>
+                                
+                            @endif
                         </div>
 
 
