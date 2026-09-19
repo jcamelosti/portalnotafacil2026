@@ -788,8 +788,8 @@ class DPSSnXmlBuilder
                 $data->indicadorTotalTributos //valor possível 0
             );
         }
-
-        if($data->opSimpNac != 1){
+        
+        if($data->opSimpNac == 3){
             $this->appendOptionalText(
                 $dom,
                 $totTrib,
@@ -878,6 +878,8 @@ class DPSSnXmlBuilder
             'cClassTrib',
             $data->cClassTrib
         );
+        // FORÇA a codificação depois do loadXML()
+        $dom->encoding = 'UTF-8';
 
         return $dom->saveXML($dps);
     }

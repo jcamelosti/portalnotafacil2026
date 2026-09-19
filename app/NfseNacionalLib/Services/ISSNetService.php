@@ -85,10 +85,10 @@ class ISSNetService
             $soap,
             $cert
         );*/
-
+        dd($response);
         $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
         $retorno = simplexml_load_string( $response );
-        
+        dd($retorno);
         return $retorno;
     }
 
