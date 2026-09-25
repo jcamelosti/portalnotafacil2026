@@ -195,10 +195,10 @@ class NotaController extends Controller
         ];
 
         $tributacoesPermitidas = $dadosCadastrais['tributacoesPermitidas']['tribISSQN'];
-        $tributacaoIssqnPermitidas = array_filter(
+        $tributacaoIssqnPermitidas = [null => 'Selecione'] + array_filter(
             $tributacaoIssqnList,
             fn ($descricao, $id) =>
-                in_array((int) $id, array_map('intval', $tributacoesPermitidas), true),
+                in_array((int) $id, array_map('intval', $tributacoesPermitidas)),
             ARRAY_FILTER_USE_BOTH
         );
 

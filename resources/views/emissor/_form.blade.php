@@ -689,7 +689,7 @@
                                 <label class="block text-sm">
                                     <span class="text-gray-700 ">Tipo de Moeda*</span>
                                     {!! Form::select('comex_tipo_moeda', $moedas
-                                    ,null, ['required','id'=> 'comex_tipo_moeda','class'=>'block w-full mt-1 text-sm  
+                                    ,null, ['id'=> 'comex_tipo_moeda','class'=>'block w-full mt-1 text-sm  
                                     form-select
                                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
                                     @if ($errors->has('comex_tipo_moeda'))
