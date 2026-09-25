@@ -68,7 +68,7 @@
                 Aviso Importante
             </div>
             <p class="text-gray-700 text-center mb-4">
-                A partir de 01/07/2026, haverá alterações nos valores dos planos para novos clientes.
+                Informamos que a nova tabela de valores das licenças, vigente a partir de 01/07/2026, é aplicável aos novos clientes, conforme valores apresentados abaixo:
             </p>
             <div class="mx-12 space-y-12 lg:space-y-0 lg:flex lg:gap-4 lg:items-center lg:justify-center">
                 @foreach($variacaoPlanos as $chaveCor => $vPlano)

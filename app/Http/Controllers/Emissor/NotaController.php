@@ -278,7 +278,7 @@ class NotaController extends Controller
             
             $retorno = $this->emissorService->emitir($dados);
 
-            return redirect()->route('nota.show', $retorno['registro']->id);
+            return redirect()->route('notas.show', $retorno['registro']->id);
         } catch (\Throwable $e) {
             session()->flash('danger', $e->getMessage());
             return back()
