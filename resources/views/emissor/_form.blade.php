@@ -646,7 +646,7 @@
 
                         <div id="containerComEx" style="display: none;">
                             <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
-                               Informações sobre transações entre residentes ou domiciliados no brasil com residentes ou domiciliados no exterior
+                               TRANSAÇÕES COM RESIDENTES OU DOMICIALIDOS NO EXTERIOR
                             </h4>
                             
                             <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
@@ -688,9 +688,15 @@
 
                                 <label class="block text-sm">
                                     <span class="text-gray-700 ">Tipo de Moeda*</span>
-                                    <input name="comex_tipo_moeda" type="text" maxlength="10" id="comex_tipo_moeda" placeholder="200 para Dólar(USD)" class="block w-full mt-1 text-sm  
-                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-                :shadow-outline-gray form-input" onkeypress="SoNumeros(event); onpaste="return false;" onblur="">
+                                    {!! Form::select('comex_tipo_moeda', $moedas
+                                    ,null, ['required','id'=> 'comex_tipo_moeda','class'=>'block w-full mt-1 text-sm  
+                                    form-select
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                    @if ($errors->has('comex_tipo_moeda'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{ { $errors->first('comex_tipo_moeda') }}</strong>
+                                    </span>
+                                    @endif
                                 </label>
 
 

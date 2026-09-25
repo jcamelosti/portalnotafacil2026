@@ -614,13 +614,15 @@ class DPSSnXmlBuilder
             $data->tipoRetencaoIss
         );
 
-        if( ((float)$data->aliquotaIss > 0.0) && $data->opSimpNac != 1){
-            $this->appendOptionalText(
-                $dom,
-                $tribMun,
-                'pAliq',
-                $this->decimal($data->aliquotaIss)
-            );
+        if( (((float)$data->aliquotaIss > 0.0) && $data->opSimpNac != 1)){
+            if(!in_array((int) $data->tributaIss, [2, 3, 4])){
+                $this->appendOptionalText(
+                    $dom,
+                    $tribMun,
+                    'pAliq',
+                    $this->decimal($data->aliquotaIss)
+                );
+            }
         }
 
         /*

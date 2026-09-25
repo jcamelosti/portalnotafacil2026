@@ -12,6 +12,7 @@ use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
 use App\Models\EmpresaNbs;
 use App\Models\IndOpIbsCbs;
+use App\Models\Moeda;
 use App\Models\Municipio;
 use App\Models\Nbs;
 use App\Models\NotaEmitida;
@@ -44,6 +45,7 @@ class NotaController extends Controller
     private $classificacaoTributariaModel;   
     private $notaBO;
     private $notasEmitidas;
+    private $moedaModel;
 
     private EmissorNotaService $emissorService;
     
@@ -52,7 +54,7 @@ class NotaController extends Controller
         EmpresaAtividade $atividadeModel,
         Nbs $nbsModel, IndOpIbsCbs $indOperModel, CstIbsCbs $cstIbsCsbModel, 
         ClassificacaoTributaria $classificacaoTributariaModel, Temp $tempModel,
-        NFSeService $nfse, EmissorNotaService $emissorService, NotaEmitida $notasEmitidas
+        NFSeService $nfse, EmissorNotaService $emissorService, NotaEmitida $notasEmitidas, Moeda $moedaModel
     ){
         //$this->notaBO = NotasBO::newInstance();
         $this->empresaModel = $empresaModel;
@@ -69,6 +71,7 @@ class NotaController extends Controller
         $this->emissorService = $emissorService;
 
         $this->notasEmitidas = $notasEmitidas;
+        $this->moedaModel = $moedaModel;
     }
     public function index(){
         $campos = request()->all();
@@ -191,15 +194,13 @@ class NotaController extends Controller
 			4 => 'Não Incidência',
         ];
 
-        if(isset($dadosCadastrais['tributacoesPermitidas']['tribISSQN']) && $dadosCadastrais['tributacoesPermitidas']['tribISSQN'] == 1){
-            unset($tributacaoIssqnList[2]);
-            unset($tributacaoIssqnList[3]);
-            unset($tributacaoIssqnList[4]);
-        }else{
-            unset($tributacaoIssqnList[2]);
-            unset($tributacaoIssqnList[3]);
-            unset($tributacaoIssqnList[4]);
-        }
+        $tributacoesPermitidas = $dadosCadastrais['tributacoesPermitidas']['tribISSQN'];
+        $tributacaoIssqnPermitidas = array_filter(
+            $tributacaoIssqnList,
+            fn ($descricao, $id) =>
+                in_array((int) $id, array_map('intval', $tributacoesPermitidas), true),
+            ARRAY_FILTER_USE_BOTH
+        );
 
         $tiposImunidadeList = [
             null => 'Selecione',
@@ -239,6 +240,8 @@ class NotaController extends Controller
         $cstIbsCsb = $this->cstIbsCsbModel->listar();
 
         $dados_cadastrais = json_decode($empresa->dados_cadastrais, true);
+
+        $moedas = $this->moedaModel->getListaMoedas();
  
         return view('emissor.create', [
             'dados_cadastrais' => $dados_cadastrais,
@@ -254,7 +257,7 @@ class NotaController extends Controller
             'atividade' => $atividade,
             'situacao_simples_nacional' => $situacao_simples_nacional,
             'regimes_apuracao_sn' => $regimes_apuracao_sn,
-            'tributacao_issqn_list' => $tributacaoIssqnList,
+            'tributacao_issqn_list' => $tributacaoIssqnPermitidas,
             'tiposImunidadeList' => $tiposImunidadeList,
             'tiposSuspencaoExigibilidade' => $tiposSuspencaoExigibilidade,
             'tipos_regime_esp_trib_mun' => $tipos_regime_esp_trib_mun,
@@ -262,6 +265,7 @@ class NotaController extends Controller
             'municipio_incidencia' => $municipio_incidencia,
             'indOpIbsCbs' => $indOpIbsCbs,
             'cstIbsCsb' => $cstIbsCsb,
+            'moedas' => $moedas
         ]);
     }
 

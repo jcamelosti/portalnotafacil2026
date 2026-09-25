@@ -169,6 +169,8 @@ class ISSNetService
 
     private function toDTO(\SimpleXMLElement $cadastro): CadastroDTO
     {
+        $tribISSQN = (array)$cadastro->TributacoesPermitidas->tribISSQN;
+       
         return new CadastroDTO(
             cnpj: (string) $cadastro->CNPJ,
             im: (string) $cadastro->IM,
@@ -198,7 +200,7 @@ class ISSNetService
             permiteExigibilidadeSuspensaProcAdm: (int)$cadastro->PermiteExigibilidadeSuspensaProcAdm,
             permiteTributarFora: (int)$cadastro->PermiteTributarFora,
             tributacoesPermitidas: [
-                'tribISSQN' => (int)$cadastro->TributacoesPermitidas->tribISSQN
+                'tribISSQN' => $tribISSQN
             ]
         );
     }
