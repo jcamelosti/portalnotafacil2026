@@ -378,13 +378,23 @@ class DPSSnXmlBuilder
         );
 
         $serv->appendChild($locPrest);
-
-        $this->appendText(
-            $dom,
-            $locPrest,
-            'cLocPrestacao',
-            $data->codigoMunicipioPrestacao ?? $data->codigoMunicipio
-        );
+        
+        //quando é para comExterior
+        if(!is_null($data->comExt)){
+            $this->appendText(
+                $dom,
+                $locPrest,
+                'cPaisPrestacao',
+                'US'
+            );
+        }else{
+            $this->appendText(
+                $dom,
+                $locPrest,
+                'cLocPrestacao',
+                $data->codigoMunicipioPrestacao ?? $data->codigoMunicipio
+            );
+        }
 
         /*$this->appendText(
             $dom,

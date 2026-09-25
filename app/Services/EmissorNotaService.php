@@ -289,7 +289,7 @@ class EmissorNotaService
             informacaoComplementar: $dados['txtInfoComplementares'] ?? null,
         );
 
-        ///dd($dados, $comExt, $dataSN);
+        //dd($dados, $comExt, $dataSN);
         
         //validar Xml
         $validacaoRet = $this->nfse->validarXml($empresa->sigla_provedor, $dataSN, $empresa->id);
@@ -357,9 +357,9 @@ class EmissorNotaService
             ->CompNfse
             ->NFSe
             ->infNFSe
-            ->nDFSe;
+            ->DPS->infDPS->nDPS;
 
-        $empresa->num_ultimo_dps = (int)$nDps;
+        $empresa->num_ultimo_dps = $nDps;
         $empresa->save();
 
         $xmlNfse = $this->obterXml($empresa, $nNfse);
