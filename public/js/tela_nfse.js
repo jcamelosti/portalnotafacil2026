@@ -50,6 +50,8 @@ $(document).ready(function () {
     const $comexMovTempBens     = $('#comex_mov_temp_bens');
     const $comexMdic            = $('#comex_mdic');
 
+    const $ddlPaisResult        = $('#ddlPaisResult');
+
     // ==========================================
     // CONTAINERS
     // ==========================================
@@ -591,8 +593,10 @@ $(document).ready(function () {
 
         if(tomadorExterior || valorCampo == 3){
             $('#containerComEx').show();
+            $('#divPaisResult').show();
         }else{
             $('#containerComEx').hide();
+            $('#divPaisResult').hide();
         }
     });    
 
@@ -608,6 +612,9 @@ $(document).ready(function () {
             campoObrigatorio($comexMecAfComext);
             campoObrigatorio($comexMovTempBens);
             campoObrigatorio($comexMdic);
+
+            //issqn
+            campoObrigatorio($ddlPaisResult);
         }else{
             /*campoNaoObrigatorio($comexModoPrestacao);
             campoNaoObrigatorio($comexVincPrest);

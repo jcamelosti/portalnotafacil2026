@@ -245,7 +245,11 @@ class EmissorNotaService
             descricaoServico: $dados['txtDescServicos'],
             codigoNbs: $dados['nbs'],
             codigoMunicipioPrestacao: $localPrestacao, //Local da Prestação de Serviço
+            localPrestacaoPais: $dados['ddlPaisPrestacao'],
+            localPrestacaoEstado: $dados['ddlEstadoPrestacao'],
+            localPrestacaoMunicipio: $dados['ddlCidadePrestacao'],
             valorServico: number_format($totalNfse, 2, '.', ''),
+            paisResultadoPrestacao: $dados['ddlPaisResult'] ?? null,
                         
             //issqn
             tributaIss: $dados['ddlTribISSQN'],

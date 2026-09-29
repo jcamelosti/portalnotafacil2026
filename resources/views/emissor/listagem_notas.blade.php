@@ -92,7 +92,7 @@
                                     <div>
                                         <p class="text-xs text-gray-500">CPF/CNPJ</p>
                                         <p class="font-semibold text-sm">
-                                            {{ $nota->tomador->cpf_cnpj_fmt }}
+                                            {{ !empty($nota->tomador->cpf_cnpj) ? $nota->tomador->cpf_cnpj_fmt : ' - '}}
                                         </p>
                                     </div>
 

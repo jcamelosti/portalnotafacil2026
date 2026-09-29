@@ -380,12 +380,20 @@ class DPSSnXmlBuilder
         $serv->appendChild($locPrest);
         
         //quando é para comExterior
-        if(!is_null($data->comExt)){
+        if(!is_null($data->comExt) && $data->localPrestacaoPais <> 26){ //26 =  brasil
+            /**
+             * País da Prestação (cPaisPrestacao): Este campo deve ficar em
+             * branco. Ele serve apenas para casos em que o prestador viaja
+             * fisicamente para outro país para executar o trabalho. Como o serviço é
+             * executado aqui do Brasil, não é necessário preencher (é por isso que o
+             * sistema bloqueia a sigla "BR" neste campo).
+             * 
+             */
             $this->appendText(
                 $dom,
                 $locPrest,
                 'cPaisPrestacao',
-                'US'
+                $data->paisResultadoPrestacao
             );
         }else{
             $this->appendText(
@@ -606,6 +614,25 @@ class DPSSnXmlBuilder
             'tribISSQN',
             $data->tributaIss
         );
+
+        //cPaisResult
+        /**
+         * País do Resultado (cPaisResult): Você deve informar sempre o país
+         * do seu cliente (ex: "US" para os Estados Unidos). Isso comprova para a
+         * prefeitura que o benefício do serviço ocorreu fora do Brasil, o que
+         * garante a sua isenção de ISS. Se o campo for preenchido com "BR", o
+         * sistema entenderá que é uma operação nacional e o imposto será
+         * cobrado.
+         */
+
+        if(!is_null($data->comExt)){
+            /*$this->appendText(
+                $dom,
+                $tribMun,
+                'cPaisResult',
+                $data->paisResultadoPrestacao
+            );*/
+        }
 
         $this->appendOptionalText(
             $dom,

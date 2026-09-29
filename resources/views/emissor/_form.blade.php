@@ -642,6 +642,23 @@
               focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
               :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
                             </label>
+
+                            <!--campo Pais onde ocorreu o resultado do serviço prestado - sempre será o pais do tomador no exterior -->
+                            <div id="divPaisResult">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">País onde ocorreu o resultado do serviço Prestado</span>
+                                    <!-- ddlPaisResult -->
+                                    {!! Form::select('ddlPaisResult', $paises
+                                    ,null, ['id'=> 'ddlPaisResult','class'=>'block w-full mt-1 text-sm  
+                                    form-select
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                    @if ($errors->has('ddlPaisResult'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{ { $errors->first('ddlPaisResult') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+                            </div>
                         </div>
 
                         <div id="containerComEx" style="display: none;">

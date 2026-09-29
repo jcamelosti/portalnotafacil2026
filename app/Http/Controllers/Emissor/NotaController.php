@@ -16,6 +16,7 @@ use App\Models\Moeda;
 use App\Models\Municipio;
 use App\Models\Nbs;
 use App\Models\NotaEmitida;
+use App\Models\Pais;
 use App\Models\Temp;
 use App\Models\Tomador;
 use App\Models\Uf;
@@ -46,6 +47,7 @@ class NotaController extends Controller
     private $notaBO;
     private $notasEmitidas;
     private $moedaModel;
+    private $paisesModel;
 
     private EmissorNotaService $emissorService;
     
@@ -54,7 +56,8 @@ class NotaController extends Controller
         EmpresaAtividade $atividadeModel,
         Nbs $nbsModel, IndOpIbsCbs $indOperModel, CstIbsCbs $cstIbsCsbModel, 
         ClassificacaoTributaria $classificacaoTributariaModel, Temp $tempModel,
-        NFSeService $nfse, EmissorNotaService $emissorService, NotaEmitida $notasEmitidas, Moeda $moedaModel
+        NFSeService $nfse, EmissorNotaService $emissorService, NotaEmitida $notasEmitidas, Moeda $moedaModel,
+        Pais $paisesModel
     ){
         //$this->notaBO = NotasBO::newInstance();
         $this->empresaModel = $empresaModel;
@@ -72,7 +75,9 @@ class NotaController extends Controller
 
         $this->notasEmitidas = $notasEmitidas;
         $this->moedaModel = $moedaModel;
+        $this->paisesModel = $paisesModel;    
     }
+
     public function index(){
         $campos = request()->all();
         $empresaSelecionada = Session::get('empresa');
@@ -242,7 +247,16 @@ class NotaController extends Controller
         $dados_cadastrais = json_decode($empresa->dados_cadastrais, true);
 
         $moedas = $this->moedaModel->getListaMoedas();
- 
+        
+        $paises = $this->paisesModel->paises(); 
+        
+        if(empty($tomador->cpf_cnpj) && $tomador->codigo_pais_bacen != '1058'){
+            $paises = [
+                '' => 'Selecione o Pais',
+                $tomador->pais => $paises[$tomador->pais]
+            ];
+        }
+
         return view('emissor.create', [
             'dados_cadastrais' => $dados_cadastrais,
             'data_competencia' => $data_competencia,
@@ -265,7 +279,8 @@ class NotaController extends Controller
             'municipio_incidencia' => $municipio_incidencia,
             'indOpIbsCbs' => $indOpIbsCbs,
             'cstIbsCsb' => $cstIbsCsb,
-            'moedas' => $moedas
+            'moedas' => $moedas,
+            'paises' => $paises
         ]);
     }
 

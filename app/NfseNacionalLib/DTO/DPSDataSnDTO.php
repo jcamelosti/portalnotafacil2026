@@ -60,6 +60,13 @@ class DPSDataSnDTO
         public readonly ?string $codigoNbs = null,
         public readonly ?string $codigoMunicipioPrestacao = null,
 
+        //local da prestação do serviço se código pais = 26 é brasil para paisPrestacao
+        public readonly ?string $localPrestacaoPais = null,
+        public readonly ?string $localPrestacaoEstado = null,
+        public readonly ?string $localPrestacaoMunicipio = null,
+
+        public readonly ?string $paisResultadoPrestacao = null,
+
         // Valores
         public readonly string $valorServico = '0.00',
 

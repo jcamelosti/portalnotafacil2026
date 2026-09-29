@@ -45,7 +45,7 @@ class NFSeService
         $domxml->formatOutput = true;
         $domxml->loadXML($xml);
         Log::info($domxml->saveXML());
-                        
+             
         // 🔥 4. ENVIAR
         return $driver->gerarNfse($xml, $empresaId);
     }
