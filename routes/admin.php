@@ -26,7 +26,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca']],
         Route::get('/', function () {
             return redirect()->route('admin.faturas.index');
         });
-        //Route::get('autenticar/usuario/{id}', [UsuariosController::class, 'autenticar'])->name('usuarios.autenticar');
+        Route::get('autenticar/usuario/{id}', [UsuariosController::class, 'autenticar'])->name('usuarios.autenticar');
         //Route::resource('photos', PhotoController::class);
         Route::resource('empresas', EmpresasController::class);
         Route::get('/remover-dados/empresa/{id}', [EmpresasController::class, 'removerDados'])->name('empresas.remover-dados');

@@ -196,7 +196,7 @@ class EmpresasController extends Controller
             ->create($dados);
 
         //$this->saveOrUpdateSpedy($empresa);
-        $this->saveOrUpdateFocuNfe($empresa);
+        //$this->saveOrUpdateFocuNfe($empresa);
 
         if ($empresa->id != null) {
             License::create([
@@ -329,7 +329,7 @@ class EmpresasController extends Controller
         $empresa->update($dados);
 
         //$this->saveOrUpdateSpedy($empresa);
-        $this->saveOrUpdateFocuNfe($empresa);
+        //$this->saveOrUpdateFocuNfe($empresa);
 
         session()->flash('message', 'Registro Atualizado com Sucesso.');
 

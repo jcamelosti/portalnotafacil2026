@@ -184,12 +184,22 @@ class UsuariosController extends Controller
 
     public function autenticar($userId){
         //if (Auth::user()->id == $userId) {
-            Auth::loginUsingId($userId);
-            session()->flash('message', 'Você está logado como: ' . Auth::user()->name);
+            //Auth::loginUsingId($userId);
+            /*dd(
+                Auth::getDefaultDriver(),
+                get_class(Auth::guard())
+            );*/
+            //Auth::guard('sanctum')->loginUsingId($userId);
+            //session()->flash('message', 'Você está logado como: ' . Auth::user()->name);
+            /*$user = User::findOrFail($userId);
+
+            Auth::guard('web')->login($user);
+
+            request()->session()->regenerate();*/
         /*} else {
             session()->flash('danger', 'Você não possui essa autorização!');
         }*/
 
-        //return redirect()->to('/c');
+        ///return redirect()->to('/c');
     }
 }

@@ -371,4 +371,6 @@ class EmpresasController extends Controller
             'totalGeral' => $resultado->sum('total')
         ]);
     }
+
+    
 }
