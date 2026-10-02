@@ -648,6 +648,8 @@ $(document).ready(function () {
         }else{
             $txtValorRetido.val('');
         }
+
+        calculos();
     });
     
     function calcularValorIssqn() {
@@ -690,6 +692,22 @@ $(document).ready(function () {
         });
     }
 
+    $aliquotaIssqn.on('change', function () {
+        calcularValorIssqn();
+    });
+
+    $valorCSLL.on('change', function () {
+        calculos();
+    });
+
+    $valorIRRF.on('change', function () {
+        calculos();
+    });
+
+    $valorCP.on('change', function () {
+        calculos();
+    });
+
     function calcularPisCofins() {
         const base      = converterNumero($txtBaseCalcFederal.val());
         const aliqPIS   = converterNumero($txtAliqPIS.val());
@@ -707,7 +725,8 @@ $(document).ready(function () {
         }
 
         // Validação das alíquotas
-        if (aliqPIS <= 0) {
+        
+        if (aliqPIS == 0) {
             $txtValorPis.val('');
             $txtValorPis.prop('readonly', false);
         } else {
@@ -718,7 +737,7 @@ $(document).ready(function () {
                 .prop('readonly', true);
         }
 
-        if (aliqCOFINS <= 0) {
+        if (aliqCOFINS == 0) {
             $txtValorCOFINS.val('');
             $txtValorCOFINS.prop('readonly', false);
         } else {
@@ -732,14 +751,17 @@ $(document).ready(function () {
 
     $baseCalcFederal.on('change', function () {
         calcularPisCofins();
+        calculos();
     });
 
     $aliqPIS.on('change', function () {
         calcularPisCofins();
+        calculos();
     });
 
     $aliqCOFINS.on('change', function () {
         calcularPisCofins();
+        calculos();
     });
 
     $empresaAtividade.on('change', function(event){
@@ -865,7 +887,7 @@ $(document).ready(function () {
         event.preventDefault();
         habilitarCampo($ddlSituacaoTributaria);
         
-        const totalServico = converterNumero($valorTotalServico.val())
+        /*const totalServico = converterNumero($valorTotalServico.val())
         
         const baseCalcIssqn = converterNumero($txtBaseCalculoISS.val());
         const aliquotaIssqn = converterNumero($aliquotaIssqn.val());
@@ -883,7 +905,8 @@ $(document).ready(function () {
 
         const totalBC = totalServico - valorPIS - valorCOFINS - valorIssqn;
         
-        $txtBaseCalc.val(formatoBrasileiro(totalBC)); 
+        $txtBaseCalc.val(formatoBrasileiro(totalBC)); */
+        calculos();
     });
 
     $ddlSituacaoTributaria.on('change', function (event) {
@@ -905,6 +928,7 @@ $(document).ready(function () {
     $valorTotalServico.on('blur', function () {
         valorServico = $(this).val();
         $txtBaseCalculoISS.val(valorServico);
+        $txtBaseCalc.val(valorServico);
     });
 
     $txtDeducaoBaseCalculo.on('blur', function(event){
@@ -1396,6 +1420,49 @@ $(document).ready(function () {
     function cst99() {
         configurarCSTCredito();
     }*/
+
+    function calculos(){
+        if($tipoRetencao.val() != 1){
+            //calcularValorIssqn();
+            calculoReduzindoISSQN = formatoBrasileiro(converterNumero($valorTotalServico.val()) - converterNumero($txtValorRetido.val()));
+            $txtBaseCalc.val(formatarMoeda(calculoReduzindoISSQN));
+        }
+
+        valorPis = 0;
+        valorCofins = 0;
+
+        if($baseCalcFederal.val() != 0 || $baseCalcFederal.val() != ''){
+            if($aliqPIS.val() != 0){
+                valorPis = formatoBrasileiro(converterNumero($baseCalcFederal.val()) * (converterNumero($aliqPIS.val()) / 100));
+            }
+
+            if($aliqCOFINS.val() != 0){
+                valorCofins = formatoBrasileiro(converterNumero($baseCalcFederal.val()) * (converterNumero($aliqCOFINS.val()) / 100));
+            }
+
+            $txtBaseCalc.val(
+                formatarMoeda(converterNumero($txtBaseCalc.val()) - converterNumero(valorPis) - converterNumero(valorCofins))
+            );
+        }
+
+        if($valorCSLL.val() != 0 || $valorCSLL.val() != ''){
+            $txtBaseCalc.val(
+                formatarMoeda(converterNumero($txtBaseCalc.val()) - converterNumero($valorCSLL.val()))
+            );
+        }
+
+        if($valorIRRF.val() != 0 || $valorIRRF.val() != ''){
+            $txtBaseCalc.val(
+                formatarMoeda(converterNumero($txtBaseCalc.val()) - converterNumero($valorIRRF.val()))
+            );
+        }
+
+        if($valorCP.val() != 0 || $valorCP.val() != ''){
+            $txtBaseCalc.val(
+                formatarMoeda(converterNumero($txtBaseCalc.val()) - converterNumero($valorCP.val()))
+            );
+        }
+    }
     
     function resetarTributacaoFederal() {
         $baseCalcFederal.closest('label').hide();

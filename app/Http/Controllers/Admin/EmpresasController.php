@@ -349,7 +349,7 @@ class EmpresasController extends Controller
         $resultado = Empresa::query()
             ->leftJoin('municipios_ibge as mi', 'mi.codigo', '=', 'empresas.cidade_id')
             ->leftJoin('ufs as uf', 'uf.id', '=', 'mi.uf_id')
-            ->leftJoin('emitidas as e', 'e.empresa_id', '=', 'empresas.id')
+            ->leftJoin('notas_emitidas as e', 'e.empresa_id', '=', 'empresas.id')
             ->selectRaw("
                 COUNT(DISTINCT empresas.id) as total,
                 empresas.cidade_id,
