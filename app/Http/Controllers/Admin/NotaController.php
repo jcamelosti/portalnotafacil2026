@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Empresa;
 use App\Models\NotaEmitida;
+use App\Services\EmissorNotaService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,10 +13,12 @@ class NotaController extends Controller
 {
     private $empresaModel;
     private $nfseModel;
-    
-    public function __construct(Empresa $empresaModel, NotaEmitida $nfseModel){
+    private $emissorService;
+
+    public function __construct(Empresa $empresaModel, NotaEmitida $nfseModel, EmissorNotaService $emissorService){
         $this->empresaModel = $empresaModel;
         $this->nfseModel = $nfseModel;
+        $this->emissorService = $emissorService;
     }
 
     /**
@@ -133,5 +136,15 @@ class NotaController extends Controller
         return view('admin.notas-emitidas.erros', [
             'erros' => $erros,
         ]);
+    }
+
+    public function obterUrlNfse(NotaEmitida $nota)
+    {
+        if (!$nota) {
+            return response()->json(['error' => 'Nota não encontrada'], 404);
+        }
+
+        $urlNfse = $this->emissorService->consultarUrlNota($nota->empresa, $nota->num_nfse);
+        return response()->json(['url' => $urlNfse]);
     }
 }

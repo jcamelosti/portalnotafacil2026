@@ -103,9 +103,9 @@
                     <div class="mt-4 md:mt-0 flex flex-wrap items-center gap-2 md:justify-end">
 
                         <!-- PDF -->
-                        <a href="{{ $nota->url_view }}"
+                        <a href="{{ route('admin.notas.consultar-url', $nota->id) }}"
                         class="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
-                            PDF
+                            Obter Url da NFS-e
                         </a>
 
                         <!-- STATUS -->

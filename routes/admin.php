@@ -43,7 +43,8 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca']],
             Route::get('renovar/{id}', [LicencaController::class, 'renovar'])->name('renovar');
             Route::get('vencimentos', [LicencaController::class, 'vencimentosLicencas'])->name('vencimentos');
         });     
-        Route::resource('notas', NotaController::class);     
+        Route::resource('notas', NotaController::class);
+        Route::get('notas/consultar-url/{nota}', [NotaController::class, 'obterUrlNfse'])->name('notas.consultar-url');     
         Route::resource('protocolos', ProtocoloController::class);    
 
         Route::get('servico/gerar/{fatura}', [FaturaController::class, 'gerarServico'])->name('faturas.gerar-servico');

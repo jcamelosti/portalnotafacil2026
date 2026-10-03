@@ -422,4 +422,20 @@ class EmissorNotaService
         
         return $xml;
     }
+
+    public function consultarUrlNota(Empresa $empresa, string $nNfse){
+        $response = $this->nfse->consultarUrlNfse(
+            $empresa->sigla_provedor,
+            $empresa->id,
+            $empresa->cpf_cnpj,//cnpj            
+            $empresa->inscricao_municipal, //im,
+            $nNfse, //nNFSe,
+            '',//dt ini
+            ''//dt fim
+        );
+
+        dd($response);
+
+        return $response;
+    }
 }
