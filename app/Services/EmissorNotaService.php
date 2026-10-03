@@ -207,6 +207,7 @@ class EmissorNotaService
             imPrestador: $empresa->inscricao_municipal,
             fonePrestador: preg_replace('/[^0-9]/', '', $empresa->telefone1) ?? null,
             emailPrestador: $empresa->email ?? null,
+            municipioPrestador: $empresa->cidade_id,
 
             //Regime da Empresa
             opSimpNac: $empresa->op_simp_nac,

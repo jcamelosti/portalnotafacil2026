@@ -944,7 +944,7 @@ class DPSSnXmlBuilder
         $municipio = preg_replace(
             '/\D/',
             '',
-            (string) $data->codigoMunicipio
+            (string) $data->municipioPrestador
         );
 
         $serie = preg_replace(

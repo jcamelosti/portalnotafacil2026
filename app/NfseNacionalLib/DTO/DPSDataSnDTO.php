@@ -20,6 +20,7 @@ class DPSDataSnDTO
         public readonly ?string $imPrestador = null,
         public readonly ?string $fonePrestador = null,
         public readonly ?string $emailPrestador = null,
+        public readonly string $municipioPrestador,
 
         // Regime tributário
         public readonly int $opSimpNac = 1,
