@@ -68,7 +68,7 @@
                             <div>
                                 <p class="text-xs text-gray-500">Valor</p>
                                 <p class="text-sm font-bold text-green-600">
-                                    R$ {{ $nota->valor_nota }}
+                                    R$ {{ $nota->valor }}
                                 </p>
                             </div>
 
@@ -76,7 +76,7 @@
                             <div>
                                 <p class="text-xs text-gray-500">Data</p>
                                 <p class="text-sm font-semibold">
-                                    {{ $nota->data_emissao_nfse }}
+                                    {{ $nota->created_at->format('d/m/Y H:i') }}
                                 </p>
                             </div>
 
@@ -89,12 +89,12 @@
                             </div>
 
                             <!-- RPS -->
-                            <div>
+                            <!--div>
                                 <p class="text-xs text-gray-500">RPS</p>
                                 <p class="text-sm font-semibold">
                                     {{ $nota->numero_rps }}
                                 </p>
-                            </div>
+                            </div-->
 
                         </div>
                     </div>

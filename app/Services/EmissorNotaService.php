@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Models\Empresa;
 use App\Models\NotaEmitida;
 use App\Models\Tomador;
+use App\Utilitarios\Utilitarios;
 use Illuminate\Support\Facades\DB;
 use JCamelo\NfseNacionalLib\DTO\ComExtDTO;
 use JCamelo\NfseNacionalLib\DTO\DPSDataSnDTO;
@@ -376,6 +377,8 @@ class EmissorNotaService
             'valor'      => $totalNfse,
             'dados_emissao' => $dados
         ]);
+
+        Utilitarios::sendMessage('Nota Emitida por: '. $empresa->razao_social.'| Nota Número: ' . $nNfse . ' | DPS: ' . $nDps);
 
         return [
             'error' => false,

@@ -1,6 +1,7 @@
 <x-area-empresa-layout title="Visualizar Serviço">
 
 <div class="py-6 w-full px-4 space-y-4">
+    @include('components.mensagens')
 
     {{-- HEADER --}}
     <div class="bg-white shadow rounded-lg p-4 flex justify-between items-center">

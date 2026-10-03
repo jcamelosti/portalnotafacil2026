@@ -435,20 +435,36 @@ class NfseNacional extends Controller
                 session()->flash('success', 'Nota Fiscal Emitida com Sucesso.');
                 return redirect()->route('servicos-mei.show', $servico->id);
             } else {
+                Log::info('Erros ao emitir NFSe: ' . json_encode($response));
                 if (isset($response['erros']) && !empty($response['erros'])) {
+                    $mensagemErro = '';
                     foreach ($response['erros'] as $erro) {
+                        $mensagemErro .= $erro['Codigo'] . ' - ' . $erro['Descricao'] . "\n";
+
+                        if(isset($erro['Complemento']) && !empty($erro['Complemento'])){
+                            $mensagemErro .= 'Complemento: ' . $erro['Complemento'] . "\n";
+                        }
+
                         DB::insert(
                             'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                             [
                                 $empresa->id,
-                                $erro['Codigo'] . ' - ' . $erro['Descricao'] . ' - Complemento: ' . $erro['Complemento']
+                                'Erros ao emitir NFSe: ' . $erro['Codigo'] . ' - ' . $erro['Descricao'] . (isset($erro['Complemento']) ? ' Complemento: ' . $erro['Complemento'] : ''),
                             ]
                         );
                     }
+                    return redirect()->back()->with('danger', 'Erros ao emitir NFSe: ' . $mensagemErro);
                 }
             }
         } catch (\Exception $e) {
-            dd($e->getMessage(), $e);
+            DB::insert(
+                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                [
+                    $empresa->id,
+                    $e->getMessage(),
+                ]
+            );
+            return redirect()->back()->with('danger', 'Erro ao emitir NFSe: ' . $e->getMessage());
         }
     }
 
