@@ -195,7 +195,10 @@ class EmissorNotaService
         
         $dataSN = new DPSDataSnDTO(
             ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
-            dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
+            //dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
+            dataEmissao:Carbon::parse($dados['data_competencia'])
+                ->setTimeFromTimeString(now()->format('H:i:s'))
+                ->format('Y-m-d\TH:i:sP'),
             serie: $empresa->serie_dps,
             numDps: ($empresa->num_ultimo_dps + 1),
             dataCompetencia: Carbon::now(
@@ -294,8 +297,6 @@ class EmissorNotaService
             cClassTrib: $dados['ddlClassificacaoTributaria'],
             informacaoComplementar: $dados['txtInfoComplementares'] ?? null,
         );
-
-        //dd($dados, $comExt, $dataSN);
         
         //validar Xml
         $validacaoRet = $this->nfse->validarXml($empresa->sigla_provedor, $dataSN, $empresa->id);

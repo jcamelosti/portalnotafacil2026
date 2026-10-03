@@ -293,8 +293,7 @@ class NotaController extends Controller
             $dados = $request->except('_token');
 
             $dados = $this->notaBO->tratarDados($dados);
-            //$this->emitir($dados);
-            
+                        
             $retorno = $this->emissorService->emitir($dados);
 
             return redirect()->route('notas.show', $retorno['registro']->id);

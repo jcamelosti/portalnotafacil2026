@@ -8,7 +8,7 @@
                     <div class="block" id="tab-profile">
                         <input type="hidden" value="{{$tomador->id}}" name="tomador_id"/>
 
-                        <!--div class="grid grid-cols-1 gap-1">
+                        <div class="grid grid-cols-1 gap-1">
                             <label class="block text-sm font-medium text-gray-700 mb-1">
                                 Competência
                             </label>
@@ -18,7 +18,7 @@
                                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                                 placeholder="dd/mm/aaaa"
                             >
-                        </div-->
+                        </div>
 
                         <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
                             Tomador do Serviço: {{ $tomador->razao_social}} - {{ $tomador->cpf_cnpj}}
@@ -559,7 +559,7 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Regimes Especiais de Tributação*</span>
                                 {!! Form::select('ddlRegimeEspecial', $tipos_regime_esp_trib_mun
-                                ,null, ['required','id'=> 'ddlRegimeEspecial','disabled','class'=>'block w-full mt-1 text-sm  
+                                ,old('ddlRegimeEspecial'), ['required','id'=> 'ddlRegimeEspecial','disabled','class'=>'block w-full mt-1 text-sm  
                                 form-select
                                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
                                 @if ($errors->has('ddlRegimeEspecial'))
@@ -572,7 +572,7 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Tipo de Retenção do ISSQN</span>
                                 {!! Form::select('ddlTipoRetencao', $tipos_retencoes
-                                ,null, ['required','id'=> 'ddlTipoRetencao','disabled','class'=>'block w-full mt-1 text-sm  
+                                ,old('ddlTipoRetencao'), ['required','id'=> 'ddlTipoRetencao','disabled','class'=>'block w-full mt-1 text-sm  
                                 form-select
                                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
                                 @if ($errors->has('ddlTipoRetencao'))
@@ -596,7 +596,7 @@
 
                              <label class="block text-sm">
                                 <span class="text-gray-700 ">Deduções Base Cálc.*:</span>
-                                <input disabled name="txtDeducaoBaseCalculo" type="text" maxlength="20" id="txtDeducaoBaseCalculo" placeholder="0,00" class="block w-full mt-1 text-sm  
+                                <input value="{{ old('txtDeducaoBaseCalculo') }}" disabled name="txtDeducaoBaseCalculo" type="text" maxlength="20" id="txtDeducaoBaseCalculo" placeholder="0,00" class="block w-full mt-1 text-sm  
               focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
               :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
                             </label>
@@ -617,34 +617,34 @@
 
                              <label class="block text-sm">
                                 <span class="text-gray-700 ">Base de Cálculo do ISSQN</span>
-                                <input disabled name="txtBaseCalculoISS" type="text" maxlength="20" id="txtBaseCalculoISS" placeholder="0,00" class="block w-full mt-1 text-sm  
+                                <input value="{{ old('txtBaseCalculoISS') }}" disabled name="txtBaseCalculoISS" type="text" maxlength="20" id="txtBaseCalculoISS" placeholder="0,00" class="block w-full mt-1 text-sm  
               focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
               :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
                             </label>
 
                              <label class="block text-sm">
                                 <span class="text-gray-700 ">Aliq. ISSQN</span>
-                                <input value="{{ number_format($atividade->aliquota,2, ',', '') }}" disabled name="txtAliquota" type="text" maxlength="5" id="txtAliquota" placeholder="0,00" class="block w-full mt-1 text-sm  
+                                <input value="{{ number_format(old('txtAliquota', $atividade->aliquota), 2, ',', '') }}" disabled name="txtAliquota" type="text" maxlength="5" id="txtAliquota" placeholder="0,00" class="block w-full mt-1 text-sm  
               focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
               :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
                             </label>
 
                              <label class="block text-sm">
                                 <span class="text-gray-700 ">Valor ISSQN</span>
-                                <input disabled name="txtValorISSQN" type="text" maxlength="5" id="txtValorISSQN" placeholder="0,00" class="block w-full mt-1 text-sm  
+                                <input value="{{ old('txtValorISSQN') }}" disabled name="txtValorISSQN" type="text" maxlength="5" id="txtValorISSQN" placeholder="0,00" class="block w-full mt-1 text-sm  
               focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
               :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
                             </label>
 
                              <label class="block text-sm">
                                 <span class="text-gray-700 ">Valor ISSQN Retido</span>
-                                <input disabled name="txtValorRetido" type="text" maxlength="20" id="txtValorRetido" placeholder="0,00" class="block w-full mt-1 text-sm  
+                                <input value="{{ old('txtValorRetido') }}" disabled name="txtValorRetido" type="text" maxlength="20" id="txtValorRetido" placeholder="0,00" class="block w-full mt-1 text-sm  
               focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
               :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
                             </label>
 
                             <!--campo Pais onde ocorreu o resultado do serviço prestado - sempre será o pais do tomador no exterior -->
-                            <div id="divPaisResult">
+                            <div id="divPaisResult" style="display: none;">
                                 <label class="block text-sm">
                                     <span class="text-gray-700 ">País onde ocorreu o resultado do serviço Prestado</span>
                                     <!-- ddlPaisResult -->
@@ -857,40 +857,40 @@
                                     <select name="ddlSitTribFederal" onchange="" language="javascript" id="ddlSitTribFederal" 
                                     class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
                                         <option selected="selected" value="">Selecione</option>
-                                        <option value="00">00 - Nenhum</option>
-                                        <option value="01">01 - Operação Tributável com Alíquota Básica</option>
-                                        <option value="02">02 - Operação Tributável com Alíquota Diferenciada</option>
-                                        <option value="03">03 - Operação Tributável com Alíquota por Unidade de Medida de Produto</option>
-                                        <option value="04">04 - Operação Tributável monofásica - Revenda a Alíquota Zero</option>
-                                        <option value="05">05 - Operação Tributável por Substituição Tributária</option>
-                                        <option value="06">06 - Operação Tributável a Alíquota Zero</option>
-                                        <option value="07">07 - Operação Isenta da Contribuição</option>
-                                        <option value="08">08 - Operação sem Incidência da Contribuição</option>
-                                        <option value="09">09 - Operação com Suspensão da Contribuição</option>
-                                        <option value="49">49 - Outras Operações de Saída</option>
-                                        <option value="50">50 - Operação com Direito a Crédito – Vinculada Exclusivamente a Receita Tributada no Mercado Interno</option>
-                                        <option value="51">51 - Operação com Direito a Crédito – Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</option>
-                                        <option value="52">52 - Operação com Direito a Crédito – Vinculada Exclusivamente a Receita de Exportação</option>
-                                        <option value="53">53 - Operação com Direito a Crédito – Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</option>
-                                        <option value="54">54 - Operação com Direito a Crédito – Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</option>
-                                        <option value="55">55 - Operação com Direito a Crédito – Vinculada a Receitas Não Tributadas no Mercado Interno e de Exportação</option>
-                                        <option value="56">56 - Operação com Direito a Crédito – Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</option>
-                                        <option value="60">60 - Crédito Presumido – Operação de Aquisição Vinculada Exclusivamente a Receita Tributada no Mercado Interno</option>
-                                        <option value="61">61 - Crédito Presumido – Operação de Aquisição Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</option>
-                                        <option value="62">62 - Crédito Presumido – Operação de Aquisição Vinculada Exclusivamente a Receita de Exportação</option>
-                                        <option value="63">63 - Crédito Presumido – Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</option>
-                                        <option value="64">64 - Crédito Presumido – Operação de Aquisição Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</option>
-                                        <option value="65">65 - Crédito Presumido – Operação de Aquisição Vinculada a Receitas Não-Tributadas no Mercado Interno e de Exportação</option>
-                                        <option value="66">66 - Crédito Presumido – Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</option>
-                                        <option value="67">67 - Crédito Presumido – Outras Operações</option>
-                                        <option value="70">70 - Operação de Aquisição sem Direito a Crédito</option>
-                                        <option value="71">71 - Operação de Aquisição com Isenção</option>
-                                        <option value="72">72 - Operação de Aquisição com Suspensão</option>
-                                        <option value="73">73 - Operação de Aquisição a Alíquota Zero</option>
-                                        <option value="74">74 - Operação de Aquisição sem Incidência da Contribuição</option>
-                                        <option value="75">75 - Operação de Aquisição por Substituição Tributária</option>
-                                        <option value="98">98 - Outras Operações de Entrada</option>
-                                        <option value="99">99 - Outras Operações</option>
+                                        <option {{ old('ddlSitTribFederal') == '00' ? 'selected' : '' }} value="00">00 - Nenhum</option>
+                                        <option {{ old('ddlSitTribFederal') == '01' ? 'selected' : '' }} value="01">01 - Operação Tributável com Alíquota Básica</option>
+                                        <option {{ old('ddlSitTribFederal') == '02' ? 'selected' : '' }} value="02">02 - Operação Tributável com Alíquota Diferenciada</option>
+                                        <option {{ old('ddlSitTribFederal') == '03' ? 'selected' : '' }} value="03">03 - Operação Tributável com Alíquota por Unidade de Medida de Produto</option>
+                                        <option {{ old('ddlSitTribFederal') == '04' ? 'selected' : '' }} value="04">04 - Operação Tributável monofásica - Revenda a Alíquota Zero</option>
+                                        <option {{ old('ddlSitTribFederal') == '05' ? 'selected' : '' }} value="05">05 - Operação Tributável por Substituição Tributária</option>
+                                        <option {{ old('ddlSitTribFederal') == '06' ? 'selected' : '' }} value="06">06 - Operação Tributável a Alíquota Zero</option>
+                                        <option {{ old('ddlSitTribFederal') == '07' ? 'selected' : '' }} value="07">07 - Operação Isenta da Contribuição</option>
+                                        <option {{ old('ddlSitTribFederal') == '08' ? 'selected' : '' }} value="08">08 - Operação sem Incidência da Contribuição</option>
+                                        <option {{ old('ddlSitTribFederal') == '09' ? 'selected' : '' }} value="09">09 - Operação com Suspensão da Contribuição</option>
+                                        <option {{ old('ddlSitTribFederal') == '49' ? 'selected' : '' }} value="49">49 - Outras Operações de Saída</option>
+                                        <option {{ old('ddlSitTribFederal') == '50' ? 'selected' : '' }} value="50">50 - Operação com Direito a Crédito – Vinculada Exclusivamente a Receita Tributada no Mercado Interno</option>
+                                        <option {{ old('ddlSitTribFederal') == '51' ? 'selected' : '' }} value="51">51 - Operação com Direito a Crédito – Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</option>
+                                        <option {{ old('ddlSitTribFederal') == '52' ? 'selected' : '' }} value="52">52 - Operação com Direito a Crédito – Vinculada Exclusivamente a Receita de Exportação</option>
+                                        <option {{ old('ddlSitTribFederal') == '53' ? 'selected' : '' }} value="53">53 - Operação com Direito a Crédito – Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</option>
+                                        <option {{ old('ddlSitTribFederal') == '54' ? 'selected' : '' }} value="54">54 - Operação com Direito a Crédito – Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</option>
+                                        <option {{ old('ddlSitTribFederal') == '55' ? 'selected' : '' }} value="55">55 - Operação com Direito a Crédito – Vinculada a Receitas Não Tributadas no Mercado Interno e de Exportação</option>
+                                        <option {{ old('ddlSitTribFederal') == '56' ? 'selected' : '' }} value="56">56 - Operação com Direito a Crédito – Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</option>
+                                        <option {{ old('ddlSitTribFederal') == '60' ? 'selected' : '' }} value="60">60 - Crédito Presumido – Operação de Aquisição Vinculada Exclusivamente a Receita Tributada no Mercado Interno</option>
+                                        <option {{ old('ddlSitTribFederal') == '61' ? 'selected' : '' }} value="61">61 - Crédito Presumido – Operação de Aquisição Vinculada Exclusivamente a Receita Não-Tributada no Mercado Interno</option>
+                                        <option {{ old('ddlSitTribFederal') == '62' ? 'selected' : '' }} value="62">62 - Crédito Presumido – Operação de Aquisição Vinculada Exclusivamente a Receita de Exportação</option>
+                                        <option {{ old('ddlSitTribFederal') == '63' ? 'selected' : '' }} value="63">63 - Crédito Presumido – Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno</option>
+                                        <option {{ old('ddlSitTribFederal') == '64' ? 'selected' : '' }} value="64">64 - Crédito Presumido – Operação de Aquisição Vinculada a Receitas Tributadas no Mercado Interno e de Exportação</option>
+                                        <option {{ old('ddlSitTribFederal') == '65' ? 'selected' : '' }} value="65">65 - Crédito Presumido – Operação de Aquisição Vinculada a Receitas Não-Tributadas no Mercado Interno e de Exportação</option>
+                                        <option {{ old('ddlSitTribFederal') == '66' ? 'selected' : '' }} value="66">66 - Crédito Presumido – Operação de Aquisição Vinculada a Receitas Tributadas e Não-Tributadas no Mercado Interno e de Exportação</option>
+                                        <option {{ old('ddlSitTribFederal') == '67' ? 'selected' : '' }} value="67">67 - Crédito Presumido – Outras Operações</option>
+                                        <option {{ old('ddlSitTribFederal') == '70' ? 'selected' : '' }} value="70">70 - Operação de Aquisição sem Direito a Crédito</option>
+                                        <option {{ old('ddlSitTribFederal') == '71' ? 'selected' : '' }} value="71">71 - Operação de Aquisição com Isenção</option>
+                                        <option {{ old('ddlSitTribFederal') == '72' ? 'selected' : '' }} value="72">72 - Operação de Aquisição com Suspensão</option>
+                                        <option {{ old('ddlSitTribFederal') == '73' ? 'selected' : '' }} value="73">73 - Operação de Aquisição a Alíquota Zero</option>
+                                        <option {{ old('ddlSitTribFederal') == '74' ? 'selected' : '' }} value="74">74 - Operação de Aquisição sem Incidência da Contribuição</option>
+                                        <option {{ old('ddlSitTribFederal') == '75' ? 'selected' : '' }} value="75">75 - Operação de Aquisição por Substituição Tributária</option>
+                                        <option {{ old('ddlSitTribFederal') == '98' ? 'selected' : '' }} value="98">98 - Outras Operações de Entrada</option>
+                                        <option {{ old('ddlSitTribFederal') == '99' ? 'selected' : '' }} value="99">99 - Outras Operações</option>
                                     </select>
                                     @if ($errors->has('nbs'))
                                         <span class="text-xs text-red-600 ">
@@ -904,23 +904,23 @@
                                 <select name="ddlTipoRetFederal" onchange="" language="javascript" id="ddlTipoRetFederal" 
                                 class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray" onclick="">
                                     <option selected="selected" value="">Selecione</option>
-                                    <option value="0">PIS/COFINS/CSLL Não Retidos</option>
-                                    <option value="1">PIS/COFINS Retido</option>
-                                    <option value="2">PIS/COFINS Não Retido</option>
-                                    <option value="3">PIS/COFINS/CSLL Retidos</option>
-                                    <option value="4">PIS/COFINS Retidos, CSLL Não Retido</option>
-                                    <option value="5">PIS Retido, COFINS/CSLL Não Retido</option>
-                                    <option value="6">COFINS Retido, PIS/CSLL Não Retido</option>
-                                    <option value="7">PIS Não Retido, COFINS/CSLL Retidos</option>
-                                    <option value="8">PIS/COFINS Não Retidos, CSLL Retido</option>
-                                    <option value="9">COFINS Não Retido, PIS/CSLL Retidos</option>
+                                    <option {{ old('ddlTipoRetFederal') == '0' ? 'selected' : '' }} value="0">PIS/COFINS/CSLL Não Retidos</option>
+                                    <option {{ old('ddlTipoRetFederal') == '1' ? 'selected' : '' }} value="1">PIS/COFINS Retido</option>
+                                    <option {{ old('ddlTipoRetFederal') == '2' ? 'selected' : '' }} value="2">PIS/COFINS Não Retido</option>
+                                    <option {{ old('ddlTipoRetFederal') == '3' ? 'selected' : '' }} value="3">PIS/COFINS/CSLL Retidos</option>
+                                    <option {{ old('ddlTipoRetFederal') == '4' ? 'selected' : '' }} value="4">PIS/COFINS Retidos, CSLL Não Retido</option>
+                                    <option {{ old('ddlTipoRetFederal') == '5' ? 'selected' : '' }} value="5">PIS Retido, COFINS/CSLL Não Retido</option>
+                                    <option {{ old('ddlTipoRetFederal') == '6' ? 'selected' : '' }} value="6">COFINS Retido, PIS/CSLL Não Retido</option>
+                                    <option {{ old('ddlTipoRetFederal') == '7' ? 'selected' : '' }} value="7">PIS Não Retido, COFINS/CSLL Retidos</option>
+                                    <option {{ old('ddlTipoRetFederal') == '8' ? 'selected' : '' }} value="8">PIS/COFINS Não Retidos, CSLL Retido</option>
+                                    <option {{ old('ddlTipoRetFederal') == '9' ? 'selected' : '' }} value="9">COFINS Não Retido, PIS/CSLL Retidos</option>
                                 </select>
                             </label>
 
                             <div id="divBaseCalcFederal" >
                                 <label class="block text-sm">
                                     <span class="text-gray-700 ">Base de Cálculo PIS/COFINS:</span>
-                                    <input name="txtBaseCalcFederal" type="text" maxlength="20" placeholder="0,00" id="txtBaseCalcFederal" class="block w-full mt-1 text-sm  
+                                    <input value="{{ old('txtBaseCalcFederal') }}" name="txtBaseCalcFederal" type="text" maxlength="20" placeholder="0,00" id="txtBaseCalcFederal" class="block w-full mt-1 text-sm  
                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                 :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
                                 </label>
@@ -929,7 +929,7 @@
                             <div id="divAliqPIS">
                                 <label class="block text-sm">
                                     <span class="text-gray-700">Alíquota PIS:</span>
-                                    <input name="txtAliqPIS" type="text" maxlength="5" placeholder="0,00" id="txtAliqPIS" class="block w-full mt-1 text-sm  
+                                    <input value="{{ old('txtAliqPIS') }}" name="txtAliqPIS" type="text" maxlength="5" placeholder="0,00" id="txtAliqPIS" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                     :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
                                 </label>
@@ -938,7 +938,7 @@
                             <div id="divAliqCOFINS">
                                 <label class="block text-sm">
                                     <span class="text-gray-700">Alíquota COFINS</span>
-                                    <input placeholder="0,00" name="txtAliqCOFINS" type="text" maxlength="5" placeholder="0,00" id="txtAliqCOFINS" class="block w-full mt-1 text-sm  
+                                    <input value="{{ old('txtAliqCOFINS') }}" name="txtAliqCOFINS" type="text" maxlength="5" placeholder="0,00" id="txtAliqCOFINS" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                     :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
                                 </label>
@@ -949,7 +949,7 @@
                             <div id="divValorPis">
                                  <label class="block text-sm">
                                     <span class="text-gray-700">Valor PIS</span>
-                                    <input placeholder="0,00" name="txtValorPis" type="text" maxlength="22" id="txtValorPis" disabled="disabled" class="block w-full mt-1 text-sm  
+                                    <input value="{{ old('txtValorPis') }}" placeholder="0,00" name="txtValorPis" type="text" maxlength="22" id="txtValorPis" disabled="disabled" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                     :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                 </label>
@@ -957,7 +957,7 @@
                             <div id="divValorCOFINS">
                                 <label class="block text-sm">
                                     <span class="text-gray-700">Valor COFINS</span>
-                                    <input placeholder="0,00" name="txtValorCOFINS" type="text" maxlength="22" id="txtValorCOFINS" disabled="disabled" class="block w-full mt-1 text-sm  
+                                    <input value="{{ old('txtValorCOFINS') }}" placeholder="0,00" name="txtValorCOFINS" type="text" maxlength="22" id="txtValorCOFINS" disabled="disabled" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                     :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                 </label>
@@ -965,7 +965,7 @@
                             <div id="divValorCSLL">
                                 <label class="block text-sm">
                                     <span class="text-gray-700">Valor CSLL</span>
-                                    <input placeholder="0,00" name="txtValorCSLL" type="text" maxlength="22" onchange="" onkeypress="" language="javascript" id="txtValorCSLL" disabled="disabled" class="block w-full mt-1 text-sm  
+                                    <input value="{{ old('txtValorCSLL') }}" placeholder="0,00" name="txtValorCSLL" type="text" maxlength="22" onchange="" onkeypress="" language="javascript" id="txtValorCSLL" disabled="disabled" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                     :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                 </label>
@@ -974,7 +974,7 @@
                             <div id="divValorIRRF">
                                 <label class="block text-sm">
                                     <span class="text-gray-700">Valor IRRF</span>
-                                    <input placeholder="0,00" name="txtValorIRRF" type="text" maxlength="22" onchange="" onkeypress="" language="javascript" id="txtValorIRRF" class="block w-full mt-1 text-sm  
+                                    <input value="{{ old('txtValorIRRF') }}" placeholder="0,00" name="txtValorIRRF" type="text" maxlength="22" onchange="" onkeypress="" language="javascript" id="txtValorIRRF" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                     :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                 </label>
@@ -982,7 +982,7 @@
                             <div id="divValorCP">
                                  <label class="block text-sm">
                                     <span class="text-gray-700">Valor CP</span>
-                                    <input placeholder="0,00" name="txtValorCP" type="text" maxlength="22" onchange="" language="javascript" id="txtValorCP" class="block w-full mt-1 text-sm  
+                                    <input value="{{ old('txtValorCP') }}" placeholder="0,00" name="txtValorCP" type="text" maxlength="22" onchange="" language="javascript" id="txtValorCP" class="block w-full mt-1 text-sm  
                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                     :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                  </label>
@@ -1012,7 +1012,7 @@
                             <div id="divPercentualTribSN">
                                 <label class="block text-sm">
                                         <span class="text-gray-700">Percentual Tot. Tributos - SN*</span>
-                                        <input required placeholder="0,00" name="txtPercentualTribSN" type="text" maxlength="22" onchange="" language="javascript" id="txtPercentualTribSN" class="block w-full mt-1 text-sm  
+                                        <input value="{{ old('txtPercentualTribSN') }}" required placeholder="0,00" name="txtPercentualTribSN" type="text" maxlength="22" onchange="" language="javascript" id="txtPercentualTribSN" class="block w-full mt-1 text-sm  
                         focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                         :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                 </label>
@@ -1021,21 +1021,21 @@
                                 
                                     <label class="block text-sm">
                                         <span class="text-gray-700">Federal*</span>
-                                        <input required placeholder="0,00" name="txtFederal" type="text" maxlength="22" onchange="" language="javascript" id="txtFederal" class="block w-full mt-1 text-sm  
+                                        <input value="{{ old('txtFederal') }}" required placeholder="0,00" name="txtFederal" type="text" maxlength="22" onchange="" language="javascript" id="txtFederal" class="block w-full mt-1 text-sm  
                         focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                         :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                     </label>
 
                                      <label class="block text-sm">
                                         <span class="text-gray-700">Estadual*</span>
-                                        <input required placeholder="0,00" name="txtEstadual" type="text" maxlength="22" onchange="" language="javascript" id="txtEstadual" class="block w-full mt-1 text-sm  
+                                        <input value="{{ old('txtEstadual') }}" required placeholder="0,00" name="txtEstadual" type="text" maxlength="22" onchange="" language="javascript" id="txtEstadual" class="block w-full mt-1 text-sm  
                         focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                         :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                     </label>
 
                                      <label class="block text-sm">
                                         <span class="text-gray-700">Municipal*</span>
-                                        <input required placeholder="0,00" name="txtMunicipal" type="text" maxlength="22" onchange="" language="javascript" id="txtMunicipal" class="block w-full mt-1 text-sm  
+                                        <input value="{{ old('txtMunicipal') }}" required placeholder="0,00" name="txtMunicipal" type="text" maxlength="22" onchange="" language="javascript" id="txtMunicipal" class="block w-full mt-1 text-sm  
                         focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                         :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                                     </label>
@@ -1052,7 +1052,7 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Indicação da Operação</span>
                                 {!! Form::select('ddlIndicadorOperacao', $indOpIbsCbs
-                                ,null, ['id'=> 'ddlIndicadorOperacao','class'=>'block w-full mt-1 text-sm  
+                                ,old('ddlIndicadorOperacao'), ['id'=> 'ddlIndicadorOperacao','class'=>'block w-full mt-1 text-sm  
                                 form-select
                                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
                                 @if ($errors->has('ddlIndicadorOperacao'))
@@ -1065,7 +1065,7 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Situação Tributária</span>
                                 {!! Form::select('ddlSituacaoTributaria', $cstIbsCsb
-                                ,null, ['required','id'=> 'ddlSituacaoTributaria','class'=>'block w-full mt-1 text-sm  
+                                ,old('ddlSituacaoTributaria'), ['required','id'=> 'ddlSituacaoTributaria','class'=>'block w-full mt-1 text-sm  
                                 form-select
                                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
                                 @if ($errors->has('ddlSituacaoTributaria'))
@@ -1078,7 +1078,7 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Classificação Tributária</span>
                                 {!! Form::select('ddlClassificacaoTributaria', ['' => 'Selecione']
-                                ,null, ['required','id'=> 'ddlClassificacaoTributaria','class'=>'block w-full mt-1 text-sm  
+                                ,old('ddlClassificacaoTributaria'), ['required','id'=> 'ddlClassificacaoTributaria','class'=>'block w-full mt-1 text-sm  
                                 form-select
                                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
                                 @if ($errors->has('ddlClassificacaoTributaria'))
@@ -1090,7 +1090,7 @@
 
                             <label class="block text-sm">
                                         <span class="text-gray-700">Base de Cálculo</span>
-                                        <input readonly placeholder="0,00" name="txtBaseCalc" type="text" maxlength="22" onchange="" language="javascript" id="txtBaseCalc" class="block w-full mt-1 text-sm  
+                                        <input readonly value="{{ old('txtBaseCalc') }}" placeholder="0,00" name="txtBaseCalc" type="text" maxlength="22" onchange="" language="javascript" id="txtBaseCalc" class="block w-full mt-1 text-sm  
                         focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                         :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                             </label>
@@ -1104,7 +1104,7 @@
                                 <span class="text-gray-700 ">Informações Complementares(*) - Caracteres Restantes:</span>
                                 <span id="LblLines2" class="aspLabel">2000</span>
                                 {!!
-                                Form::textarea('txtInfoComplementares', $nota_original['txtInfoComplementares'] ?? '.', [
+                                Form::textarea('txtInfoComplementares', old('txtInfoComplementares') ?? '.', [
                                     'name'=>"txtInfoComplementares",
                                     'id'=>"txtInfoComplementares",
                                     'style'=>"height: 60px !important;",
