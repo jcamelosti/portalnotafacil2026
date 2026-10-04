@@ -1,6 +1,7 @@
 <x-area-empresa-layout title="Visualizar Serviço">
 
 <div class="py-6 w-full px-4 space-y-4">
+    @include('components.mensagens')
 
     {{-- HEADER --}}
     <div class="bg-white shadow rounded-lg p-4 flex justify-between items-center">
@@ -75,7 +76,7 @@
 
                 <div>
                     <span class="text-gray-500">NBS:</span><br>
-                    <strong>{{ $servico->nbs->codigo_nbs . ' - '.$servico->nbs->descricao_nbs ?? '-' }}</strong>
+                    <strong>{{ $servico->nbs->codigo . ' - '.$servico->nbs->descricao ?? '-' }}</strong>
                 </div>
 
             </div>

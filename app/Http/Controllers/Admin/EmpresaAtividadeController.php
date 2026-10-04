@@ -45,7 +45,7 @@ class EmpresaAtividadeController extends Controller
         $empresaId = session()->get('empresa_id');
         $atividade = new EmpresaAtividade();
         $atividade->empresa_id = $empresaId;
-        
+                
         return view('admin.empresa-atividades.criar')->with([
             'atividade' => $atividade,
         ]);;
@@ -96,7 +96,7 @@ class EmpresaAtividadeController extends Controller
     {
         $atividade = $this->atividadesModel
             ->find($id);
-                    
+        
         return view('admin.empresa-atividades.editar')->with([
             'atividade' => $atividade,
         ]);

@@ -30,10 +30,6 @@ class Empresa extends Model
         'complemento',
         'bairro',
         'cidade_id',
-        'is_mei',
-        'is_optante_simples_nac',
-        'vig_ini_simples_nac',
-        'vig_fim_simples_nac',
         'permite_deducao',
         'permite_desc_incond',
         'permite_desc_cond',
@@ -49,13 +45,34 @@ class Empresa extends Model
         'natureza_juridica',
         'serie_nota',
         'nbs_id',
-        'num_ultimo_dps'
+        'num_ultimo_dps',
+        'serie_dps',
+        'sigla_provedor',
+        'ambiente_emissao',
+        'regime_tributario',
+        'op_simp_nac',
+        'tp_regime_esp_trib_mun',
+        'tp_reg_apuracao_sn',
+        'regime',
+        'focunfe_id',
+        'focunfe_token_hmg',
+        'focunfe_token_prd',
     ];
 
     /*public function getCepAttribute($value)
     {
         return Utilitarios::formatar('cep', $value);
     }*/
+
+    public function getCidadeIdAttribute(){
+        $cidade_id = $this->attributes['cidade_id'];
+        
+        if($this->attributes['ambiente_emissao'] === 'HOMOLOGACAO'){
+            $cidade_id = '5002704'; // Se estive setado $this->attributes['ambiente_emissao'] === 'HOMOLOGACAO', em hmg só funciona com campo grande
+        }
+
+        return $cidade_id;
+    }
 
     public function getCpfCnpjFmtAttribute(){
         $doc = null;
@@ -89,29 +106,19 @@ class Empresa extends Model
         return (strlen($cpf_cnpj) <= 12) ? 1 : 2;
     }
 
-    public function cnaes()
-    {
-        return $this->hasMany(EmpresaCnae::class, 'empresa_id', 'id');
-    }
-
     public function atividadesEmpresa()
     {
         return $this->hasMany(EmpresaAtividade::class, 'empresa_id', 'id');
     }
 
-    public function naturezaOperacoes()
+    /*public function naturezaOperacoes()
     {
         return $this->hasMany(EmpresaNaturezaOperacao::class, 'empresa_id', 'id');
-    }
+    }*/
 
     public function tomadores()
     {
         return $this->hasMany(Tomador::class, 'empresa_id', 'id');
-    }
-
-    public function notasEmitidas()
-    {
-        return $this->hasMany(NotaEmitida::class, 'empresa_id', 'id');
     }
 
     public function licenca()
@@ -122,6 +129,10 @@ class Empresa extends Model
     public function cidade()
     {
         return $this->belongsTo(Municipio::class, 'cidade_id', 'codigo');
+    }
+
+    public function certificado(){
+        return $this->hasOne(Certificado::class);
     }
 
     public function empresasList($userId = null){
@@ -148,10 +159,6 @@ class Empresa extends Model
             ->all();
     }
 
-    public function itemLc(){
-        return $this->belongsTo(ListaServico::class, 'item_lc_id', 'id');
-    }
-
     public function getValidateLicencaAttribute()
     {
         $resultado = null;
@@ -171,6 +178,60 @@ class Empresa extends Model
         return $this->belongsTo(Plano::class, 'plano_id', 'id');
     }
 
+    public static function getProvedorEmissao(){
+        return [
+            '' => 'Nenhum Provedor Selecionado',
+            'issnet' => 'Nota Control - ISSNET',
+        ];
+    }
+
+    public static function getAmbienteEmissao(){
+        return [
+            '' => 'Nenhum Ambiente Selecionado',
+            'HOMOLOGACAO' => 'Homologação(Testes)',
+            'PRODUCAO' => 'Produção'
+        ];
+    }
+
+    //Situação perante Simples Nacional:
+    public static function getOpcaoSimplesNacional(){
+        return [
+            '1' => 'Não Optante',
+			'2' => 'Optante - Microempreendedor Individual (MEI)',
+			'3' => 'Optante - Microempresa ou Empresa de Pequeno Porte (ME/EPP)'
+        ];
+    }
+
+    public static function getRegimeApuracaoSimplesNacional(){
+        return [
+            '1' => 'Regime de apuração dos tributos federais e municipal pelo SN',
+			'2' => 'Regime de apuração dos tributos federais pelo SN e o ISSQN pela NFS-e conforme respectiva legislação municipal do tributo',
+			'3' => 'Regime de apuração dos tributos federais e municipal pela NFS-e conforme respectivas legilações federal e municipal de cada tributo'
+        ];
+    }
+
+    public static function getTiposRegimeEspecialTributacaoMunicipio(){
+        return [
+            '0' => 'Nenhum',
+			'1' => 'Ato Cooperado (Cooperativa)',
+			'2' => 'Estimativa',
+			'3' => 'Microempresa Municipal',
+			'4' => 'Notário ou Registrador', 
+			'5' => 'Profissional Autônomo',
+			'6' => 'Sociedade de Profissionais'
+        ];
+    }
+
+    //para Campo taxRegime - Spedy
+    public static function getRegimeTributario(){
+        return [
+            'simplesNacional' => 'Simples Nacional',
+            'simplesNacionalExcessoSublimite' => 'Simples Nacional - excesso de sublimite de receita bruta',
+            'regimeNormal' => 'Regime Normal (Lucro Presumido ou Lucro Real)',
+            'simplesNacionalMEI' => 'Simples Nacional — MEI'
+        ];
+    }
+
     public function getRegimeEspecialTributacao(){
         return [
             1 => 'Microempresa Municipal',
@@ -180,6 +241,72 @@ class Empresa extends Model
             5 => 'Microempresário Individual (MEI)',
             6 => 'Microempresa ou Empresa de Pequeno Porte (ME EPP)',
         ];
+    }
+
+    //campo tax Regime
+    public function getRegimes(){
+        return [
+            'simplesNacional' => 'Simples Nacional',
+            'simplesNacionalExcessoSublimite' => 'Simples Nacional — Excesso de sublimite de receita bruta',
+            'regimeNormal' => 'Regime Normal (Lucro Presumido ou Lucro Real)',
+            'simplesNacionalMEI' => 'Simples Nacional — MEI'
+        ];
+    }
+
+    public function getRegimeEspecialTributacaoAttribute(){
+        $campo = $this->attributes['regime_esp_tributacao'];
+        $valorRetorno = '';
+
+        switch($campo){
+            case 1: //Microempresa Municipal
+                $valorRetorno = 'municipalMicroenterprise';
+                break;
+            case 2: //Estimativa
+                $valorRetorno = 'estimate';
+                break;
+            case 3: //Sociedade de Profissionais
+                $valorRetorno = 'societyOfProfessionals';
+                break;
+            case 4: //Cooperativa
+                $valorRetorno = 'cooperative';
+                break;
+            case 5: //Microempresário Individual (MEI)
+                $valorRetorno = 'individualMicroenterprise';
+                break;
+            case 6: //Microempresa ou Empresa de Pequeno Porte (ME EPP)
+                $valorRetorno = 'microenterpriseAndSmallBusiness';
+                break;
+            case 7: //Sem Regime Especial
+                $valorRetorno = 'noSpecialRegime';
+                break;
+            default:
+                $valorRetorno = 'others';
+                break;
+        }
+
+        return $valorRetorno;
+    }
+
+    public function getSimplesNacionalRegimeAttribute(){
+        $valorRetorno = 'federalAndMunicipalBySimplesNacional';
+        $campo = $this->attributes['tp_reg_apuracao_sn'];
+
+        switch($campo){
+            case 1: //Microempresa Municipal
+                $valorRetorno = 'federalAndMunicipalBySimplesNacional';
+                break;
+            case 2: //Estimativa
+                $valorRetorno = 'federalBySimplesAndIssqnByNfse';
+                break;
+            case 3: //Sociedade de Profissionais
+                $valorRetorno = 'federalAndMunicipalByNfse';
+                break;
+            default:
+                $valorRetorno = 'federalAndMunicipalBySimplesNacional';
+                break;
+        }
+
+        return $valorRetorno;
     }
 }
 

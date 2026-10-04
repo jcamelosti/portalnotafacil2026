@@ -9,25 +9,39 @@ class Nbs extends Model
     protected $table = 'nbs';
 
     protected $fillable = [
-        'codigo_nbs',
-        'descricao_nbs',
-        'codigo_subitem_lc',
-        'codigo_subitem_lc_limpo'
+        'codigo',
+        'descricao',
     ];
 
-    public function getListaNbs($filtro = null)
+    public function getListaNbs()
     {
         return ['' => 'Selecione o NBS'] + $this
             ->select(
                 'id',
-                DB::raw("concat(codigo_nbs, ' - ', IFNULL(descricao_nbs, '')) as field1")
+                DB::raw("concat(codigo, ' - ', IFNULL(descricao, '')) as field1")
             )
-            ->where(function ($query) use ($filtro) {
+            /*->where(function ($query) use ($filtro) {
                 if($filtro != ''){
                     $query->whereIn('codigo_subitem_lc_limpo', [$filtro]);
                 }
-            })
+            })*/
             ->pluck('field1', 'id')
+            ->all();
+    }
+
+    public function getListaNbsPorCodigo()
+    {
+        return ['' => 'Selecione o NBS'] + $this
+            ->select(
+                'codigo',
+                DB::raw("concat(codigo, ' - ', IFNULL(descricao, '')) as field1")
+            )
+            /*->where(function ($query) use ($filtro) {
+                if($filtro != ''){
+                    $query->whereIn('codigo_subitem_lc_limpo', [$filtro]);
+                }
+            })*/
+            ->pluck('field1', 'codigo')
             ->all();
     }
 }

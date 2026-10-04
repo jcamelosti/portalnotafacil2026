@@ -23,7 +23,7 @@ class MercadoPago
         $valorFatura = (float)$varPlano->valor;
 
         $preference_data = array (
-            "notification_url"=> "https://nfse.portalnotafacil.com.br/retorno/mercadopago",
+            "notification_url"=> "https://https://nfse-nacional.portalnotafacil.com.br/retorno/mercadopago",
             "description"=> $descricao, //DESCRIÇÃO DO CARRINHO OU ITEM VENDIDO.
             "transaction_amount"=> $valorFatura, //VALOR TOTAL A SER PAGO PELO COMPRADOR.
             "external_reference"=> $referencia[0], //NUMERO DO PEDIDO DE SEU SITE PARA FUTURA CONCILIAÇÃO FINANCEIRA.

@@ -2,16 +2,22 @@
 
 use App\Http\Controllers\Emissor\CertificadoController;
 use App\Http\Controllers\Emissor\DadosFaturamentoController;
+use App\Http\Controllers\Emissor\DanfseController;
 use App\Http\Controllers\Emissor\DashboardController;
 use App\Http\Controllers\Emissor\NfseNacional;
+use App\Http\Controllers\Emissor\NotaController;
 use App\Http\Controllers\Emissor\ProtocoloController;
+use App\Http\Controllers\Emissor\TesteNfeNacionalController;
+use App\Http\Controllers\Empresas\CodTribMunCodTribNacController;
 use App\Http\Controllers\Empresas\EmpresasController;
 use App\Http\Controllers\Empresas\LicencasController;
+use App\Http\Controllers\Empresas\NbsController;
 use App\Http\Controllers\Empresas\SolicitarCreditoController;
 use App\Http\Controllers\InfinitePayWebHookController;
 use App\Http\Controllers\Irpj\RelatorioController;
 use App\Http\Controllers\MercadoPagoController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\TestSpedyController;
 use App\Http\Controllers\Tomadores\TomadoresController;
 use Illuminate\Support\Facades\Route;
 
@@ -44,6 +50,8 @@ Route::get('/consultar/cidades/{uf_id}', [SiteController::class, 'consultarCidad
 Route::get('/consultar/item-lc/{cnae_id}', [SiteController::class, 'consultarItemLc'])->name('site.consulta_item_lc');
 Route::get('/consultar/nbs/{item_lc_id}', [SiteController::class, 'consultarNbs'])->name('site.consulta_nbs');
 Route::get('/listar/cidades', [SiteController::class, 'buscarCidades'])->name('site.consulta_cidades_geral');
+Route::get('/consultar/cidades/{uf_id}/json', [SiteController::class, 'buscarCidadesJson'])->name('site.consulta_cidades-json');
+Route::get('/consultar/estados/json', [SiteController::class, 'buscarEstadosJson'])->name('site.consulta_estados-json');
 
 //MERCADO PAGO - /retorno/mercadopago
 //essa rota é sobre aguardar o pagamento do pix e redirecionar o usuário.
@@ -63,6 +71,11 @@ Route::get('/foto/{hash}', function ($hash) {
     return response()->file($path);
 })->name('foto');
 
+
+//TESTES SPEDY
+Route::get('/testes/spedy', [TestSpedyController::class, 'index'])->name('spedy.testes');
+Route::get('/testes/focunfe', [TesteNfeNacionalController::class, 'cadastraEmpresaFocuNfe'])->name('focunfse.testes');
+
 Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', 'dados.faturamento']], function () {
     Route::group(['prefix' => 'c'], function() {
         /*Route::get('/pagamento-realizado', [DashboardController::class, 'pagamentoRealizado'])->name('pagamentoRealizado');
@@ -72,27 +85,41 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
         Route::get('/', [\App\Http\Controllers\Emissor\DashboardController::class, 'dashboard'])->name('dashboard');
         
         Route::group(['prefix' => 'emissor'], function () {
-            /*Route::get('nota/listagem', [\App\Http\Controllers\Emissor\NotaController::class, 'index'])->name('nota.index');
+            Route::get('nota/listagem', [\App\Http\Controllers\Emissor\NotaController::class, 'index'])->name('nota.index');
             Route::get('nota/criar', [\App\Http\Controllers\Emissor\NotaController::class, 'create'])->name('nota.emitir');
             Route::post('nota/salvar', [\App\Http\Controllers\Emissor\NotaController::class, 'store'])->name('notas.store');
+            Route::get('nota/show/{nota}', [\App\Http\Controllers\Emissor\NotaController::class, 'show'])->name('notas.show');
             
             Route::get('nota/imprimir/pdf/{prestador}/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'imprimirNota'])->name('notas.pdf');
             Route::get('nota/imprimir/xml/{prestador}/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'baixarXml'])->name('notas.xml');
             Route::get('nota/cancelar/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'cancelarNota'])->name('notas.cancelar');
             Route::get('notas/emitidas',  [\App\Http\Controllers\Emissor\NotaController::class, 'listarNotaEmitidas'])->name('notas.emitidas-listagem');
-            Route::get('nota/print/xml/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'visualizarXmlNota'])->name('notas.visualizar-xml');
+            Route::get('nota/print/xml/{nota}', [\App\Http\Controllers\Emissor\NotaController::class, 'visualizarXmlNota'])->name('notas.visualizar-xml');
             Route::any('nota/cancelar/{id}/issnet', [\App\Http\Controllers\Emissor\NotaController::class, 'cancelarNotaIssNet'])->name('notas.cancelar-issnet');
             Route::get('nota/duplicar/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'duplicar'])->name('notas.duplicar');
 
             //confirmação transmissao notas
-            Route::get('nota/transmissao/ok', [\App\Http\Controllers\Emissor\NotaController::class, 'confirmacaoTransmissao'])->name('notas.confirmacao-transmissao');
+            //Route::get('nota/transmissao/ok', [\App\Http\Controllers\Emissor\NotaController::class, 'confirmacaoTransmissao'])->name('notas.confirmacao-transmissao');
 
             Route::get('nota/substuicao/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'substituirNota'])->name('notas.substitucao');
             Route::post('nota/substituicao/salvar', [\App\Http\Controllers\Emissor\NotaController::class, 'store_substituicao'])->name('notas.store-substituicao');
 
-            Route::get('teste/nfse-nacional', [\App\Http\Controllers\Emissor\NfseNacional::class, 'teste']);*/
+            //Route::get('teste/nfse-nacional', [\App\Http\Controllers\Emissor\NfseNacional::class, 'teste']);
+
+            //novas rotas - 17/08/2026
             Route::get('nfse-nacional/testes', [\App\Http\Controllers\Emissor\TesteNfeNacionalController::class, 'teste']);
             
+            //pesquisar
+            Route::get('/obter/tributacao-nacional/por-tributacao-mun', [NotaController::class, 'obterTributacaoNacionalPorAtividadeMun']);
+            Route::get('/obter/nbs/por-empresa', [NotaController::class, 'obterNbs']);
+            //obterPercentualAtividadeMunicipio
+            Route::get('/obter/percentual-atividade-mun', [NotaController::class, 'obterPercentualAtividadeMunicipio']);
+            Route::get('/obter/percentual-trib-nac', [NotaController::class, 'obterPercentualTribNac']);
+            Route::get('/obter/classificacoes-tributarias', [NotaController::class, 'obterClassificacoesTributarias']);
+
+            Route::get('/nfse/{nota}/danfse', [DanfseController::class, 'pdf'])
+                //->where('filename', '.*')
+                ->name('nfse.danfse.pdf');
         });
 
         Route::group(['prefix' => 'emissor-nacional-mei'], function () {
@@ -136,6 +163,60 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             Route::get('/', [\App\Http\Controllers\Emissor\DashboardController::class, 'index'])->name('area-cliente');
 
             Route::resource('empresas', EmpresasController::class);
+            Route::prefix('correlacao/codtribmun-codtribnac/{empresa}')->group(function () {
+                Route::get(
+                    'listagem',
+                    [CodTribMunCodTribNacController::class,'index']
+                )->name('codtrimun-codtribnac.index');
+                
+                Route::get(
+                    'criar',
+                    [CodTribMunCodTribNacController::class,'create']
+                )->name('codtrimun-codtribnac.create');
+                
+                Route::post(
+                    'store',
+                    [CodTribMunCodTribNacController::class,'store']
+                )->name('codtrimun-codtribnac.store');
+
+                Route::get(
+                    '{correlacaoTribMunTribNac}/editar',
+                    [CodTribMunCodTribNacController::class,'edit']
+                )->name('codtrimun-codtribnac.edit');
+
+                Route::put(
+                    '{correlacaoTribMunTribNac}/atualizar',
+                    [CodTribMunCodTribNacController::class,'update']
+                )->name('codtrimun-codtribnac.update');
+            });
+
+            Route::prefix('empresa/nbs/{empresa}')->group(function () {
+                Route::get(
+                    'listagem',
+                    [NbsController::class,'index']
+                )->name('empresa-nbs.index');
+                
+                Route::get(
+                    'criar',
+                    [NbsController::class,'create']
+                )->name('empresa-nbs.create');
+                
+                Route::post(
+                    'store',
+                    [NbsController::class,'store']
+                )->name('empresa-nbs.store');
+
+                Route::get(
+                    '{empresaNbs}/editar',
+                    [NbsController::class,'edit']
+                )->name('empresa-nbs.edit');
+
+                Route::put(
+                    '{empresaNbs}/atualizar',
+                    [NbsController::class,'update']
+                )->name('empresa-nbs.update');
+            });
+
             Route::get('/empresas/list/json', [EmpresasController::class, 'json'])->name('empresas.json');
             Route::resource('tomadores', TomadoresController::class);
             // Rota adicional para outro método de update

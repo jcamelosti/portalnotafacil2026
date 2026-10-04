@@ -1,0 +1,1100 @@
+<?php
+
+namespace JCamelo\NfseNacionalLib\XML\Builders;
+
+use JCamelo\NfseNacionalLib\DTO\DPSDataSnDTO;
+use DOMDocument;
+use DOMElement;
+use InvalidArgumentException;
+
+class DPSSnXmlBuilder
+{
+    private const NS_NFSE = 'http://www.sped.fazenda.gov.br/nfse';
+
+    public function build(DPSDataSnDTO $data): string
+    {
+        $dom = new DOMDocument('1.0', 'UTF-8');
+
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = false;
+
+        /*
+         * <DPS versao="1.01">
+         */
+        /*$dps = $dom->createElement(
+            'DPS'
+        );*/
+
+        $dps = $dom->createElement(
+            'DPS'
+        );
+
+        $dps->setAttribute(
+            'versao',
+            $data->versao ?? '1.01'
+        );
+
+        $dom->appendChild($dps);
+
+        /*
+         * <infDPS Id="...">
+         */
+        /*$infDps = $dom->createElement(
+            'infDPS'
+        );*/
+
+        $infDps = $dom->createElement('infDPS');
+
+        $infDps->setAttribute(
+            'Id',
+            $this->generateId($data)
+        );
+
+        $dps->appendChild($infDps);
+
+        /*
+         * =========================================================
+         * DADOS DA DPS
+         * =========================================================
+         */
+
+        $this->appendText(
+            $dom,
+            $infDps,
+            'tpAmb',
+            $data->ambiente
+        );
+
+        $this->appendText(
+            $dom,
+            $infDps,
+            'dhEmi',
+            $data->dataEmissao
+        );
+
+        $this->appendText(
+            $dom,
+            $infDps,
+            'verAplic',
+            $data->verAplic ?? '1.01'
+        );
+
+        $this->appendText(
+            $dom,
+            $infDps,
+            'serie',
+            $data->serie
+        );
+
+        $this->appendText(
+            $dom,
+            $infDps,
+            'nDPS',
+            $data->numDps
+        );
+
+        $this->appendText(
+            $dom,
+            $infDps,
+            'dCompet',
+            $data->dataCompetencia
+        );
+
+        $this->appendText(
+            $dom,
+            $infDps,
+            'tpEmit',
+            1
+        );
+
+        $this->appendText(
+            $dom,
+            $infDps,
+            'cLocEmi',
+            $data->codigoMunicipio
+        );
+
+        /*
+         * =========================================================
+         * PRESTADOR
+         * =========================================================
+         */
+
+        /*$prest = $dom->createElement(
+            'prest'
+        );*/
+        $prest = $dom->createElement(
+            'prest'
+        );
+
+        $infDps->appendChild($prest);
+
+        $this->appendOptionalText(
+            $dom,
+            $prest,
+            'CNPJ',
+            $data->cnpjPrestador
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $prest,
+            'IM',
+            $data->imPrestador
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $prest,
+            'fone',
+            $data->fonePrestador
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $prest,
+            'email',
+            $data->emailPrestador
+        );
+
+        /*
+         * regTrib
+         */
+        /*$regTrib = $dom->createElement(
+            'regTrib'
+        );*/
+
+        $regTrib = $dom->createElement(
+            'regTrib'
+        );
+
+        $prest->appendChild($regTrib);
+
+        $this->appendOptionalText(
+            $dom,
+            $regTrib,
+            'opSimpNac',
+            $data->opSimpNac
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $regTrib,
+            'regApTribSN',
+            $data->regApTribSN
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $regTrib,
+            'regEspTrib',
+            $data->regEspTrib
+        );
+
+        /*
+         * =========================================================
+         * TOMADOR
+         * =========================================================
+         */
+
+        $toma = $dom->createElement(
+            'toma'
+        );
+
+        $infDps->appendChild($toma);
+
+        /*
+         * CPF ou CNPJ
+         */
+        if (!empty($data->cnpjTomador)) {
+
+            $this->appendText(
+                $dom,
+                $toma,
+                'CNPJ',
+                $data->cnpjTomador
+            );
+
+        } elseif (!empty($data->cpfTomador)) {
+
+            $this->appendText(
+                $dom,
+                $toma,
+                'CPF',
+                $data->cpfTomador
+            );
+        }
+
+        if(is_null($data->nao_nif) || empty($data->nao_nif)){
+            $this->appendOptionalText(
+                $dom,
+                $toma,
+                'NIF',
+                $data->nif
+            );
+        }else{
+             $this->appendOptionalText(
+                $dom,
+                $toma,
+                'cNaoNIF',
+                $data->nao_nif
+            );
+        }
+
+        $this->appendOptionalText(
+            $dom,
+            $toma,
+            'xNome',
+            $data->razaoTomador
+        );
+
+        /*
+         * Endereço
+         */
+        $end = $dom->createElement(
+            'end'
+        );
+
+        $toma->appendChild($end);
+        
+        if($data->endNoExterior == 2){
+            $endNac = $dom->createElement(
+                'endNac'
+            );
+
+            $end->appendChild($endNac);
+
+            $this->appendOptionalText(
+                $dom,
+                $endNac,
+                'cMun',
+                $data->codigoMunicipioTomador
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $endNac,
+                'CEP',
+                $data->cepTomador
+            );
+        }else{
+            $endExt = $dom->createElement(
+                'endExt'
+            );
+
+            $end->appendChild($endExt);
+
+            //cPais
+            $this->appendOptionalText(
+                $dom,
+                $endExt,
+                'cPais',
+                $data->pais
+            );
+
+            //cEndPost
+            $this->appendOptionalText(
+                $dom,
+                $endExt,
+                'cEndPost',
+                $data->endPostal
+            );
+
+            //xCidade
+            $this->appendOptionalText(
+                $dom,
+                $endExt,
+                'xCidade',
+                $data->cidade
+            );
+            //xEstProvReg
+            $this->appendOptionalText(
+                $dom,
+                $endExt,
+                'xEstProvReg',
+                $data->provincia
+            );
+        }
+
+        $this->appendOptionalText(
+            $dom,
+            $end,
+            'xLgr',
+            $data->logradouroTomador
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $end,
+            'nro',
+            $data->numeroTomador
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $end,
+            'xCpl',
+            $data->complementoTomador
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $end,
+            'xBairro',
+            $data->bairroTomador
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $toma,
+            'fone',
+            $data->foneTomador
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $toma,
+            'email',
+            $data->emailTomador
+        );
+
+        /*
+         * =========================================================
+         * SERVIÇO
+         * =========================================================
+         */
+
+        $serv = $dom->createElement(
+            'serv'
+        );
+
+        $infDps->appendChild($serv);
+
+        /*
+         * locPrest
+         */
+        $locPrest = $dom->createElement(
+            'locPrest'
+        );
+
+        $serv->appendChild($locPrest);
+        
+        //quando é para comExterior
+        if(!is_null($data->comExt) && $data->localPrestacaoPais <> 26){ //26 =  brasil
+            /**
+             * País da Prestação (cPaisPrestacao): Este campo deve ficar em
+             * branco. Ele serve apenas para casos em que o prestador viaja
+             * fisicamente para outro país para executar o trabalho. Como o serviço é
+             * executado aqui do Brasil, não é necessário preencher (é por isso que o
+             * sistema bloqueia a sigla "BR" neste campo).
+             * 
+             */
+            $this->appendText(
+                $dom,
+                $locPrest,
+                'cPaisPrestacao',
+                $data->paisResultadoPrestacao
+            );
+        }else{
+            $this->appendText(
+                $dom,
+                $locPrest,
+                'cLocPrestacao',
+                $data->codigoMunicipioPrestacao ?? $data->codigoMunicipio
+            );
+        }
+
+        /*$this->appendText(
+            $dom,
+            $locPrest,
+            'cPaisPrestacao',
+            'US'
+        );*/
+
+        /*
+         * cServ
+         */
+        $cServ = $dom->createElement(
+            'cServ'
+        );
+
+        $serv->appendChild($cServ);
+
+        $this->appendOptionalText(
+            $dom,
+            $cServ,
+            'cTribNac',
+            $data->codigoTributacaoNacional
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $cServ,
+            'cTribMun',
+            $data->codigoServicoMunicipal
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $cServ,
+            'xDescServ',
+            $data->descricaoServico
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $cServ,
+            'cNBS',
+            $data->codigoNbs
+        );
+
+        /*
+         * comExt
+         */
+        if(!is_null($data->comExt)){
+            $comExt = $dom->createElement(
+                'comExt'
+            );
+
+            $serv->appendChild($comExt);
+
+            //mdPrestacao
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'mdPrestacao',
+                $data->comExt->mdPrestacao
+            );
+
+            //vincPrest
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'vincPrest',
+                $data->comExt->vincPrest
+            );
+
+            //tpMoeda
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'tpMoeda',
+                $data->comExt->tpMoeda
+            );
+
+            //vServMoeda
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'vServMoeda',
+                $data->comExt->vServMoeda
+            );
+
+            //mecAFComexP
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'mecAFComexP',
+                $data->comExt->mecAFComexP
+            );
+
+            //mecAFComexT
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'mecAFComexT',
+                $data->comExt->mecAFComexT
+            );
+
+            //movTempBens
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'movTempBens',
+                $data->comExt->movTempBens
+            );
+
+            //nDI
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'nDI',
+                $data->comExt->nDI
+            );
+
+            //nRE
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'nRE',
+                $data->comExt->nRE
+            );
+
+            //mdic
+            $this->appendOptionalText(
+                $dom,
+                $comExt,
+                'mdic',
+                $data->comExt->mdic
+            );
+        }
+
+        /*
+         * infoCompl
+         */
+        if (!empty($data->informacaoComplementar)) {
+
+            $infoCompl = $dom->createElement(
+                //self::NS_NFSE,
+                'infoCompl'
+            );
+
+            $serv->appendChild($infoCompl);
+
+            $this->appendText(
+                $dom,
+                $infoCompl,
+                'xInfComp',
+                $data->informacaoComplementar
+            );
+        }
+
+        /*
+         * =========================================================
+         * VALORES
+         * =========================================================
+         */
+
+        $valores = $dom->createElement(
+            'valores'
+        );
+
+        $infDps->appendChild($valores);
+
+        /*
+         * vServPrest
+         */
+        $vServPrest = $dom->createElement(
+            'vServPrest'
+        );
+
+        $valores->appendChild($vServPrest);
+
+        $this->appendText(
+            $dom,
+            $vServPrest,
+            'vServ',
+            $this->decimal($data->valorServico)
+        );
+
+        /*
+         * trib
+         */
+        $trib = $dom->createElement(
+            'trib'
+        );
+
+        $valores->appendChild($trib);
+
+        /*
+         * =========================================================
+         * TRIBUTAÇÃO MUNICIPAL
+         * =========================================================
+         */
+
+        $tribMun = $dom->createElement(
+            'tribMun'
+        );
+
+        $trib->appendChild($tribMun);
+
+        $this->appendOptionalText(
+            $dom,
+            $tribMun,
+            'tribISSQN',
+            $data->tributaIss
+        );
+
+        //cPaisResult
+        /**
+         * País do Resultado (cPaisResult): Você deve informar sempre o país
+         * do seu cliente (ex: "US" para os Estados Unidos). Isso comprova para a
+         * prefeitura que o benefício do serviço ocorreu fora do Brasil, o que
+         * garante a sua isenção de ISS. Se o campo for preenchido com "BR", o
+         * sistema entenderá que é uma operação nacional e o imposto será
+         * cobrado.
+         */
+
+        if(!is_null($data->comExt)){
+            /*$this->appendText(
+                $dom,
+                $tribMun,
+                'cPaisResult',
+                $data->paisResultadoPrestacao
+            );*/
+        }
+
+        $this->appendOptionalText(
+            $dom,
+            $tribMun,
+            'tpRetISSQN',
+            $data->tipoRetencaoIss
+        );
+
+        if( (((float)$data->aliquotaIss > 0.0) && $data->opSimpNac != 1)){
+            if(!in_array((int) $data->tributaIss, [2, 3, 4])){
+                $this->appendOptionalText(
+                    $dom,
+                    $tribMun,
+                    'pAliq',
+                    $this->decimal($data->aliquotaIss)
+                );
+            }
+        }
+
+        /*
+         * =========================================================
+         * TRIBUTAÇÃO FEDERAL
+         * =========================================================
+         */
+
+        $tribFed = $dom->createElement(
+            'tribFed'
+        );
+
+        $trib->appendChild($tribFed);
+
+        /*
+         * PIS/COFINS
+         */
+        $piscofins = $dom->createElement(
+            'piscofins'
+        );
+
+        $tribFed->appendChild($piscofins);
+
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'CST',
+            $data->cstPisCofins
+        );
+
+        /*
+            Regra se os campos de aliquota foram preenchidos fazer os calculos e preencher
+        */
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'vBCPisCofins',
+            $data->baseCalculoPisCofins
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'pAliqPis',
+            $data->aliquotaPis
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'pAliqCofins',
+            $data->aliquotaCofins
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'vPis',
+            $data->valorPis
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'vCofins',
+            $data->valorCofins
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $piscofins,
+            'tpRetPisCofins',
+            $data->tipoRetencaoPisCofins
+        );
+
+        /*
+         * Retenções
+         */
+        if((float) $this->decimal($data->valorRetencaoCp) > 0.0){
+            $this->appendOptionalText(
+                $dom,
+                $tribFed,
+                'vRetCP',
+                $this->decimal($data->valorRetencaoCp)
+            );
+        }
+
+        if((float) $this->decimal($data->valorRetencaoIrrf) > 0.0){
+            $this->appendOptionalText(
+                $dom,
+                $tribFed,
+                'vRetIRRF',
+                $this->decimal($data->valorRetencaoIrrf)
+            );
+        }
+
+        if((float) $this->decimal($data->valorRetencaoCsll) > 0.0){
+            $this->appendOptionalText(
+                $dom,
+                $tribFed,
+                'vRetCSLL',
+                $this->decimal($data->valorRetencaoCsll)
+            );
+        }
+
+        /*
+         * =========================================================
+         * TOTAL TRIBUTOS
+         * =========================================================
+         */
+
+        $totTrib = $dom->createElement(
+            'totTrib'
+        );
+
+        $trib->appendChild($totTrib);
+
+        if($data->opSimpNac == 1){
+            if($data->tipoInfoTributos == 1){
+                $vTotTrib = $dom->createElement(
+                    'vTotTrib'
+                );
+                $totTrib->appendChild($vTotTrib);
+
+                $this->appendOptionalText(
+                    $dom,
+                    $vTotTrib,
+                    'vTotTribFed',
+                    $this->decimal($data->percentualTribFederal)
+                );
+
+                $this->appendOptionalText(
+                    $dom,
+                    $vTotTrib,
+                    'vTotTribEst',
+                    $this->decimal($data->percentualTribEstadual)
+                );
+
+                $this->appendOptionalText(
+                    $dom,
+                    $vTotTrib,
+                    'vTotTribMun',
+                    $this->decimal($data->percentualTribMunicipal)
+                );
+            }else{
+                $pTotTrib = $dom->createElement(
+                    'pTotTrib'
+                );
+                $totTrib->appendChild($pTotTrib);
+
+                $this->appendOptionalText(
+                    $dom,
+                    $pTotTrib,
+                    'pTotTribFed',
+                    $this->decimal($data->valorTribFederal)
+                );
+
+                $this->appendOptionalText(
+                    $dom,
+                    $pTotTrib,
+                    'pTotTribEst',
+                    $this->decimal($data->valorTribEstadual)
+                );
+
+                $this->appendOptionalText(
+                    $dom,
+                    $pTotTrib,
+                    'pTotTribMun',
+                    $this->decimal($data->valorTribMunicipal)
+                );
+            }
+        }
+
+        if(isset($data->indicadorTotalTributos) && !empty($data->indicadorTotalTributos)){
+            $this->appendOptionalText(
+                $dom,
+                $totTrib,
+                'indTotTrib',
+                $data->indicadorTotalTributos //valor possível 0
+            );
+        }
+        
+        if($data->opSimpNac == 3){
+            $this->appendOptionalText(
+                $dom,
+                $totTrib,
+                'pTotTribSN',
+                $this->decimal($data->percentualTotalTributos)
+            );
+        }
+
+        /*
+         * =========================================================
+         * IBS / CBS
+         * =========================================================
+         */
+
+        $ibscbs = $dom->createElement(
+            'IBSCBS'
+        );
+
+        $infDps->appendChild($ibscbs);
+
+        $this->appendOptionalText(
+            $dom,
+            $ibscbs,
+            'finNFSe',
+            $data->finNfse
+        );
+
+        /*$this->appendOptionalText(
+            $dom,
+            $ibscbs,
+            'indFinal',
+            $data->indFinal ?? 0
+        );*/
+
+        $this->appendOptionalText(
+            $dom,
+            $ibscbs,
+            'cIndOp',
+            $data->cIndOp
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $ibscbs,
+            'indDest',
+            $data->indDest
+        );
+
+        /*
+         * valores
+         */
+        $ibscbsValores = $dom->createElement(
+            'valores'
+        );
+
+        $ibscbs->appendChild($ibscbsValores);
+
+        /*
+         * trib
+         */
+        $ibscbsTrib = $dom->createElement(
+            'trib'
+        );
+
+        $ibscbsValores->appendChild($ibscbsTrib);
+
+        /*
+         * gIBSCBS
+         */
+        $gibscbs = $dom->createElement(
+            'gIBSCBS'
+        );
+
+        $ibscbsTrib->appendChild($gibscbs);
+
+        $this->appendOptionalText(
+            $dom,
+            $gibscbs,
+            'CST',
+            $data->cstIbsCbs
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $gibscbs,
+            'cClassTrib',
+            $data->cClassTrib
+        );
+        // FORÇA a codificação depois do loadXML()
+        $dom->encoding = 'UTF-8';
+
+        return $dom->saveXML($dps);
+    }
+
+    /**
+     * Gera:
+     *
+     * DPS + cMun + tipo inscrição + inscrição federal + série + nDPS
+     */
+    private function generateId(DPSDataSnDTO $data): string
+    {
+        /*$string = 'DPS';
+        $string .= substr($data->codigoMunicipio, 0, 7); //Cód.Mun. (7) + //seria código do municipio do emitente
+        $string .= (strlen($data->cnpjPrestador) === 14) ? 2 : 1; //Tipo de Inscrição Federal (1) +
+        $string .= str_pad($data->cnpjPrestador, 14, 0, STR_PAD_LEFT); //Inscrição Federal (14 - CPF completar com 000 à esquerda) +
+        $string .= str_pad('8', 5, 0, STR_PAD_LEFT); //Série DPS (5) +
+        $string .= str_pad($data->numDps, 15, 0, STR_PAD_LEFT); //Série DPS (5) +*/
+       
+        $municipio = preg_replace(
+            '/\D/',
+            '',
+            (string) $data->municipioPrestador
+        );
+
+        $serie = preg_replace(
+            '/\D/',
+            '',
+            (string) $data->serie
+        );
+
+        /*
+         * 1 = CNPJ
+         * 2 = CPF
+         */
+        if (!empty($data->cnpjPrestador)) {
+
+            $tipoInscricao = '2';
+
+            $documento = preg_replace(
+                '/\D/',
+                '',
+                $data->cnpjPrestador
+            );
+
+        } else {
+
+            $tipoInscricao = '1';
+
+            $documento = preg_replace(
+                '/\D/',
+                '',
+                $data->cpfPrestador
+            );
+        }
+
+        $municipio = str_pad(
+            $municipio,
+            7,
+            '0',
+            STR_PAD_LEFT
+        );
+
+        $documento = str_pad(
+            $documento,
+            14,
+            '0',
+            STR_PAD_LEFT
+        );
+
+        $serie = str_pad(
+            $serie,
+            5,
+            '0',
+            STR_PAD_LEFT
+        );
+
+        $numero = str_pad(
+            (string) $data->numDps,
+            15,
+            '0',
+            STR_PAD_LEFT
+        );
+        
+        return 'DPS'
+            . $municipio
+            . $tipoInscricao
+            . $documento
+            . $serie
+            . $numero;
+    }
+
+    /**
+     * Adiciona elemento obrigatório.
+     */
+    private function appendText(
+        DOMDocument $dom,
+        DOMElement $parent,
+        string $name,
+        mixed $value
+    ): DOMElement {
+
+        if ($value === null || $value === '') {
+            throw new InvalidArgumentException(
+                "O campo {$name} é obrigatório."
+            );
+        }
+
+        $element = $dom->createElement(
+            $name
+        );
+
+        $element->appendChild(
+            $dom->createTextNode((string) $value)
+        );
+
+        $parent->appendChild($element);
+
+        return $element;
+    }
+
+    /**
+     * Adiciona elemento somente quando possui valor.
+     */
+    private function appendOptionalText(
+        DOMDocument $dom,
+        DOMElement $parent,
+        string $name,
+        mixed $value
+    ): ?DOMElement {
+
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $element = $dom->createElement(
+            $name
+        );
+
+        $element->appendChild(
+            $dom->createTextNode((string) $value)
+        );
+
+        $parent->appendChild($element);
+
+        return $element;
+    }
+
+    /**
+     * Normaliza valores decimais para o padrão XML.
+     *
+     * Ex:
+     * 10       => 10.00
+     * 10,5     => 10.50
+     * 10.5     => 10.50
+     */
+    private function decimal(mixed $value): ?string
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $value = str_replace(
+            ',',
+            '.',
+            (string) $value
+        );
+
+        return number_format(
+            (float) $value,
+            2,
+            '.',
+            ''
+        );
+    }
+}

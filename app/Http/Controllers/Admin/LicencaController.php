@@ -151,9 +151,9 @@ class LicencaController extends Controller
                 'users.name'
             )
             ->selectSub(function ($query) {
-                $query->from('emitidas')
+                $query->from('notas_emitidas')
                     ->selectRaw('MAX(created_at)')
-                    ->whereColumn('emitidas.empresa_id', 'empresas.id');
+                    ->whereColumn('notas_emitidas.empresa_id', 'empresas.id');
             }, 'ultima_emissao')
             ->join('empresas', 'empresas.id', '=', 'licenses.empresa_id')
             ->join('planos', 'planos.id', '=', 'empresas.plano_id')
@@ -176,9 +176,9 @@ class LicencaController extends Controller
                 'users.name'
             )
             ->selectSub(function ($query) {
-                $query->from('emitidas')
+                $query->from('notas_emitidas')
                     ->selectRaw('MAX(created_at)')
-                    ->whereColumn('emitidas.empresa_id', 'empresas.id');
+                    ->whereColumn('notas_emitidas.empresa_id', 'empresas.id');
             }, 'ultima_emissao')
             ->join('empresas','empresas.id','=','licenses.empresa_id')
             ->join('planos', 'planos.id', 'empresas.plano_id')

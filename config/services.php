@@ -30,4 +30,8 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'spedy' => [
+        'url' => env('SPEDY_API_URL', 'https://api.spedy.com.br/v1'),
+        'api_key' => env('SPEDY_API_KEY'),
+    ],
 ];

@@ -38,6 +38,7 @@
                     <span class="text-gray-700 ">Cidade Atendidas:</span>
                    
                     <select name="cidade_id" class="block w-full mt-1 text-sm form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray">
+                    <option value="">Selecione o Município</option>    
                     @foreach ($cidades as $cidade)
                         @if($cidade->total_empresas > 0)
                         <option {{ old('cidade_id', request()->cidade_id) == $cidade->codigo ? ' selected ' : '' }} value="{{ $cidade->codigo }}">{{ $cidade->municipio}} ({{ $cidade->total_empresas }})</option>

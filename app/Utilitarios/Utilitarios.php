@@ -1,18 +1,13 @@
 <?php
 namespace App\Utilitarios;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-
-
-use DOMDocument;
-use RobRichards\XMLSecLibs\XMLSecurityDSig;
-use RobRichards\XMLSecLibs\XMLSecurityKey;
-use SoapClient;
-use SimpleXMLElement;
-use Illuminate\Support\Facades\Log;
 
 class Utilitarios
 {
+    public static function somenteNumeros($string)
+    {
+        return preg_replace('/[^0-9]/', '', $string);
+    }
     public static function formatar ($tipo, $string, $size = 10)
     {
         switch ($tipo)
@@ -84,7 +79,17 @@ class Utilitarios
             'txtAliq',
             'txtDeducaoBaseCalculo',
             'txtDescontoInCondicionado',
-            'txtDescontoCondicionado'
+            'txtDescontoCondicionado',
+            'txtAliquota',
+            'txtValorIRRF',
+            'txtValorCP',
+            'txtBaseCalc',
+            'txtPercentualTribSN',
+            'txtBaseCalcFederal',
+            'txtAliqPIS',
+            'txtAliqCOFINS',
+            'txtValorCSLL',
+            'comex_vserv_moeda'
         ];
 
         $semPontuacao = [

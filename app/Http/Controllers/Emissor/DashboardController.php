@@ -8,7 +8,7 @@ use App\Models\CreditoUser;
 use App\Models\Empresa;
 use App\Models\EmpresaCompartilhada;
 use App\Models\License;
-use App\Models\NotaEmitida;
+//use App\Models\NotaEmitida;
 use App\Models\PlanoVariacao;
 use App\Utilitarios\Utilitarios;
 use Illuminate\Http\Request;
@@ -41,7 +41,7 @@ class DashboardController extends Controller
             return redirect('/c');
         }
 
-        $notasEmitidas = NotaEmitida::whereMonth('created_at', '=', date('m'))
+        /*$notasEmitidas = NotaEmitida::whereMonth('created_at', '=', date('m'))
             ->where('empresa_id', $this->empresa->id)
             ->count();          
 
@@ -69,8 +69,13 @@ class DashboardController extends Controller
         }else{
             $dados = Utilitarios::consultarEmpresaCNPJ($this->empresa->cpf_cnpj);
         }
-        $this->empresa->save();
+        $this->empresa->save();*/
 
+        $notasEmitidas = [];
+        $notasCanceladas= [];
+        $notasEmitidasTotal= [];
+        $notasCanceladasTotal= [];
+        $notas= [];   
 
         return view('dashboard_cliente')->with([
             'empresa' => $this->empresa,

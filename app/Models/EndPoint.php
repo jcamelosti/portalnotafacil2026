@@ -15,14 +15,4 @@ class EndPoint extends Model
         'codigo_municipio',
         'url_endpoint',
     ];
-
-    public function getUrlEndPointAttribute(){
-        $url = $this->attributes['url_endpoint'];
-
-        if(getenv('VERSAO_WEB_SERVICE') == '2.04'){
-           $url = $this->attributes['url_endpoint2'];
-        }
-        
-        return $url;
-    }
 }

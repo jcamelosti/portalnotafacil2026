@@ -20,7 +20,9 @@
         "livewire/livewire": "^2.0",
         "maatwebsite/excel": "^3.1",
         "maciejczyzewski/bottomline": "^0.2.0",
+        "mpdf/mpdf": "^8.3",
         "nfephp-org/sped-common": "^5.1",
+        "ramsey/uuid": "^4.9",
         "respect/validation": "^1.1",
         "robrichards/xmlseclibs": "^3.1"
     },
@@ -44,17 +46,13 @@
     },
     "autoload": {
         "classmap": [
-            "app/ClassesIssnet/Certificado.php",
-            "app/ClassesIssnet/DOMImproved.php",
-            "app/ClassesIssnet/RenderRPS.php",
-            "app/ClassesIssnet/RpsClass.php"
+            "app/ClassesIssnet/Certificado.php"
         ],
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/",
             "FerFabricio\\Hydrator\\": "app/Hydrator",
-            "NFePHP\\NFSe\\Models\\Issnet\\": "app/ClassesIssNet",
             "NFePHP\\Common\\": "app/ClassesIssNet",
             "Hadder\\NfseNacional\\": "app/NfseNacional",
             "JCamelo\\NfseNacionalLib\\": "app/NfseNacionalLib/"

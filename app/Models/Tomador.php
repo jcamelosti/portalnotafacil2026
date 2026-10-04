@@ -30,7 +30,11 @@ class Tomador extends Model
         'bairro',
         'cidade_id',
         'codigo_pais_bacen',
-        'nif'
+        'nif',
+        'nao_nif',
+        'cidade',
+        'provincia',
+        'pais'
     ];
 
     /*protected static function booted()

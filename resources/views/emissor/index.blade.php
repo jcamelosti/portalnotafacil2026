@@ -19,9 +19,7 @@
                             <th class="px-4 py-3">Tomador</th>
                             <th class="px-4 py-3">Data Emissão</th>
                             <th class="px-4 py-3">Situação</th>
-                            <!--th class="px-4 py-3">Código Verificação</th-->
                             <th class="px-4 py-3">Núm. Nota</th>
-                            <th class="px-4 py-3">Núm. RPS</th>
                             <th class="px-4 py-3">Download PDF</th>
                             <th class="px-4 py-3">Download XML</th>
                             <th class="px-4 py-3">Cancelar</th>
@@ -38,7 +36,7 @@
                                                 aria-hidden="true">{{ $nota->id }}</div>
                                         </div> --}}
                                         <div>
-                                            <p class="font-semibold">{{ $nota->nfse_id }}</p>
+                                            <p class="font-semibold">{{ $nota->id }}</p>
                                             <p class="text-xs text-gray-600 ">
                                                 {{ $nota->tomador->razao_social }}
                                             </p>
@@ -46,7 +44,7 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 text-sm">
-                                    {{ $nota->data_emissao_br }}
+                                    {{ $nota->id }}teste
                                 </td>
                                 <td class="px-4 py-3 text-xs">
                                     @if($nota->situacao == 'CONCLUIDO')
@@ -61,15 +59,10 @@
                                 </span>
                                     @endif
                                 </td>
-                                <!--td class="px-4 py-3 text-sm">
-                                    { { $nota->codigo_verificacao } }
-                                </td-->
                                 <td class="px-4 py-3 text-sm">
-                                    {{ $nota->numero_nfse }}
+                                    {{ $nota->id }}
                                 </td>
-                                <td class="px-4 py-3 text-sm">
-                                    {{ $nota->numero_rps }}
-                                </td>
+
                                 <td class="px-4 py-3 text-sm">
                                     @if($nota->situacao == 'CONCLUIDO')
                                         <span

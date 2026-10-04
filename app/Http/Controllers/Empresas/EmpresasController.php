@@ -4,16 +4,14 @@ namespace App\Http\Controllers\Empresas;
 
 use App\Http\Controllers\Controller;
 use App\Models\Certificado;
-use App\Models\CnaeLc;
 use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
-use App\Models\EmpresaCnae;
 use App\Models\EmpresaCompartilhada;
 use App\Models\License;
-use App\Models\ListaServico;
 use App\Models\Municipio;
 use App\Models\Nbs;
 use App\Models\Uf;
+use App\Services\FocuNfe\GestaoService;
 use App\Traits\IssnetTrait;
 use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
@@ -21,7 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Log;
+use JCamelo\NfseNacionalLib\Manager\CertificateManager;
 use JCamelo\NfseNacionalLib\Services\NFSeService;
 
 class EmpresasController extends Controller
@@ -31,8 +29,6 @@ class EmpresasController extends Controller
     private $empresaModel;
     private $estadoModel;
     private $municipioModel;
-    private $listaServicoModel;
-    private $cnaeModel;
     private $atividadeModel;
     private $licenseModel;
     private $certificadoModel;
@@ -43,16 +39,16 @@ class EmpresasController extends Controller
     public function __construct(
         NFSeService $nfse,
         Empresa $empresaModel, Uf $estadoModel, 
-        Municipio $municipioModel, ListaServico $listaServicoModel,
-        EmpresaCnae $cnaeModel, EmpresaAtividade $atividadeModel,
-        License $licenseModel, Certificado $certificadoModel, EmpresaCompartilhada $empresaCompartilhadaModel, Nbs $nbsModel
+        Municipio $municipioModel, 
+        EmpresaAtividade $atividadeModel,
+        License $licenseModel, Certificado $certificadoModel, EmpresaCompartilhada $empresaCompartilhadaModel, Nbs $nbsModel,
+        private CertificateManager $certManager, 
+        private GestaoService $focuNfeService
     )
     {
         $this->empresaModel = $empresaModel;
         $this->estadoModel = $estadoModel;
         $this->municipioModel = $municipioModel;
-        $this->listaServicoModel = $listaServicoModel;
-        $this->cnaeModel = $cnaeModel;
         $this->atividadeModel = $atividadeModel;
         $this->licenseModel = $licenseModel;
         $this->certificadoModel = $certificadoModel;
@@ -127,14 +123,11 @@ class EmpresasController extends Controller
        
         $estados = $this->estadoModel->getListaEstados();
         $cidades = $this->municipioModel->municipiosComEndPoint();
-        $servicos = $this->listaServicoModel->getListaServicos();
         $uf_id = 9;
         $cidades = $this->municipioModel->municipiosComEndPoint($uf_id);
-        $cnaes = [];
         $atividades = [];
         $estado = null;
         $empresa = new Empresa();
-        //$empresa->cidade_id = 0;
         $regimeEspecialTributacaoList = $this->empresaModel->getRegimeEspecialTributacao();
         
         $dados_busca_cnpj = Session::has('nova_empresa_prest');
@@ -158,9 +151,7 @@ class EmpresasController extends Controller
             'uf_id' => !empty($estado) ? $estado->id : 9,
             'estados' => $estados,
             'cidades' => $cidades,
-            'servicos' => $servicos,
             'atividades' => $atividades,
-            'cnaes' => $cnaes,
             'reg_esp_trib' => $regimeEspecialTributacaoList,
             'estado' => $estado
         ]);
@@ -195,24 +186,6 @@ class EmpresasController extends Controller
             $dados['plano_id'] = 1;
         }
 
-        switch($dados['cidade_id']):
-            case '5208707'://goiania
-                $dados['serie_nota'] = 1;
-                break;
-            case '5201405'://aparecidada de goiania
-                $dados['serie_nota'] = 9;
-                break;
-            case '3301702'://duque de caxias
-                $dados['serie_nota'] = 1;
-                break;
-            case '3543402'://Ribeirão Preto
-                $dados['serie_nota'] = 1;
-                break;
-            default:
-                $dados['serie_nota'] = 8;
-                break;
-        endswitch;
-
         if(!is_null($empresaExiste)){
             session()->flash('info', 'Não foi possível adicionar a Empresa. A empresa já encontra-se cadastrada no sistema.');
             return redirect()->back();
@@ -221,6 +194,9 @@ class EmpresasController extends Controller
         $empresa = $this
             ->empresaModel
             ->create($dados);
+
+        //$this->saveOrUpdateSpedy($empresa);
+        //$this->saveOrUpdateFocuNfe($empresa);
 
         if ($empresa->id != null) {
             License::create([
@@ -261,7 +237,7 @@ class EmpresasController extends Controller
         $userId = Auth::user()->id;
         
         $empresa = $this->empresaModel
-            ->with(['cnaes'])
+            //->with(['cnaes'])
             //->where('user_id', $userId)
              // OU empresas compartilhadas com ele
             /*->orWhereIn('id', function($sub) use ($userId) {
@@ -291,44 +267,35 @@ class EmpresasController extends Controller
         $cidade = $empresa->cidade()->first();
         $uf_id = $empresa->cidade()->first()->estado()->first()->id;
         $cidades = $this->municipioModel->municipiosComEndPoint($uf_id);
+        $atividades = $this->atividadeModel->atividadesList($empresa->id);    
+               
+        $provedores = Empresa::getProvedorEmissao();
+        $ambientes_emissao = Empresa::getAmbienteEmissao();
         
-        $cnaes = $this->cnaeModel->cnaesList($empresa->id);
-        $atividades = $this->atividadeModel->atividadesList($empresa->id);
-        
-        $empresaCnaePrincipalId = $empresa->empresa_cnae_id;
-        
-        //filtro items lc conforme cnae
-        $listaCnae = $this->cnaeModel->find($empresaCnaePrincipalId);
-        if(!is_null($listaCnae)){
-            $filtroLc = CnaeLc::where('cnae', $listaCnae->codigo_cnae)->get();
-            $itemLcFiltro = [];
-            foreach($filtroLc as $filter){
-                $itemLcFiltro[] = $filter->item_lc;
-            }
-            $servicos = $this->listaServicoModel->getListaServicos($itemLcFiltro);
-        }else{
-            $servicos = [];
-        }
 
+
+        $situacao_simples_nacional = Empresa::getOpcaoSimplesNacional();//Regime de Apuração Tributária pelo Simples Nacional, campo regApTribSN em regTrib
+        //Regime de Apuração Tributária pelo Simples Nacional.
+        $regimes_apuracao_sn = Empresa::getRegimeApuracaoSimplesNacional();
+        //Tipos de Regimes Especiais de Tributação Municipal:
+        $tipos_regime_esp_trib_mun = Empresa::getTiposRegimeEspecialTributacaoMunicipio();
         $regimeEspecialTributacaoList = $this->empresaModel->getRegimeEspecialTributacao();
-        
-        if(!empty($empresa->item_lc_id)){
-            $nbs_list = $this->nbsModel->getListaNbs($empresa->item_lc_id);
-        }else{
-            $nbs_list = [];
-        }
-        
+        $regimes = $this->empresaModel->getRegimes();
+
         return view('empresas.editar')->with([
             'estados' => $estados,
             'empresa' => $empresa,
             'uf_id' => $uf_id,
             'cidade' => $cidade,
             'cidades' => $cidades,
-            'servicos' => $servicos,
             'atividades' => $atividades,
-            'cnaes' => $cnaes,
+            'provedores' => $provedores,
+            'ambientes_emissao' => $ambientes_emissao,
+            'situacao_simples_nacional' => $situacao_simples_nacional,
+            'regimes_apuracao_sn' => $regimes_apuracao_sn,
+            'tipos_regime_esp_trib_mun' => $tipos_regime_esp_trib_mun,
             'reg_esp_trib' => $regimeEspecialTributacaoList,
-            'nbs_list' => $nbs_list
+            'regimes' => $regimes,
         ]);
     }
 
@@ -345,25 +312,6 @@ class EmpresasController extends Controller
         $userId = Auth::user()->id;
         $empresa = $this->empresaModel->find($id);
 
-
-        switch($dados['cidade_id']):
-            case '5208707'://goiania
-                $dados['serie_nota'] = 1;
-                break;
-            case '5201405'://aparecidada de goiania
-                $dados['serie_nota'] = 9;
-                break;
-            case '3301702'://duque de caxias
-                $dados['serie_nota'] = 1;
-                break;
-            case '3543402'://Ribeirão Preto
-                $dados['serie_nota'] = 1;
-                break;
-            default:
-                $dados['serie_nota'] = 8;
-                break;
-        endswitch;
-
         $empresaCompartilhada = $this->empresaCompartilhadaModel->where('empresa_id', $id)
             ->where('autorizado', 'S')
             ->where('solicitante_user_id', $userId)->first();
@@ -379,6 +327,9 @@ class EmpresasController extends Controller
         }
        
         $empresa->update($dados);
+
+        //$this->saveOrUpdateSpedy($empresa);
+        //$this->saveOrUpdateFocuNfe($empresa);
 
         session()->flash('message', 'Registro Atualizado com Sucesso.');
 
@@ -515,9 +466,13 @@ class EmpresasController extends Controller
                 session()->flash('danger', 'A Empresa '. $empresa->razao_social .' não possui um certificado digital válido cadastrado. O Certificado Digital é necessário para a comunicação com o Sistema da Prefeitura.');
                 return redirect()->route('empresas.edit', $empresa->id);
             }
-
-            $dados = $this->consultarDadosCadastrais($empresa->cpf_cnpj, $empresa->inscricao_municipal);
-            //Log::info($dados);
+            
+            $consultarDadosCadastraisDTO = $this->nfse->consultarDadosCadastrais(
+                $empresa->sigla_provedor,
+                $empresaId, // 🔥 empresa dinâmica - referencia para buscar certificado digital,
+                $empresa->cpf_cnpj, // 🔥 cnpj dinâmico
+                $empresa->inscricao_municipal // 🔥 inscrição municipal dinâmica
+            );
                         
             if(isset($dados['error'])){
                 session()->flash('danger', $dados['message']);
@@ -529,7 +484,7 @@ class EmpresasController extends Controller
                 }
             }
             
-            if(!isset($dados['Atividades']['Atividade']['CodigoTributacaoMunicipio'])){
+            /*if(!isset($dados['Atividades']['Atividade']['CodigoTributacaoMunicipio'])){
                 foreach ($dados['Atividades']['Atividade'] as $atividade) {
                     $empresaAtividade = new EmpresaAtividade();
                     $empresaAtividade->insere([
@@ -587,14 +542,25 @@ class EmpresasController extends Controller
             }
 
             $empresa->dados_cadastrais = json_encode($dados);
-            $empresa->save();
+            $empresa->save();*/
 
-            DB::statement("
-                UPDATE empresa_cnaes AS e
-                JOIN cnae_lc AS c ON e.codigo_cnae = c.cnae
-                SET e.descricao_cnae = c.descricao_cnae
-                WHERE e.empresa_id = ?
-            ", [$empresaId]);
+            $atividades = [];
+            foreach ($consultarDadosCadastraisDTO->atividades as $atividade) {
+                $atividades[] = [
+                    'empresa_id' => $empresa->id,
+                    'codigo_atividade' => $atividade['cTribMun'],
+                    'descricao_atividade' => $atividade['xTribMun'],
+                    'vigencia_inicial' => date('Y-m-d', strtotime($atividade['vigencia_data_inicial'])),
+                    'vigencia_final'   => (isset($atividade['vigencia_data_final'])) ? $atividade['vigencia_data_final'] : null,
+                    'aliquota' => $atividade['pAliq']
+                ];
+            }
+            EmpresaAtividade::where('empresa_id', $empresa->id)->delete();
+            EmpresaAtividade::insert($atividades);
+
+            $empresa->dados_cadastrais = json_encode($consultarDadosCadastraisDTO);
+            $empresa->save();
+            
         }catch(\Exception $e){
             dd($e->getMessage());
         }
@@ -704,5 +670,181 @@ class EmpresasController extends Controller
         $solicitacao->delete();
         session()->flash('success', 'Solicitação de Compartilhamento de Empresa removido com sucesso.');    
         return redirect()->route('empresas.list-solicitar-acesso-empresa');
+    }
+
+    protected function saveOrUpdateSpedy($empresa){
+        $spedyService = app(\App\Services\Spedy\SpedyService::class);
+
+        try {
+            if(is_null($empresa->spedy_id)){
+                $data = [
+                    'name' => $empresa->razao_social, //required
+                    'legalName' => $empresa->nome_fantasia, //required
+                    'federalTaxNumber' => $empresa->cpf_cnpj, //required
+                    'address' => [ //required
+                        'street' => $empresa->logradouro,
+                        'district' => $empresa->bairro,
+                        'postalCode' => Utilitarios::somenteNumeros($empresa->cep),
+                        'number' => $empresa->numero,
+                        'additionalInformation' => $empresa->complemento,
+                        'city' => [
+                                'code' => $empresa->cidade_id,
+                                'name' => $empresa->cidade()->first()->municipio,
+                                'state' => strtolower($empresa->cidade()->first()->estado()->first()->sigla)
+                        ],
+                        'country' => [
+                                'code' => '1058',
+                                'name' => 'Brasil',
+                        ],
+                        'cityName' => $empresa->cidade()->first()->municipio
+                    ],
+                    'stateTaxNumber' => null,//inscrição estadual
+                    'cityTaxNumber' => $empresa->inscricao_municipal,
+                    'email' => $empresa->email,
+                    'phone' =>  Utilitarios::somenteNumeros($empresa->telefone1),
+                    'mobilePhone' => Utilitarios::somenteNumeros($empresa->telefone2),
+                    'taxRegime' => $empresa->regime,//taxRegime
+                    'specialTaxRegime' => $empresa->regime_especial_tributacao,//specialTaxRegime
+                    'simplesNacionalTaxRegime' => $empresa->simples_nacional_regime,//
+                ];
+
+                //Atividades Econômicas
+                foreach($empresa->atividadesEmpresa()->get() as $key => $atividade){
+                    $data['economicActivities'][] = [
+                        'code' => $atividade->codigo_atividade,
+                        'type' => ($key == 0) ? 'main' : 'secondary'
+                    ];
+                }
+                
+                $response = $spedyService->createCompany($data);
+                $empresa->spedy_id = $response['id'];
+                $empresa->spedy_api_key = $response['apiCredentials']['apiKey'];
+                $empresa->save();
+            } else {
+                $data = [
+                    'id' => $empresa->spedy_id,
+                    'name' => $empresa->razao_social, //required
+                    'legalName' => $empresa->nome_fantasia, //required
+                    'federalTaxNumber' => $empresa->cpf_cnpj, //required
+                    'address' => [ //required
+                        'street' => $empresa->logradouro,
+                        'district' => $empresa->bairro,
+                        'postalCode' => Utilitarios::somenteNumeros($empresa->cep),
+                        'number' => $empresa->numero,
+                        'additionalInformation' => $empresa->complemento,
+                        'city' => [
+                                'code' => $empresa->cidade_id,
+                                'name' => $empresa->cidade()->first()->municipio,
+                                'state' => strtolower($empresa->cidade()->first()->estado()->first()->sigla)
+                        ],
+                        'country' => [
+                                'code' => '1058',
+                                'name' => 'Brasil',
+                        ],
+                        'cityName' => $empresa->cidade()->first()->municipio
+                    ],
+                    'stateTaxNumber' => null,//inscrição estadual
+                    'cityTaxNumber' => $empresa->inscricao_municipal,
+                    'email' => $empresa->email,
+                    'phone' =>  Utilitarios::somenteNumeros($empresa->telefone1),
+                    'mobilePhone' => Utilitarios::somenteNumeros($empresa->telefone2),
+                    'taxRegime' => $empresa->regime,//taxRegime
+                    'specialTaxRegime' => $empresa->regime_especial_tributacao,//specialTaxRegime
+                    'simplesNacionalTaxRegime' => $empresa->simples_nacional_regime,//
+                ];
+
+                //Atividades Econômicas
+                foreach($empresa->atividadesEmpresa()->get() as $key => $atividade){
+                    $data['economicActivities'][] = [
+                        'code' => $atividade->codigo_atividade,
+                        'type' => ($key == 0) ? 'main' : 'secondary'
+                    ];
+                }
+                $spedyService->updateCompany($empresa->spedy_id, $data);
+            }
+
+           
+            $certificado = $empresa->certificado->first();
+            $certificadoSpedy = $spedyService->verificarCertificado($empresa->spedy_id);
+
+            if($certificado && !isset($certificadoSpedy[0]['id'])){
+                $cd = $this->certManager->getCertificate($empresa->id);
+                $certificadoUpload = $spedyService->uploadCertificate(
+                    $empresa->spedy_id,
+                    $cd['pfx'],
+                    $cd['password']
+                );
+            }
+
+            $dados =[
+                'serviceInvoice' => [
+                    'series' => $empresa->serie_dps,
+                    'issueType' => 'website',
+                    'environmentType'=> $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 'development': 'production',
+                    'nextNumber' => $empresa->num_ultimo_dps //número do próximo rps/dps
+                ],
+            ];
+            $spedyService->setConfigurations($empresa->spedy_id, $dados);
+        } catch (\RuntimeException $e) {
+            dd($e->getMessage());
+        }
+    }
+
+    protected function saveOrUpdateFocuNfe(Empresa $empresa){
+        $regime_tributario = match ($empresa->regime) {
+            'simplesNacional' => 1,
+            'simplesNacionalExcessoSublimite' => 2,
+            'regimeNormal' => 3,
+            'simplesNacionalMEI' => 4,
+            default => 1,
+        };
+
+        $dados = [
+            'nome' => $empresa->razao_social,
+            'nome_fantasia' => $empresa->nome_fantasia,
+            'cnpj' => $empresa->cpf_cnpj,
+            //'inscricao_estadual' => '123456',
+            'inscricao_municipal' => $empresa->inscricao_municipal,
+
+            'cep' => $empresa->cep,
+            'bairro' => $empresa->bairro ,
+            'complemento' => $empresa->complemento,
+            'logradouro' => $empresa->logradouro,
+            'municipio' => $empresa->cidade()->first()->municipio,
+            'numero' => $empresa->numero,
+            'pais' => 'Brasil',
+            'regime_tributario' => $regime_tributario,
+            'telefone' => '',
+            'uf' => $empresa->cidade()->first()->estado()->first()->sigla,
+            
+            //Nfse
+            'habilita_nfse' => true,
+
+            //produção
+            'proximo_numero_nfse_producao' => null,
+            'serie_nfse_producao' => null,
+
+            //homologacao
+            'proximo_numero_nfse_homologacao' => '7',
+            'serie_nfse_homologacao' => '0008',
+        ];
+
+        $certificado = $empresa->certificado->first();
+        if($certificado){
+            $cd = $this->certManager->getCertificate($empresa->id);
+            $dados['arquivo_certificado_base64'] = base64_encode(file_get_contents($cd['pfx']));
+            $dados['senha_certificado'] = $cd['password'];
+        }
+
+        if(!empty($empresa->focunfe_id)){
+            $resultado = $this->focuNfeService->atualizarEmpresa($empresa->focunfe_id, $dados);
+        }else{
+            $resultado = $this->focuNfeService->criarEmpresa($dados);
+        }
+        
+        $empresa->focunfe_id = $resultado['id'];
+        $empresa->focunfe_token_hmg = $resultado['token_homologacao'];
+        $empresa->focunfe_token_prd = $resultado['token_producao'];
+        $empresa->save();
     }
 }

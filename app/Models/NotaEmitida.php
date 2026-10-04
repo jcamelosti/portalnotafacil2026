@@ -2,130 +2,45 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NotaEmitida extends Model
 {
-    use HasFactory;
-
-    protected $table = 'emitidas';
-    
-    protected $casts = [
-        'dados_emissao_json' => 'array',
-    ];
+    protected $table = 'notas_emitidas';
 
     protected $fillable = [
         'empresa_id',
         'tomador_id',
+        'nfse_xml',
         'num_nfse',
-        'cod_verificacao_nfse',
-        'data_emissao_nfse',
-        'numero_rps',
-        'serie_rps',
-        'tipo_rps',
-        'data_emissao_rps',
-        'competencia',
-        'valor_nota',
-        'cod_trib_mun',
-        'url_view',
-        'cancelada',
-        'data_hora_cancel',
-        'motivo_cancelamento',
-        'nome_tomador',
-        'dados_emissao_json'
+        'valor',
+        'dados_emissao',
     ];
 
-    public function setCodVerificacaoNfseAttribute($value)
-    {
-        $this->attributes['cod_verificacao_nfse'] = $this->mask(str_replace(' ', '', $value), '## ## ##');
-    }
+    protected $casts = [
+        'valor' => 'decimal:2',
+        'dados_emissao' => 'array',
+    ];
 
-    public function getDataEmissaoNfseAttribute($value)
-    {
-        return Carbon::createFromFormat('Y-m-d', $value)->format('d/m/Y');
-    }
-
-    public function getDataHoraCancelAttribute($value)
-    {
-        if ($value != '')
-            return Carbon::createFromFormat('Y-m-d G:i:s', $value)->format('d/m/Y - G:i:s');
-        else
-            return null;
-    }
-
-    public function getCanCancelAttribute(){       
-        $diff = now()->diffInDays($this->created_at);
-        
-        if($diff <= 90){
-            return true;
-        }
-
-        return false;
-    }
-
-    public function getValorNotaAttribute($value)
-    {
-        return number_format($value, 2, ',', '.');
-    }
-
-    public function empresa()
+    public function empresa(): BelongsTo
     {
         return $this->belongsTo(Empresa::class);
     }
 
-    public function tomador()
+    public function tomador(): BelongsTo
     {
-        return $this->belongsTo(Tomador::class);
+        return $this->belongsTo(Tomador::class, 'tomador_id');
     }
 
-    protected function notaExiste($dados)
-    {
-        $res = $this
-            ->where('empresa_id', $dados['empresa_id'])
-            ->where('tomador_id', $dados['tomador_id'])
-            ->where('num_nfse', $dados['num_nfse'])
-            ->first();
 
-        if ($res) {
+    public function getCanCancelAttribute(){       
+        $diff = now()->diffInDays($this->created_at);
+        
+        if($diff <= 2){
             return true;
         }
 
         return false;
-    }
-    public function adicionarNfse($nfse)
-    {
-        if (!$this->notaExiste($nfse)) {
-            return $this->create($nfse);
-        } else {
-            $nota = $this->where('empresa_id', $nfse['empresa_id'])
-                ->where('tomador_id', $nfse['tomador_id'])
-                ->where('num_nfse', $nfse['num_nfse'])
-                ->first();
-
-            $nota = $nota->update($nfse);
-
-            return $this->where('empresa_id', $nfse['empresa_id'])
-                ->where('tomador_id', $nfse['tomador_id'])
-                ->where('num_nfse', $nfse['num_nfse'])
-                ->first();
-        }
-    }
-
-    public function mask($val, $mask)
-    {
-        $maskared = '';
-        $k = 0;
-        for ($i = 0; $i <= strlen($mask) - 1; $i++) {
-            if ($mask[$i] == '#') {
-                if (isset($val[$k]))
-                    $maskared .= $val[$k++];
-            } else {
-                if (isset($mask[$i]))
-                    $maskared .= $mask[$i];
-            }
-        }
-        return $maskared;
     }
 }

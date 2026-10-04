@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Traits\IssnetTrait;
 use App\Models\Empresa;
 use App\Models\License;
-use App\Models\NotaEmitida;
+//use App\Models\NotaEmitida;
 use App\Models\Tomador;
 use Illuminate\Support\Facades\Validator;
 use App\Utilitarios\Utilitarios;
@@ -25,7 +25,7 @@ class NotaController extends BaseController
     private $tomadorModel;
     private $nfseModel;
 
-    public function __construct(Empresa $empresaModel, Tomador $tomadorModel, NotaEmitida $nfseModel){
+    public function __construct(Empresa $empresaModel, Tomador $tomadorModel, stdClass $nfseModel){
         $this->notaBO = NotasBO::newInstance();
         $this->empresaModel = $empresaModel;
         $this->tomadorModel = $tomadorModel;

@@ -4,33 +4,92 @@ namespace JCamelo\NfseNacionalLib\Services;
 use Illuminate\Support\Facades\Log;
 use JCamelo\NfseNacionalLib\DTO\CadastroDTO;
 use JCamelo\NfseNacionalLib\Manager\CertificateManager;
+use JCamelo\NfseNacionalLib\Manager\WebServicesManager;
 
 class ISSNetService
 {
      public function __construct(
         private CertificateManager $certManager,
-        private SoapTransport $transport
+        private SoapTransport $transport,
+        private WebServicesManager $wsManager
     ) {}
+    
+    public function validarXml(string $xml, int $empresaId){
+        $xml =  str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);
+        
+        $soap = SoapBuilder::build('ValidarXml', $xml);
        
+        $cert = $this->certManager->getCertificate($empresaId);
+        
+        //Obter o Endpoint correto se produção ou homologação conforme campo ambiente_emissao do registro da empresa
+        $ws = $this->wsManager->getWsUrl($empresaId);
+        
+        $response = $this->transport->send(
+            $ws['url'],
+            config('nfse.uri'),
+            'ValidarXml',
+            $soap,
+            $cert
+        );
+
+        $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
+        $retorno = simplexml_load_string( $response );
+        
+        return $retorno;
+    }
+
+    public function consultarXml(string $xml, int $empresaId){
+        $xml =  str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);
+        
+        $soap = SoapBuilder::build('ConsultarNfseServicoPrestado', $xml);
+        $cert = $this->certManager->getCertificate($empresaId);
+
+        //Obter o Endpoint correto se produção ou homologação conforme campo ambiente_emissao do registro da empresa
+        $ws = $this->wsManager->getWsUrl($empresaId);
+
+         $response = $this->transport->send(
+            $ws['url'],
+            config('nfse.uri'),
+            'ConsultarNfseServicoPrestado',
+            $soap,
+            $cert
+        );
+
+        $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
+        $retorno = simplexml_load_string( $response );
+        
+        return $retorno;
+    }
+
     public function gerarNfse(string $xml, int $empresaId)
     {
         $xml =  str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);
         $soap = SoapBuilder::build('GerarNfse', $xml);
        
         $cert = $this->certManager->getCertificate($empresaId);
+        //Obter o Endpoint correto se produção ou homologação conforme campo ambiente_emissao do registro da empresa
+        $ws = $this->wsManager->getWsUrl($empresaId);
+        
         $response = $this->transport->send(
-            config('nfse.url'),
+            $ws['url'],
             config('nfse.uri'),
             'GerarNfse',
             $soap,
             $cert
         );
-        echo "<br>";
-        echo __METHOD__."<br><br>";
-        echo "<br>";
+
+        /*$resposta = $this->transport->enviarRequisicao(
+            $ws['url'],
+            config('nfse.uri'),
+            'GerarNfse',
+            $soap,
+            $cert
+        );*/
         
-        dd($response);
-        return $this->parse($response);
+        $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
+        $retorno = simplexml_load_string( $response );
+        
+        return $retorno;
     }
 
     public function cancelarNfse(string $xml)
@@ -42,16 +101,19 @@ class ISSNetService
     {
         $soap = SoapBuilder::build('ConsultarDadosCadastrais', $xml);
         $cert = $this->certManager->getCertificate($empresaId);
-
+        //Obter o Endpoint correto se produção ou homologação conforme campo ambiente_emissao do registro da empresa
+        $ws = $this->wsManager->getWsUrl($empresaId);
+                
         $response = $this->transport->send(
-            config('nfse.url'),
+            $ws['url'],
             config('nfse.uri'),
             'ConsultarDadosCadastrais',
             $soap,
             $cert
         );
+
         $cadastroXml = $this->extractCadastro($response);
-        dd($cadastroXml);
+        
         return $this->toDTO($cadastroXml);
     }
 
@@ -59,17 +121,20 @@ class ISSNetService
     {
         $soap = SoapBuilder::build('ConsultarUrlNfse', $xml);
         $cert = $this->certManager->getCertificate($empresaId);
-
+        $ws = $this->wsManager->getWsUrl($empresaId);
+        
         $response = $this->transport->send(
-            config('nfse.url'),
+            $ws['url'],
             config('nfse.uri'),
             'ConsultarUrlNfse',
             $soap,
             $cert
         );
-        echo __METHOD__."<br><br>";
-        dd($response);
-        //return $this->parse($response);
+        
+        Log::info(__METHOD__);
+        Log::info($response);
+        
+        return $this->parse($response);
     }
 
     public function extractCadastro(string $response): \SimpleXMLElement
@@ -102,7 +167,8 @@ class ISSNetService
 
     private function toDTO(\SimpleXMLElement $cadastro): CadastroDTO
     {
-        //dd($cadastro);
+        $tribISSQN = (array)$cadastro->TributacoesPermitidas->tribISSQN;
+       
         return new CadastroDTO(
             cnpj: (string) $cadastro->CNPJ,
             im: (string) $cadastro->IM,
@@ -132,7 +198,7 @@ class ISSNetService
             permiteExigibilidadeSuspensaProcAdm: (int)$cadastro->PermiteExigibilidadeSuspensaProcAdm,
             permiteTributarFora: (int)$cadastro->PermiteTributarFora,
             tributacoesPermitidas: [
-                'tribISSQN' => (int)$cadastro->TributacoesPermitidas->tribISSQN
+                'tribISSQN' => $tribISSQN
             ]
         );
     }
@@ -160,20 +226,20 @@ class ISSNetService
         if (isset($cadastro->Atividades->Atividade)) {
             foreach ($cadastro->Atividades->Atividade as $atv) {
                 $result[] = [
-                    'codigo' => (string) $atv->cTribMun,
-                    'descricao' => (string) $atv->xTribMun,
-                    'aliquota' => (float) $atv->pAliq,
+                    'cTribMun' => (string) $atv->cTribMun,
+                    'xTribMun' => (string) $atv->xTribMun,
+                    'pAliq' => (float) $atv->pAliq,
+                    'vigencia_data_inicial' => (string)$atv->Vigencias->Vigencia->DataInicial
                 ];
             }
         }
-
         return $result;
     }
 
     private function parse($response)
     {
         $xml = simplexml_load_string($response);
-        $output = (string)$xml->xpath('//outputXML')[0];
+        //$output = (string)$xml->xpath('//outputXML')[0];
 
         return simplexml_load_string($output);
     }
@@ -184,18 +250,19 @@ class ISSNetService
         $soap = SoapBuilder::build('RecepcionarLoteDpsSincrono', $xml);
        
         $cert = $this->certManager->getCertificate($empresaId);
+        //Obter o Endpoint correto se produção ou homologação conforme campo ambiente_emissao do registro da empresa
+        $ws = $this->wsManager->getWsUrl($empresaId);
+       
         $response = $this->transport->send(
-            config('nfse.url'),
+            $ws['url'],
             config('nfse.uri'),
             'RecepcionarLoteDpsSincrono',
             $soap,
             $cert
         );
-        echo "<br>";
-        echo __METHOD__."<br><br>";
-        echo "<br>";
-        
+       
         dd($response);
+
         return $this->parse($response);
     }
 }

@@ -9,67 +9,72 @@
         </label>
     @endif
 
-    <label class="block text-sm">
-        <span class="text-gray-700 ">Razão Social:</span>
-        {!! Form::text('razao_social', null, ['maxlength' => '255', 'required', 'class'=>'block w-full mt-1 text-sm  
-        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-        :shadow-outline-gray form-input', 'placeholder'=>'Razão Social']) !!}
-        @if ($errors->has('razao_social'))
-            <span class="text-xs text-red-600 ">
-            <strong>{{ $errors->first('razao_social') }}</strong>
-            </span>
-        @endif
-    </label>
-    <label class="block text-sm">
-        <span class="text-gray-700 ">Nome Fantasia:</span>
-        {!! Form::text('nome_fantasia', null, ['maxlength' => '255','class'=>'block w-full mt-1 text-sm  
-        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-        :shadow-outline-gray form-input', 'placeholder'=>'Nome Fantasia']) !!}
-        @if ($errors->has('nome_fantasia'))
-            <span class="text-xs text-red-600 ">
-            <strong>{{ $errors->first('nome_fantasia') }}</strong>
-            </span>
-        @endif
-    </label>
-    <label class="block text-sm">
-        <span class="text-gray-700 ">Inscrição Municipal:</span>
-        {!! Form::text('inscricao_municipal', null, ['maxlength' => '20','class'=>'block w-full mt-1 text-sm  
-        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-        :shadow-outline-gray form-input', 'placeholder'=>'Inscrição Municipal']) !!}
-        @if ($errors->has('inscricao_municipal'))
-            <span class="text-xs text-red-600 ">
-            <strong>{{ $errors->first('inscricao_municipal') }}</strong>
-            </span>
-        @endif
-    </label>
-    <label class="block text-sm">
-        <span class="text-gray-700 ">E-mail para Contato:</span>
-        {!! Form::text('email', null, ['maxlength' => '255','class'=>'block w-full mt-1 text-sm  
-        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-        :shadow-outline-gray form-input', 'placeholder'=>'emaildaempresa@provedor.com.br']) !!}
-        @if ($errors->has('email'))
-            <span class="text-xs text-red-600 ">
-            <strong>{{ $errors->first('email') }}</strong>
-            </span>
-        @endif
-    </label>
-
-    <label class="block text-sm">
-        <span class="text-gray-700 ">CNPJ:</span>
-        {!! Form::text('cpf_cnpj', null, ['required','class'=>'block w-full mt-1 text-sm  
-        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-        :shadow-outline-gray form-input', 'placeholder'=>'CNPJ ou CPF da Empresa', 'id' => 'cpf_cnpj']) !!}
-        @if ($errors->has('cpf_cnpj'))
-            <span class="text-xs text-red-600 ">
-            <strong>{{ $errors->first('cpf_cnpj') }}</strong>
-        </span>
-        @endif
-    </label>
+    <div class="grid grid-cols-2 gap-1">
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Razão Social:</span>
+            {!! Form::text('razao_social', null, ['maxlength' => '255', 'required', 'class'=>'block w-full mt-1 text-sm  
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            :shadow-outline-gray form-input', 'placeholder'=>'Razão Social']) !!}
+            @if ($errors->has('razao_social'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('razao_social') }}</strong>
+                </span>
+            @endif
+        </label>
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Nome Fantasia:</span>
+            {!! Form::text('nome_fantasia', null, ['maxlength' => '255','class'=>'block w-full mt-1 text-sm  
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            :shadow-outline-gray form-input', 'placeholder'=>'Nome Fantasia']) !!}
+            @if ($errors->has('nome_fantasia'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('nome_fantasia') }}</strong>
+                </span>
+            @endif
+        </label>
+    </div>
 
     <div class="grid grid-cols-2 gap-1">
         <label class="block text-sm">
+            <span class="text-gray-700 ">CNPJ:</span>
+            {!! Form::text('cpf_cnpj', null, ['required','class'=>'block w-full mt-1 text-sm  
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            :shadow-outline-gray form-input', 'placeholder'=>'CNPJ ou CPF da Empresa', 'id' => 'cpf_cnpj']) !!}
+            @if ($errors->has('cpf_cnpj'))
+            <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('cpf_cnpj') }}</strong>
+            </span>
+            @endif
+        </label>
+
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Inscrição Municipal:</span>
+            {!! Form::text('inscricao_municipal', null, ['maxlength' => '20','class'=>'block w-full mt-1 text-sm  
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            :shadow-outline-gray form-input', 'placeholder'=>'Inscrição Municipal']) !!}
+            @if ($errors->has('inscricao_municipal'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('inscricao_municipal') }}</strong>
+                </span>
+            @endif
+        </label>
+    </div>
+
+    <div class="grid grid-cols-3 gap-1">
+        <label class="block text-sm">
+            <span class="text-gray-700 ">E-mail para Contato:</span>
+            {!! Form::text('email', !empty($empresa->email) ? $empresa->email : '', ['maxlength' => '255','class'=>'block w-full mt-1 text-sm  
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            :shadow-outline-gray form-input', 'placeholder'=>'emaildaempresa@provedor.com.br']) !!}
+            @if ($errors->has('email'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('email') }}</strong>
+                </span>
+            @endif
+        </label>
+        <label class="block text-sm">
             <span class="text-gray-700 ">Telefone Fixo/Celular:</span>
-            {!! Form::text('telefone1', null, ['required','class'=>'block w-full mt-1 text-sm 
+            {!! Form::text('telefone1', !empty($empresa->telefone1) ? $empresa->telefone1 : '', ['required','class'=>'block w-full mt-1 text-sm 
             
             focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
             :shadow-outline-gray form-input', 'placeholder'=>'Informe o telefone fixo ou celular de contato', 'id'=>'phone_fixo']) !!}
@@ -82,7 +87,7 @@
 
         <label class="block text-sm">
             <span class="text-gray-700 ">WhatsApp:</span>
-            {!! Form::text('telefone2', null, ['class'=>'block w-full mt-1 text-sm  
+            {!! Form::text('telefone2', !empty($empresa->telefone2) ? $empresa->telefone2 : '', ['class'=>'block w-full mt-1 text-sm  
             focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
             :shadow-outline-gray form-input', 'placeholder'=>'Informe o número de WhatsApp', 'id'=>'whatsapp']) !!}
             @if ($errors->has('telefone2'))
@@ -93,129 +98,66 @@
         </label>
     </div>
 
-    <div class="grid grid-cols-2 gap-1">
-        <label class="block text-sm">
-            <span class="text-gray-700 ">CEP:</span>
-            {!! Form::text('cep', null, ['required','class'=>'cep block w-full mt-1 text-sm  
-            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-            :shadow-outline-gray form-input', 'placeholder'=>'Informe o CEP é o Endereço será Buscado Automaticamente', 'id'=>'cep']) !!}
-            @if ($errors->has('cep'))
-                <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('cep') }}</strong>
-            </span>
-            @endif
-        </label>
-        
-        <label class="block text-sm">
-            <span class="text-gray-700 ">Tipo de Logradouro:</span>
-            {!! Form::select('tipo_logradouro',
-            [
-                "Alameda" => "Alameda", 
-                "Avenida" => "Avenida", 
-                "Chácara" => "Chácara", 
-                "Colônia" => "Colônia", 
-                "Condomínio" => "Condomínio", 
-                "Estância" => "Estância", 
-                "Estrada" => "Estrada", 
-                "Fazenda" => "Fazenda", 
-                "Praça" => "Praça", 
-                "Prolongamento" => "Prolongamento", 
-                "Rodovia" => "Rodovia", 
-                "Rua" => "Rua", 
-                "Sítio" => "Sítio", 
-                "Travessa" => "Travessa", 
-                "Vicinal" => "Vicinal",
-                "Eqn" => "Eqnp"
-            ]
-            ,$empresa->tipo_logradouro, ['required','class'=>'block w-full mt-1 text-sm  
-            
-            form-select
-            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
-            @if ($errors->has('tipo_logradouro'))
-                <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('tipo_logradouro') }}</strong>
-            </span>
-            @endif
-        </label>
+    <div class="grid grid-cols-3 md:grid-cols-3 lg:grid-cols-3 gap-4 mt-4">
+        <div class="lg:col-span-1">
+            <label class="block text-sm">
+                <span class="text-gray-700 ">CEP:</span>
+                {!! Form::text('cep', !empty($empresa->cep) ? $empresa->cep : '', ['required','class'=>'cep block w-full mt-1 text-sm  
+                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                :shadow-outline-gray form-input', 'placeholder'=>'Informe o CEP é o Endereço será Buscado Automaticamente', 'id'=>'cep']) !!}
+                @if ($errors->has('cep'))
+                    <span class="text-xs text-red-600 ">
+                    <strong>{{ $errors->first('cep') }}</strong>
+                </span>
+                @endif
+            </label>
+        </div>
+
+        <div class="lg:col-span-2">
+            <label class="block text-sm">
+                <span class="text-gray-700 ">Logradouro:</span>
+                {!! Form::text('logradouro', !empty($empresa->logradouro) ? $empresa->logradouro : '', ['required','class'=>'block w-full mt-1 text-sm  
+                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                :shadow-outline-gray form-input', 'placeholder'=>'Endereço da Empresa: Rua X, Quadra Y Lote B', 'id'=>'street']) !!}
+                @if ($errors->has('logradouro'))
+                    <span class="text-xs text-red-600 ">
+                    <strong>{{ $errors->first('logradouro') }}</strong>
+                </span>
+                @endif
+            </label>
+        </div>
+
+        <div>
+            <label class="block text-sm">
+                <span class="text-gray-700 ">Número:</span>
+                {!! Form::text('numero', !empty($empresa->numero) ? $empresa->numero : ' ', ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
+                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
+                @if ($errors->has('numero'))
+                    <span class="text-xs text-red-600 ">
+                    <strong>{{ $errors->first('numero') }}</strong>
+                </span>
+                @endif
+            </label>
+        </div>
+
+        <div>
+            <label class="block text-sm">
+                <span class="text-gray-700 ">Complemento:</span>
+                {!! Form::text('complemento', !empty($empresa->complemento) ? $empresa->complemento : '', ['maxlength' => '255','class'=>'block w-full mt-1 text-sm 
+                
+                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                :shadow-outline-gray form-input', 'placeholder'=>'Complemento']) !!}
+                @if ($errors->has('complemento'))
+                    <span class="text-xs text-red-600 ">
+                    <strong>{{ $errors->first('complemento') }}</strong>
+                </span>
+                @endif
+            </label>
+        </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-1">
-        <label class="block text-sm">
-            <span class="text-gray-700 ">Logradouro:</span>
-            {!! Form::text('logradouro', null, ['required','class'=>'block w-full mt-1 text-sm  
-            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-            :shadow-outline-gray form-input', 'placeholder'=>'Endereço da Empresa: Rua X, Quadra Y Lote B', 'id'=>'street']) !!}
-            @if ($errors->has('logradouro'))
-                <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('logradouro') }}</strong>
-            </span>
-            @endif
-        </label>
-
-        <label class="block text-sm">
-            <span class="text-gray-700 ">Número:</span>
-            {!! Form::text('numero', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
-            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
-            @if ($errors->has('numero'))
-                <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('numero') }}</strong>
-            </span>
-            @endif
-        </label>
-    </div>
-    <div class="grid grid-cols-1 gap-1">
-        <label class="block text-sm">
-            <span class="text-gray-700 ">Complento:</span>
-            {!! Form::text('complemento', null, ['maxlength' => '255','class'=>'block w-full mt-1 text-sm 
-            
-            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-            :shadow-outline-gray form-input', 'placeholder'=>'Complemento']) !!}
-            @if ($errors->has('complemento'))
-                <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('complemento') }}</strong>
-            </span>
-            @endif
-        </label>
-    </div>
-    <div class="grid grid-cols-4 gap-1">
-        <label class="block text-sm">
-            <span class="text-gray-700 ">Tipo de Bairro:</span>
-            {!! Form::select('tipo_bairro',
-            [
-                "Bairro" => "Bairro",
-                "Bosque" => "Bosque", 
-                "Chácara" => "Chácara",
-                "Conjunto" => "Conjunto", 
-                "Desmembramento" => "Desmembramento", 
-                "Distrito" => "Distrito", 
-                "Favela" => "Favela", 
-                "Fazenda" => "Fazenda", 
-                "Gleba" => "Gleba", 
-                "Horto" => "Horto", 
-                "Jardim" => "Jardim", 
-                "Loteamento" => "Loteamento", 
-                "Núcleo" => "Núcleo", 
-                "Parque" => "Parque", 
-                "Residencial" => "Residencial", 
-                "Sítio" => "Sítio", 
-                "Tropical" => "Tropical", 
-                "Vila" => "Vila", 
-                "Zona" => "Zona", 
-                "Centro" => "Centro",
-                "Setor" => "Setor",
-            ]
-            ,$empresa->tipo_bairro, ['required','class'=>'block w-full mt-1 text-sm  
-            
-            form-select
-            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
-            @if ($errors->has('tipo_bairro'))
-                <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('tipo_bairro') }}</strong>
-            </span>
-            @endif
-        </label>
-
+    <div class="grid grid-cols-4 gap-1 mt-4">
         <label class="block text-sm">
             <span class="text-gray-700 ">Bairro:</span>
             {!! Form::text('bairro', null, ['maxlength' => '255','required','class'=>'block w-full mt-1 text-sm  
@@ -258,24 +200,8 @@
         </div>
     </div>
 
-    @if(count($cnaes) > 1)
-    <div class="grid grid-cols-1 gap-1">
-        <label class="block text-sm">
-            <span class="text-gray-700 ">Cnae:</span>
-            {!! Form::select('empresa_cnae_id', isset($cnaes) ? $cnaes : []
-            ,$empresa->empresa_cnae_id, ['required','class'=>'block w-full mt-1 text-sm  
-            
-            form-select
-            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
-            @if ($errors->has('empresa_cnae_id'))
-                <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('empresa_cnae_id') }}</strong>
-            </span>
-            @endif
-        </label>
-    <div>
-        
-    <div class="grid grid-cols-1 gap-1">
+    @if(count($atividades) > 1)
+    <div class="grid grid-cols-1 gap-1 mt-4">
         <label class="block text-sm">
             <span class="text-gray-700 ">Atividade no Município:</span>
             {!! Form::select('empresa_atividade_id', isset($atividades) ? $atividades : []
@@ -290,44 +216,9 @@
             @endif
         </label>
     <div>
-        @if(!empty($empresa->empresa_cnae_id))
-        <div class="grid grid-cols-1 gap-1">
-            <label class="block text-sm">
-                <span class="text-gray-700 ">Item da LC116/2003:</span>
-                {!! Form::select('item_lc_id', $servicos
-                ,$empresa->item_lc_id, [empty($servicos) ? '' : 'required','class'=>'block w-full mt-1 text-sm  
-                
-                form-select
-                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
-                @if ($errors->has('item_lc_id'))
-                    <span class="text-xs text-red-600 ">
-                    <strong>{{ $errors->first('item_lc_id') }}</strong>
-                </span>
-                @endif
-            </label>
-        <div>
-        @endif
     @endif
 
-    @if(!empty($empresa->item_lc_id))
-        <div class="grid grid-cols-1 gap-1">
-            <label class="block text-sm">
-                <span class="text-gray-700 ">NBS:</span>
-                {!! Form::select('nbs_id', $nbs_list
-                ,$empresa->nbs_id, [empty($nbs_list) ? '' : 'required','class'=>'block w-full mt-1 text-sm  
-                
-                form-select
-                focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
-                @if ($errors->has('nbs_id'))
-                    <span class="text-xs text-red-600 ">
-                    <strong>{{ $errors->first('nbs_id') }}</strong>
-                </span>
-                @endif
-            </label>
-        <div>
-    @endif
-        
-    <div class="grid grid-cols-4 gap-1">
+    <div class="grid grid-cols-4 gap-1 mt-4">
         <label class="block text-sm">
             <span class="text-gray-700 ">Empresa é MEI?:</span>
             {!! Form::select('is_mei', [1 => 'SIM', 0 => 'NÃO']
@@ -382,7 +273,7 @@
         </label>
     </div>
 
-    <div class="grid grid-cols-4 gap-1">
+    <div class="grid grid-cols-4 gap-1 mt-4">
         <label class="block text-sm">
             <span class="text-gray-700 ">Optante Simples Nacional?:</span>
             {!! Form::select('is_optante_simples_nac', [1 => 'SIM', 2 => 'NÃO']
@@ -420,22 +311,109 @@
             </span>
             @endif
         </label>
+    </div>
+
+    @if($empresa->is_mei == '1')
+    <div class="grid grid-cols-2 gap-1 mt-4">
         <label class="block text-sm">
-            <span class="text-gray-700 ">Regime Especial de Tributação:</span>
-            {!! Form::select('regime_esp_tributacao', isset($reg_esp_trib) ? $reg_esp_trib : []
-            ,$empresa->regime_esp_tributacao, ['required','class'=>'block w-full mt-1 text-sm  
-            
+            <span class="text-gray-700 ">Número do Próximo DPS:</span>
+            {!! Form::text('num_ultimo_dps', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
+            @if ($errors->has('num_ultimo_dps'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('num_ultimo_dps') }}</strong>
+            </span>
+            @endif
+        </label>
+
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Série DPS:</span>
+            {!! Form::text('serie_dps', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
+            @if ($errors->has('serie_dps'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('serie_dps') }}</strong>
+            </span>
+            @endif
+        </label>
+    </div>
+    @else
+    <h2 class="mt-4 mb-4 text-2xl font-semibold text-blue-700">Campos importantes para NFSe Nacional</h2>
+
+    <div class="grid grid-cols-4 gap-1">
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Provedor de Emissão NFS-e:</span>
+            {!! Form::select('sigla_provedor', $provedores
+            ,$empresa->sigla_provedor, ['required','class'=>'block w-full mt-1 text-sm  
             form-select
             focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
-            @if ($errors->has('regime_esp_tributacao'))
+            @if ($errors->has('sigla_provedor'))
                 <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('regime_esp_tributacao') }}</strong>
+                <strong>{ { $errors->first('sigla_provedor') }}</strong>
+            </span>
+            @endif
+        </label>
+
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Ambiente Emissão NFS-e:</span>
+            {!! Form::select('ambiente_emissao', $ambientes_emissao
+            ,$empresa->ambiente_emissao, ['required','class'=>'block w-full mt-1 text-sm  
+            form-select
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+            @if ($errors->has('ambiente_emissao'))
+                <span class="text-xs text-red-600 ">
+                <strong>{ { $errors->first('ambiente_emissao') }}</strong>
             </span>
             @endif
         </label>
     </div>
 
-    <div class="grid grid-cols-4 gap-1">
+    <div class="grid grid-cols-4 gap-1 mt-4">
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Situação Perante Simples Nacional</span>
+            {!! Form::select('op_simp_nac', $situacao_simples_nacional
+            ,$empresa->op_simp_nac, ['required','class'=>'block w-full mt-1 text-sm  
+            form-select
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+            @if ($errors->has('op_simp_nac'))
+                <span class="text-xs text-red-600 ">
+                <strong>{ { $errors->first('op_simp_nac') }}</strong>
+            </span>
+            @endif
+        </label>
+
+        @if($empresa->op_simp_nac == 3 || $empresa->op_simp_nac == 2)
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Regime de Apuração Tributária pelo Simples Nacional:</span>
+            {!! Form::select('tp_reg_apuracao_sn', $regimes_apuracao_sn
+            ,$empresa->tp_reg_apuracao_sn, ['required','class'=>'block w-full mt-1 text-sm  
+            form-select
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+            @if ($errors->has('tp_reg_apuracao_sn'))
+                <span class="text-xs text-red-600 ">
+                <strong>{ { $errors->first('tp_reg_apuracao_sn') }}</strong>
+            </span>
+            @endif
+        </label>
+        @endif
+
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Tipos de Regimes Especiais de Tributação Municipal:</span>
+            {!! Form::select('tp_regime_esp_trib_mun', $tipos_regime_esp_trib_mun
+            ,$empresa->tp_regime_esp_trib_mun, ['required','class'=>'block w-full mt-1 text-sm  
+            form-select
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+            @if ($errors->has('tp_regime_esp_trib_mun'))
+                <span class="text-xs text-red-600 ">
+                <strong>{ { $errors->first('tp_regime_esp_trib_mun') }}</strong>
+            </span>
+            @endif
+        </label>
+    </div>
+
+    <div class="grid grid-cols-4 gap-1 mt-6">
         <label class="block text-sm">
             <span class="text-gray-700 ">Plano:</span>
             {!! Form::select('plano_id', $planos
@@ -466,37 +444,10 @@
             @endif
         </label>
     <div>
-
-    <div class="grid grid-cols-1 gap-1">
+    
+    <div class="grid grid-cols-2 gap-1 mt-4">
         <label class="block text-sm">
-            <span class="text-gray-700 ">Número da Última Nota Emitida:</span>
-            {!! Form::text('num_ultima_nota', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
-            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
-            @if ($errors->has('num_ultima_nota'))
-                <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('num_ultima_nota') }}</strong>
-            </span>
-            @endif
-        </label>
-    </div>
-    <div class="grid grid-cols-1 gap-1">
-        <label class="block text-sm">
-            <span class="text-gray-700 ">Número de Série(Série da Nota):</span>
-            {!! Form::text('serie_nota', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
-            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
-            @if ($errors->has('serie_nota'))
-                <span class="text-xs text-red-600 ">
-                <strong>{{ $errors->first('serie_nota') }}</strong>
-            </span>
-            @endif
-        </label>
-    </div>
-
-    <div class="grid grid-cols-1 gap-1">
-        <label class="block text-sm">
-            <span class="text-gray-700 ">Próximo Número de DPS(Número do próximo DPS NFSe Nacional):</span>
+            <span class="text-gray-700 ">Número do Último DPS:</span>
             {!! Form::text('num_ultimo_dps', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
             focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
             :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
@@ -506,10 +457,23 @@
             </span>
             @endif
         </label>
+
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Série DPS:</span>
+            {!! Form::text('serie_dps', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
+            @if ($errors->has('serie_dps'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('serie_dps') }}</strong>
+            </span>
+            @endif
+        </label>
     </div>
+    @endif
 </div>
 
-<div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+<div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse mt-4">
     <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
         <a href="{{ route('empresas.index') }}"
            class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-white text-base leading-6 font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
