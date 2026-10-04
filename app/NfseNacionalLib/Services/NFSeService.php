@@ -38,7 +38,6 @@ class NFSeService
         Log::info('Xml Assinado');
         Log::info($xml);
 
-        
         //formatando xml para Log
         $domxml = new \DOMDocument('1.0');
         $domxml->preserveWhiteSpace = false;

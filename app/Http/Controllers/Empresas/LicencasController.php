@@ -441,6 +441,7 @@ class LicencasController extends Controller
                 ]));
             }           
         }catch(Exception $e){
+            dd($e->getMessage());
             session()->flash('danger', 'Não foi possível gerar a Chave PIX. Tente Novamente');
             return redirect()->route('area-cliente');
         }
@@ -460,7 +461,7 @@ class LicencasController extends Controller
         unset($nomeArr[0]);
 
         $payment = [
-            "notification_url"=> "https://https://nfse-nacional.portalnotafacil.com.br/retorno/mercadopago",
+            "notification_url"=> "https://nfse-nacional.portalnotafacil.com.br/retorno/mercadopago",
             "transaction_amount" => (float)number_format($dados['produto']['valor_unitario'],2),
             "description" => $dados['produto']['descricao'],
             "payment_method_id" => "pix",

@@ -127,6 +127,12 @@
                     </div>
                 </div>
             </div>
+
+            <a target="_blank"
+                href="{{ route('nfse.danfse.pdf', $nota->id) }}"
+                class="px-3 py-1 text-xl font-semibold text-white bg-green-600 rounded hover:bg-green-700">
+                    Imprimir Danfe - NFS-e
+            </a>
         </div>  
     </div>
 </x-area-empresa-layout>

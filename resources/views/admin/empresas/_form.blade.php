@@ -200,6 +200,7 @@
         </div>
     </div>
 
+    @if(count($atividades) > 1)
     <div class="grid grid-cols-1 gap-1 mt-4">
         <label class="block text-sm">
             <span class="text-gray-700 ">Atividade no Município:</span>
@@ -215,6 +216,7 @@
             @endif
         </label>
     <div>
+    @endif
 
     <div class="grid grid-cols-4 gap-1 mt-4">
         <label class="block text-sm">
@@ -311,6 +313,33 @@
         </label>
     </div>
 
+    @if($empresa->is_mei == '1')
+    <div class="grid grid-cols-2 gap-1 mt-4">
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Número do Próximo DPS:</span>
+            {!! Form::text('num_ultimo_dps', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
+            @if ($errors->has('num_ultimo_dps'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('num_ultimo_dps') }}</strong>
+            </span>
+            @endif
+        </label>
+
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Série DPS:</span>
+            {!! Form::text('serie_dps', null, ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
+            @if ($errors->has('serie_dps'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('serie_dps') }}</strong>
+            </span>
+            @endif
+        </label>
+    </div>
+    @else
     <h2 class="mt-4 mb-4 text-2xl font-semibold text-blue-700">Campos importantes para NFSe Nacional</h2>
 
     <div class="grid grid-cols-4 gap-1">
@@ -441,6 +470,7 @@
             @endif
         </label>
     </div>
+    @endif
 </div>
 
 <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse mt-4">

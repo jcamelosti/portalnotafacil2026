@@ -45,7 +45,11 @@
                     <td class="px-4 py-3">
                         <div>
                             <p class="text-xs text-gray-600">
+                                @if($lista->ultima_emissao)
                                 {{ \Carbon\Carbon::parse($lista->ultima_emissao)->format('d/m/Y H:m:s') }}
+                                @else
+                                Nenhuma emissão registrada
+                                @endif
                             </p>
                         </div>
                     </td>

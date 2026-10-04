@@ -141,6 +141,12 @@
                                     PDF
                                 </a-->
 
+                                <a target="_blank"
+                                href="{{ route('nfse.danfse.pdf', $nota->id) }}"
+                                class="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
+                                    PDF
+                                </a>
+
                                 <a href="{{ route('notas.visualizar-xml', $nota->id) }}"
                                 class="px-3 py-1 text-xs font-semibold text-white bg-green-500 rounded hover:bg-green-600">
                                     XML

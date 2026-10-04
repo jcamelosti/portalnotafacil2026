@@ -68,7 +68,7 @@
                             <div>
                                 <p class="text-xs text-gray-500">Valor</p>
                                 <p class="text-sm font-bold text-green-600">
-                                    R$ {{ $nota->valor_nota }}
+                                    R$ {{ $nota->valor }}
                                 </p>
                             </div>
 
@@ -76,7 +76,7 @@
                             <div>
                                 <p class="text-xs text-gray-500">Data</p>
                                 <p class="text-sm font-semibold">
-                                    {{ $nota->data_emissao_nfse }}
+                                    {{ $nota->created_at->format('d/m/Y H:i') }}
                                 </p>
                             </div>
 
@@ -89,12 +89,12 @@
                             </div>
 
                             <!-- RPS -->
-                            <div>
+                            <!--div>
                                 <p class="text-xs text-gray-500">RPS</p>
                                 <p class="text-sm font-semibold">
                                     {{ $nota->numero_rps }}
                                 </p>
-                            </div>
+                            </div-->
 
                         </div>
                     </div>
@@ -103,9 +103,15 @@
                     <div class="mt-4 md:mt-0 flex flex-wrap items-center gap-2 md:justify-end">
 
                         <!-- PDF -->
-                        <a href="{{ $nota->url_view }}"
+                        <a href="{{ route('admin.notas.consultar-url', $nota->id) }}"
                         class="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
-                            PDF
+                            Obter Url da NFS-e
+                        </a>
+
+                        
+                        <a target="_blank" href="{{ route('nfse.danfse.pdf', $nota->id) }}"
+                        class="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
+                            Gerar Danfe NFS-e
                         </a>
 
                         <!-- STATUS -->

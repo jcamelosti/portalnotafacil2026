@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Emissor\CertificadoController;
 use App\Http\Controllers\Emissor\DadosFaturamentoController;
+use App\Http\Controllers\Emissor\DanfseController;
 use App\Http\Controllers\Emissor\DashboardController;
 use App\Http\Controllers\Emissor\NfseNacional;
 use App\Http\Controllers\Emissor\NotaController;
@@ -115,6 +116,10 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             Route::get('/obter/percentual-atividade-mun', [NotaController::class, 'obterPercentualAtividadeMunicipio']);
             Route::get('/obter/percentual-trib-nac', [NotaController::class, 'obterPercentualTribNac']);
             Route::get('/obter/classificacoes-tributarias', [NotaController::class, 'obterClassificacoesTributarias']);
+
+            Route::get('/nfse/{nota}/danfse', [DanfseController::class, 'pdf'])
+                //->where('filename', '.*')
+                ->name('nfse.danfse.pdf');
         });
 
         Route::group(['prefix' => 'emissor-nacional-mei'], function () {

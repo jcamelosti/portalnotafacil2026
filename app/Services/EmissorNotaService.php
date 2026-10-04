@@ -4,6 +4,7 @@ namespace App\Services;
 use App\Models\Empresa;
 use App\Models\NotaEmitida;
 use App\Models\Tomador;
+use App\Utilitarios\Utilitarios;
 use Illuminate\Support\Facades\DB;
 use JCamelo\NfseNacionalLib\DTO\ComExtDTO;
 use JCamelo\NfseNacionalLib\DTO\DPSDataSnDTO;
@@ -194,7 +195,10 @@ class EmissorNotaService
         
         $dataSN = new DPSDataSnDTO(
             ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
-            dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
+            //dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
+            dataEmissao:Carbon::parse($dados['data_competencia'])
+                ->setTimeFromTimeString(now()->format('H:i:s'))
+                ->format('Y-m-d\TH:i:sP'),
             serie: $empresa->serie_dps,
             numDps: ($empresa->num_ultimo_dps + 1),
             dataCompetencia: Carbon::now(
@@ -206,6 +210,7 @@ class EmissorNotaService
             imPrestador: $empresa->inscricao_municipal,
             fonePrestador: preg_replace('/[^0-9]/', '', $empresa->telefone1) ?? null,
             emailPrestador: $empresa->email ?? null,
+            municipioPrestador: $empresa->cidade_id,
 
             //Regime da Empresa
             opSimpNac: $empresa->op_simp_nac,
@@ -292,8 +297,6 @@ class EmissorNotaService
             cClassTrib: $dados['ddlClassificacaoTributaria'],
             informacaoComplementar: $dados['txtInfoComplementares'] ?? null,
         );
-
-        //dd($dados, $comExt, $dataSN);
         
         //validar Xml
         $validacaoRet = $this->nfse->validarXml($empresa->sigla_provedor, $dataSN, $empresa->id);
@@ -377,6 +380,8 @@ class EmissorNotaService
             'dados_emissao' => $dados
         ]);
 
+        Utilitarios::sendMessage('Nota Emitida por: '. $empresa->razao_social.'| Nota Número: ' . $nNfse . ' | DPS: ' . $nDps);
+
         return [
             'error' => false,
             'Mensagem' => 'Nota Nº: '. $nNfse .' Emitida com Sucesso',
@@ -418,5 +423,21 @@ class EmissorNotaService
         $xml =  str_replace('<?xml version="1.0"?>', '', $xml);
         
         return $xml;
+    }
+
+    public function consultarUrlNota(Empresa $empresa, string $nNfse){
+        $response = $this->nfse->consultarUrlNfse(
+            $empresa->sigla_provedor,
+            $empresa->id,
+            $empresa->cpf_cnpj,//cnpj            
+            $empresa->inscricao_municipal, //im,
+            $nNfse, //nNFSe,
+            '',//dt ini
+            ''//dt fim
+        );
+
+        dd($response);
+
+        return $response;
     }
 }

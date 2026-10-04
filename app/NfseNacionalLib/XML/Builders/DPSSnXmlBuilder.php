@@ -728,19 +728,23 @@ class DPSSnXmlBuilder
         /*
          * Retenções
          */
-        $this->appendOptionalText(
-            $dom,
-            $tribFed,
-            'vRetCP',
-            $this->decimal($data->valorRetencaoCp)
-        );
+        if((float) $this->decimal($data->valorRetencaoCp) > 0.0){
+            $this->appendOptionalText(
+                $dom,
+                $tribFed,
+                'vRetCP',
+                $this->decimal($data->valorRetencaoCp)
+            );
+        }
 
-        $this->appendOptionalText(
-            $dom,
-            $tribFed,
-            'vRetIRRF',
-            $this->decimal($data->valorRetencaoIrrf)
-        );
+        if((float) $this->decimal($data->valorRetencaoIrrf) > 0.0){
+            $this->appendOptionalText(
+                $dom,
+                $tribFed,
+                'vRetIRRF',
+                $this->decimal($data->valorRetencaoIrrf)
+            );
+        }
 
         if((float) $this->decimal($data->valorRetencaoCsll) > 0.0){
             $this->appendOptionalText(
@@ -940,7 +944,7 @@ class DPSSnXmlBuilder
         $municipio = preg_replace(
             '/\D/',
             '',
-            (string) $data->codigoMunicipio
+            (string) $data->municipioPrestador
         );
 
         $serie = preg_replace(

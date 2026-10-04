@@ -20,6 +20,7 @@
         "livewire/livewire": "^2.0",
         "maatwebsite/excel": "^3.1",
         "maciejczyzewski/bottomline": "^0.2.0",
+        "mpdf/mpdf": "^8.3",
         "nfephp-org/sped-common": "^5.1",
         "ramsey/uuid": "^4.9",
         "respect/validation": "^1.1",

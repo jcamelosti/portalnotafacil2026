@@ -37,7 +37,9 @@
                         {{-- DADOS --}}
                         <div>
                             <div class="text-lg font-bold text-gray-800">
-                                {{ $user->name }}
+                                <a href="{{ route('admin.usuarios.autenticar', $user->id) }}">
+                                    {{ $user->name }}
+                                </a>
                             </div>
 
                             <div class="text-sm text-gray-500">
