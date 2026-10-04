@@ -99,7 +99,7 @@
                         <div class="grid md:grid-cols-5 gap-1">
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Valor Total dos Serviços(*):</span>
-                                        {!! Form::text('txtTotal', isset($nota_original) ? number_format($nota_original['txtTotal'],2,',','.') : null, [
+                                        {!! Form::text('txtTotal', old('txtTotal'), [
                                             'placeholder'=> "0,00",
                                             'name'=>'txtTotal',
                                             'required',
@@ -624,7 +624,7 @@
 
                              <label class="block text-sm">
                                 <span class="text-gray-700 ">Aliq. ISSQN</span>
-                                <input value="{{ number_format(old('txtAliquota', $atividade->aliquota), 2, ',', '') }}" disabled name="txtAliquota" type="text" maxlength="5" id="txtAliquota" placeholder="0,00" class="block w-full mt-1 text-sm  
+                                <input required value="{{ old('txtAliquota') }}" disabled name="txtAliquota" type="text" maxlength="5" id="txtAliquota" placeholder="0,00" class="block w-full mt-1 text-sm  
               focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
               :shadow-outline-gray form-input" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;" onblur="">
                             </label>

@@ -108,6 +108,12 @@
                             Obter Url da NFS-e
                         </a>
 
+                        
+                        <a target="_blank" href="{{ route('nfse.danfse.pdf', $nota->id) }}"
+                        class="px-3 py-1 text-xs font-semibold text-white bg-green-600 rounded hover:bg-green-700">
+                            Gerar Danfe NFS-e
+                        </a>
+
                         <!-- STATUS -->
                         @if($nota->cancelada == '0')
                             <span class="px-3 py-1 text-xs font-semibold text-white bg-green-700 rounded">
