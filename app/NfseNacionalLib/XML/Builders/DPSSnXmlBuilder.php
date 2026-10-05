@@ -111,7 +111,7 @@ class DPSSnXmlBuilder
             $dom,
             $infDps,
             'cLocEmi',
-            $data->codigoMunicipio
+            $data->municipioPrestador
         );
 
         /*

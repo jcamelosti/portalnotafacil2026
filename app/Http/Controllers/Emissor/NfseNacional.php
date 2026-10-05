@@ -36,7 +36,7 @@ class NfseNacional extends Controller
             ->first();
         
         $empresa = Empresa::find(1);
-        $certificado = getenv("CAMINHO_CERTIFICADO_LOCAL").$empresa->cpf_cnpj.".pfx";
+        $certificado = getenv("CAMINHO_CERTIFICADO_LOCAL").$certificadoCliente->arquivo;
         
         try {
             $config = new \stdClass();

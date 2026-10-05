@@ -4,6 +4,7 @@ namespace JCamelo\NfseNacionalLib\Manager;
 
 use App\Models\Empresa;
 use App\Models\Certificado as CertificadoModel;
+use Illuminate\Support\Facades\Log;
 
 class CertificateManager
 {
@@ -33,7 +34,10 @@ class CertificateManager
         $oCert->loadPfxFile($path, $password);
 
         $pem = $oCert->pathCerts . $empresa->cpf_cnpj . "_certKEY.pem";
-        $pfx = $oCert->pathCerts . $empresa->cpf_cnpj . ".pfx";
+        //$pfx = $oCert->pathCerts . $empresa->cpf_cnpj . ".pfx";
+        $pfx = $oCert->pathCerts . $cert->arquivo;
+
+        Log::info("CertificateManager: getCertificate: pfx: " . $pfx);
 
         return [
             'cert' => $pem,

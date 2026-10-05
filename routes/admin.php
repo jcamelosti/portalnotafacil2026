@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\CodTribMunCodTribNacController;
 use App\Http\Controllers\Admin\EmpresaAtividadeController;
 use App\Http\Controllers\Admin\EmpresaCnaeController;
 use App\Http\Controllers\Admin\EmpresasController;
 use App\Http\Controllers\Admin\FaturaController;
 use App\Http\Controllers\Admin\LicencaController;
+use App\Http\Controllers\Admin\NbsController;
 use App\Http\Controllers\Admin\NotaController;
 use App\Http\Controllers\Admin\ProtocoloController;
 use App\Http\Controllers\Admin\UsuariosController;
@@ -32,6 +34,60 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca']],
         Route::get('/remover-dados/empresa/{id}', [EmpresasController::class, 'removerDados'])->name('empresas.remover-dados');
         Route::get('/api-externa/empresas', [EmpresasController::class, 'empresasApiTecnospeed'])->name('empresas.tecnospeed');
         Route::get('/empresas-por-estado', [EmpresasController::class, 'empresasPorEstado'])->name('empresas.por-estado');
+
+        Route::prefix('correlacao/codtribmun-codtribnac/{empresa}')->group(function () {
+                Route::get(
+                    'listagem',
+                    [CodTribMunCodTribNacController::class,'index']
+                )->name('codtrimun-codtribnac.index');
+                
+                Route::get(
+                    'criar',
+                    [CodTribMunCodTribNacController::class,'create']
+                )->name('codtrimun-codtribnac.create');
+                
+                Route::post(
+                    'store',
+                    [CodTribMunCodTribNacController::class,'store']
+                )->name('codtrimun-codtribnac.store');
+
+                Route::get(
+                    '{correlacaoTribMunTribNac}/editar',
+                    [CodTribMunCodTribNacController::class,'edit']
+                )->name('codtrimun-codtribnac.edit');
+
+                Route::put(
+                    '{correlacaoTribMunTribNac}/atualizar',
+                    [CodTribMunCodTribNacController::class,'update']
+                )->name('codtrimun-codtribnac.update');
+            });
+
+            Route::prefix('empresa/nbs/{empresa}')->group(function () {
+                Route::get(
+                    'listagem',
+                    [NbsController::class,'index']
+                )->name('empresa-nbs.index');
+                
+                Route::get(
+                    'criar',
+                    [NbsController::class,'create']
+                )->name('empresa-nbs.create');
+                
+                Route::post(
+                    'store',
+                    [NbsController::class,'store']
+                )->name('empresa-nbs.store');
+
+                Route::get(
+                    '{empresaNbs}/editar',
+                    [NbsController::class,'edit']
+                )->name('empresa-nbs.edit');
+
+                Route::put(
+                    '{empresaNbs}/atualizar',
+                    [NbsController::class,'update']
+                )->name('empresa-nbs.update');
+            });
 
         Route::resource('usuarios', UsuariosController::class);
         Route::resource('empresa-cnaes', EmpresaCnaeController::class);
