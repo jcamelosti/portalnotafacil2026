@@ -137,7 +137,7 @@ class EmpresasController extends Controller
             'uf_id' => 9,
             'estados' => $estados,
             'cidades' => $cidades,
-            'servicos' => $servicos
+            //'servicos' => $servicos
         ]);
     }
 
@@ -152,10 +152,18 @@ class EmpresasController extends Controller
         $cnpj = preg_replace('/[^0-9]/', '', $request->input('cpf_cnpj'));
 
         $dadosEmpresa = Utilitarios::consultarEmpresaCNPJ($cnpj);
+        
         $cadastroExiste = $this->empresaModel->where('cpf_cnpj', $cnpj)->first();
 
         if(is_null($cadastroExiste)){
+            $cidade = $this->municipioModel
+                ->leftJoin('ufs', 'ufs.id', '=', 'municipios_ibge.uf_id')
+                ->where('municipios_ibge.municipio', $dadosEmpresa['municipio'])
+                ->where('ufs.sigla', $dadosEmpresa['uf'])
+                ->first();
+            
             $empresaAdd = $this->empresaModel->fill($dadosEmpresa);
+            $empresaAdd->cidade_id = $cidade->codigo;
             $empresaAdd->user_id = 1;
             $empresaAdd->inscricao_municipal = '00000';
             $empresaAdd->save();

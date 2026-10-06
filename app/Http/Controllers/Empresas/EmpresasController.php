@@ -139,12 +139,24 @@ class EmpresasController extends Controller
         if($dados_busca_cnpj){
             $dadosEmpresa = Session::get('nova_empresa_prest');
             if(!empty($dadosEmpresa)){
+                $cidade = $this->municipioModel
+                    ->leftJoin('ufs', 'ufs.id', '=', 'municipios_ibge.uf_id')
+                    ->where('municipios_ibge.municipio', $dadosEmpresa['municipio'])
+                    ->where('ufs.sigla', $dadosEmpresa['uf'])
+                    ->first();
+                $dadosEmpresa['cidade_id'] = $cidade->codigo;
+                $dadosEmpresa['ambiente_emissao'] = 'PRODUCAO';
                 $empresa->fill($dadosEmpresa);
                 $estado = $this->estadoModel->where('sigla', $dadosEmpresa['uf'])->first();
             }else{
                 session()->flash('danger', 'Não foi possível consultar o CNPJ informado. Insira os Dados Manualmente');
             }
         }
+
+        $provedores = Empresa::getProvedorEmissao();
+        $ambientes_emissao = Empresa::getAmbienteEmissao();
+        $regimes = $this->empresaModel->getRegimes();
+
 
         return view('empresas.criar')->with([
             'empresa' => $empresa,
@@ -153,7 +165,12 @@ class EmpresasController extends Controller
             'cidades' => $cidades,
             'atividades' => $atividades,
             'reg_esp_trib' => $regimeEspecialTributacaoList,
-            'estado' => $estado
+            'estado' => $estado,
+            'provedores' => $provedores,
+            'ambientes_emissao' => $ambientes_emissao,
+            'regimes' => $regimes,
+            'situacao_simples_nacional' => Empresa::getOpcaoSimplesNacional(),
+            'mtipos_regime_esp_trib_mun' => Empresa::getTiposRegimeEspecialTributacaoMunicipio(),
         ]);
     }
 
