@@ -129,10 +129,10 @@ class NotaController extends Controller
         $empresa = $this->empresaModel->with(['atividadesEmpresa'])
             ->find(Session::get('empresa_selecionada'));
 
-        if(is_null($empresa->codigo_atividade)){
+        /*if(is_null($empresa->codigo_atividade)){
             session()->flash('danger', 'Opss! A empresa não possui uma Atividade no Municipio selecionada. Sincronize os dados com Issnet e selecione uma Atividade no Municipio para prosseguir com a emissão da NFS-e.');
             return redirect()->route('empresas.edit', $empresa->id);
-        }
+        }*/
         
         $estados = $this->estadoModel->getListaEstados();
         $uf_id = $empresa->cidade()->first()->uf_id;

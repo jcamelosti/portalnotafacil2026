@@ -49,7 +49,7 @@
 
     <label class="block text-sm">
         <span class="text-gray-700 ">Alíquota(%):</span>
-        {!! Form::number('aliquota', null, ['required','class'=>'block w-full mt-1 text-sm  
+        {!! Form::number('aliquota', null, [ 'step'=>'0.01', 'min' => '0', 'required','class'=>'block w-full mt-1 text-sm  
         focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
         :shadow-outline-gray form-input', 'placeholder'=>'Alíquota(%)']) !!}
         @if ($errors->has('aliquota'))

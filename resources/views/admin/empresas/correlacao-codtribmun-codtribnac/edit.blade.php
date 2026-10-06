@@ -18,7 +18,7 @@
         <div class="container grid mx-auto py-10 max-w-10xl">
             {!! Form::model($correlacaoTribMunTribNac,['route'=>['admin.codtrimun-codtribnac.update', [$empresa, $correlacaoTribMunTribNac]]]) !!}
                 @method('PUT')
-                @include('empresas.correlacao-codtribmun-codtribnac._form')
+                @include('admin.empresas.correlacao-codtribmun-codtribnac._form')
             {!! Form::close() !!}
         </div>
     </div>
