@@ -99,21 +99,62 @@ class NFSeService
         return $driver->consultarXml($xml, $empresaId);
     }
 
-    public function recepcionarLoteDpsSincrono(string $provider, DPSDataDTO $data, int $empresaId)
-    {
+    public function consultarNfseServicosPrestados(
+        string $provider, 
+        int $empresaId, 
+        string $cnpj, 
+        string $im, 
+        ?int $numero_nfse, 
+        string $data_inicial, 
+        string $data_final, 
+        ?int $pagina
+    ){
+        $pagina = is_null($pagina) ? 1 : $pagina;
+        $xml = XmlFactory::consultarNfseServicosPrestados($cnpj, $im, $numero_nfse, $data_inicial, $data_final, $pagina);
         
-        // 🔥 1. GERAR XML (usa seu Factory + Builders)
-        $xml = DPSFactory::makeRecepcionarLoteDpsSincrono($data);
-       
-        // 🔥 2. ASSINAR XML
-        $assinador = app(XmlSigner::class);
-		$xml = $assinador->assinar($xml, 'infDPS', $empresaId);
-		$xml = str_replace('<?xml version="1.0"?>', '', $xml);
+        $driver = NFSeProviderFactory::make($provider);
+        
+        Log::info($xml);
+        return $driver->consultarNfseServicosPrestados($xml, $empresaId);
+    }
 
-        // 🔥 3. ESCOLHER PROVIDER
+    public function consultarNfseServicosTomados
+    (
+        string $provider, 
+        int $empresaId, 
+        string $cnpj, 
+        string $im, 
+        ?int $numero_nfse, 
+        string $data_inicial, 
+        string $data_final, 
+        ?int $pagina
+    ){
+        $pagina = is_null($pagina) ? 1 : $pagina;
+
+        $xml = XmlFactory::consultarNfseServicosTomados(
+            $cnpj, // CNPJ consulente
+            null,              // CPF consulente
+            $im,          // IM consulente
+
+            $numero_nfse,             // Número NFS-e
+            $data_inicial,              // Data inicial emissão
+            $data_final,              // Data final emissão
+            null,              // Data inicial competência
+            null,              // Data final competência
+
+            $cnpj,  // CNPJ tomador
+            null,              // CPF tomador
+            $im,          // IM tomador
+
+            null,              // CNPJ intermediário
+            null,              // CPF intermediário
+            null,              // IM intermediário
+
+            $pagina                 // Página
+        );
+        
         $driver = NFSeProviderFactory::make($provider);
 
-        // 🔥 4. ENVIAR
-        return $driver->recepcionarLoteDpsSincrono($xml, $empresaId);
+        return $driver->consultarNfseServicosTomados($xml, $empresaId);
     }
 }

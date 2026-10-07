@@ -9,4 +9,6 @@ interface NFSeProviderInterface
     public function consultarLote(string $xml);
     public function consultarDadosCadastrais(string $xml, int $empresaId);
     public function recepcionarLoteDpsSincrono(string $xml, int $empresaId);
+    public function consultarNfseServicosPrestados(string $xml, int $empresaId);
+    public function consultarNfseServicosTomados(string $xml, int $empresaId);
 }

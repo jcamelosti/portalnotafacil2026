@@ -436,8 +436,52 @@ class EmissorNotaService
             ''//dt fim
         );
 
-        dd($response);
+        $retorno = null;
+        $mensagem = '';
 
-        return $response;
+        if (
+            isset($response['ConsultarUrlNfseResponse']['ConsultarUrlNfseResposta']['ListaMensagemRetorno']['MensagemRetorno'])
+        ) {
+            $erro = $response['ConsultarUrlNfseResponse']
+                ['ConsultarUrlNfseResposta']
+                ['ListaMensagemRetorno']
+                ['MensagemRetorno'];
+
+            // Quando vier apenas uma mensagem
+            if (
+                isset($erro['Codigo']) &&
+                isset($erro['Mensagem'])
+            ) {
+                $mensagem = "Erro: #" . $erro['Codigo'] . ' - ' . $erro['Mensagem'];
+
+                if (isset($erro['Correcao'])) {
+                    $mensagem .= ' Solução: ' . $erro['Correcao'];
+                }
+            }
+            // Quando vierem várias mensagens
+            elseif (is_array($erro)) {
+                foreach ($erro as $err) {
+                    if (isset($err['Codigo']) && isset($err['Mensagem'])) {
+                        $mensagem .= "Erro: #" . $err['Codigo'] . ' - ' . $err['Mensagem'];
+
+                        if (isset($err['Correcao'])) {
+                            $mensagem .= ' Solução: ' . $err['Correcao'];
+                        }
+
+                        $mensagem .= ' / ';
+                    }
+                }
+
+                $mensagem = rtrim($mensagem, ' /');
+            }
+        }
+
+        $retorno = [
+            'error' => true,
+            'data' => null,
+            'message' => $mensagem
+        ];
+
+        return $retorno;
     }
 }

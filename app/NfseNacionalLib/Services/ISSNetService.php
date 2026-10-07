@@ -62,6 +62,9 @@ class ISSNetService
         $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
         $retorno = simplexml_load_string( $response );
         
+        //retornado array
+        //$retorno = $this->parse($response);
+        
         return $retorno;
     }
 
@@ -140,11 +143,9 @@ class ISSNetService
             $soap,
             $cert
         );
-        
-        Log::info(__METHOD__);
-        Log::info($response);
-        
-        return $this->parse($response);
+
+        $retorno = $this->parse($response);
+        return $retorno;
     }
 
     public function extractCadastro(string $response): \SimpleXMLElement
@@ -245,16 +246,22 @@ class ISSNetService
         }
         return $result;
     }
-
-    private function parse($response)
+    
+    public function parse($response)
     {
-        $xml = simplexml_load_string($response);
-        //$output = (string)$xml->xpath('//outputXML')[0];
+        $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
+        $retorno = simplexml_load_string( $response );
 
-        return simplexml_load_string($output);
+        //convertendo a resposta para array
+        $arr = json_decode(json_encode($retorno), true);
+        $raiz = array_key_first($arr);
+        
+        return $arr[$raiz];
     }
 
-    public function recepcionarLoteDpsSincrono(string $xml, int $empresaId)
+    //
+
+    /*public function recepcionarLoteDpsSincrono(string $xml, int $empresaId)
     {
         $xml =  str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $xml);
         $soap = SoapBuilder::build('RecepcionarLoteDpsSincrono', $xml);
@@ -273,6 +280,40 @@ class ISSNetService
        
         dd($response);
 
-        return $this->parse($response);
+        return $this-> parse($response);
+    }*/
+
+    public function consultarNfseServicosPrestados(string $xml, int $empresaId){
+        $soap = SoapBuilder::build('ConsultarNfseServicoPrestado', $xml);
+        $cert = $this->certManager->getCertificate($empresaId);
+        //Obter o Endpoint correto se produção ou homologação conforme campo ambiente_emissao do registro da empresa
+        $ws = $this->wsManager->getWsUrl($empresaId);
+       
+        $response = $this->transport->send(
+            $ws['url'],
+            config('nfse.uri'),
+            'ConsultarNfseServicoPrestado',
+            $soap,
+            $cert
+        );
+
+        dd($this->parse($response));
+    }
+
+    public function consultarNfseServicosTomados(string $xml, int $empresaId){
+        $soap = SoapBuilder::build('ConsultarNfseServicoTomado', $xml);
+        $cert = $this->certManager->getCertificate($empresaId);
+        //Obter o Endpoint correto se produção ou homologação conforme campo ambiente_emissao do registro da empresa
+        $ws = $this->wsManager->getWsUrl($empresaId);
+       
+        $response = $this->transport->send(
+            $ws['url'],
+            config('nfse.uri'),
+            'ConsultarNfseServicoTomado',
+            $soap,
+            $cert
+        );
+
+        dd($this->parse($response));
     }
 }
