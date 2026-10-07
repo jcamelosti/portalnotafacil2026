@@ -32,6 +32,8 @@ class ISSNetService
             $cert
         );
 
+        Log::info($response);
+
         $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
         $retorno = simplexml_load_string( $response );
         
@@ -54,6 +56,8 @@ class ISSNetService
             $soap,
             $cert
         );
+
+        Log::info($response);
 
         $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
         $retorno = simplexml_load_string( $response );
@@ -111,6 +115,9 @@ class ISSNetService
             $soap,
             $cert
         );
+
+        Log::info("DADOS CADASTRAIS");
+        Log::info($response);
 
         $cadastroXml = $this->extractCadastro($response);
         
