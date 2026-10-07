@@ -89,6 +89,9 @@ class ISSNetService
             $soap,
             $cert
         );*/
+
+        Log::info("Gerar Nfse");
+        Log::info($response);
         
         $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
         $retorno = simplexml_load_string( $response );
