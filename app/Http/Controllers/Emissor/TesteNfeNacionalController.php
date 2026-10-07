@@ -74,5 +74,7 @@ class TesteNfeNacionalController extends Controller
             '2026-07-30',//dt fim
             null
         );*/
+
+        
     }
 }
