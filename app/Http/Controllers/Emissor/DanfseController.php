@@ -66,7 +66,7 @@ class DanfseController extends Controller
         }
 
         $data = $parser->parse($nota->nfse_xml);
-
+        
         return view('nfse.danfse', [
             'data' => $data,
             'nota' => $nota,

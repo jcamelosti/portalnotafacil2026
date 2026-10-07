@@ -163,7 +163,8 @@ class DanfseXmlParser
                 'liquido_com_ibs_cbs' => $this->money($this->value($nf, 'n:IBSCBS/n:totCIBS/n:vTotNF')),
             ],
 
-            'informacoes_complementares' => $this->value($nf, 'n:xOutInf'),
+            //'informacoes_complementares' => $this->value($nf, 'n:xOutInf'),
+            'informacoes_complementares' => $this->value($dps, 'n:serv/n:infoCompl/n:xInfComp'),
         ];
     }
 
