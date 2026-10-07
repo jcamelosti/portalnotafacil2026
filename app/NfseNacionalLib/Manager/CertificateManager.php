@@ -37,7 +37,7 @@ class CertificateManager
         //$pfx = $oCert->pathCerts . $empresa->cpf_cnpj . ".pfx";
         $pfx = $oCert->pathCerts . $cert->arquivo;
 
-        Log::info("CertificateManager: getCertificate: pfx: " . $pfx);
+        //Log::info("CertificateManager: getCertificate: pfx: " . $pfx);
 
         return [
             'cert' => $pem,
