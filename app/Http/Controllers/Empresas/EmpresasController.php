@@ -333,7 +333,7 @@ class EmpresasController extends Controller
             ->where('autorizado', 'S')
             ->where('solicitante_user_id', $userId)->first();
         
-        if( (!empty($empresa) && $empresa->user_id != $userId) || !is_null($empresaCompartilhada)){
+        if( (!is_null($empresa) && $empresa->user_id != $userId) && is_null($empresaCompartilhada)){
             session()->flash('message', 'Você não pode editar essa Empresa.');
             return redirect()->route('empresas.edit', $id);
         }
