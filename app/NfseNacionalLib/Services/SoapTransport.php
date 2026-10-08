@@ -8,6 +8,19 @@ class SoapTransport
 {
     public function send(string $url, string $uri, string $method, string $xml, array $cert)
     {
+        $context = stream_context_create([
+            'ssl' => [
+                'verify_peer' => true,
+                'verify_peer_name' => true,
+                'allow_self_signed' => false,
+                'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,
+            ],
+
+            'http' => [
+                'timeout' => 120,
+            ],
+        ]);
+
         $client = new \SoapClient(null, [
             'location' => $url,
             'uri' => $uri,
@@ -15,6 +28,7 @@ class SoapTransport
             'exceptions' => true,
             'local_cert' => $cert['cert'],
             'passphrase' => $cert['password'],
+            'stream_context' => $context,
         ]);
 
         $response = $client->__doRequest(
@@ -23,6 +37,9 @@ class SoapTransport
             $uri . '/' . $method,
             SOAP_1_1
         );
+
+        Log::info('Resposta da Requisição SOAP');
+        Log::info($response);
 
         return $response;
     }

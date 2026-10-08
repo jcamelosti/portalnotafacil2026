@@ -62,6 +62,7 @@ $(document).ready(function () {
     const $txtBairroObras       = $('#txtBairroObras');
     const $txtCidadeObras       = $('#txtCidadeObras');
     const $txtUFObras           = $('#txtUFObras');
+    const $txtComplementoObras  = $('#txtComplementoObras');
 
     // ==========================================
     // CONTAINERS
@@ -900,7 +901,7 @@ $(document).ready(function () {
 
     function obterAtividade(codigoAtividade){
         $.getJSON('/c/emissor/obter/percentual-atividade-mun?q=' + codigoAtividade, function (data) {
-            $('#txtAliquota').val(formatoBrasileiro(data.aliquota));
+            //$('#txtAliquota').val(formatoBrasileiro(data.aliquota));
         });
     }
 
@@ -967,6 +968,7 @@ $(document).ready(function () {
             campoObrigatorio($txtBairroObras);     
             campoObrigatorio($txtCidadeObras);     
             campoObrigatorio($txtUFObras);
+            campoObrigatorio($txtComplementoObras);
         }else{
             campoNaoObrigatorio($txtInscImob);        
             campoNaoObrigatorio($txtCepObras);        
@@ -974,7 +976,8 @@ $(document).ready(function () {
             campoNaoObrigatorio($txtNumeroObras);     
             campoNaoObrigatorio($txtBairroObras);     
             campoNaoObrigatorio($txtCidadeObras);     
-            campoNaoObrigatorio($txtUFObras);         
+            campoNaoObrigatorio($txtUFObras);      
+            campoNaoObrigatorio($txtComplementoObras);   
             $grupoDadosObra.hide();
         }
     });
