@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Models\Empresa;
+use App\Models\Municipio;
 use App\Models\NotaEmitida;
 use App\Models\Tomador;
 use App\Utilitarios\Utilitarios;
@@ -513,5 +514,88 @@ class EmissorNotaService
         ];
 
         return $retorno;
+    }
+
+    public function consultarServicosPrestados(array $dados){
+        $empresa = $this->empresaModel->find(Session::get('empresa_selecionada'));
+
+        $retorno = $this->nfse->consultarNfseServicosTomados(
+            'issnet',
+            $empresa->id,
+            $empresa->cpf_cnpj,//cnpj            
+            $empresa->inscricao_municipal,
+            null,
+            $dados['data_inicio'],//dt ini
+            $dados['data_fim'],//dt fim
+            null
+        );
+
+        $lista = $retorno['ConsultarNfseServicoTomadoResponse']['ConsultarNfseServicoTomadoResposta']['ListaNfse']['CompNfse'];
+
+        $inserirAtualizar = [];
+
+        foreach($lista as $key => $nota){
+            $inserirAtualizar[$key] = [
+                'nNfse' => $nota['NFSe']['infNFSe']['nNFSe'],
+                'valor' => $nota['NFSe']['infNFSe']['valores']['vBC'],
+                'cpf_cnpj' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['toma']['CNPJ'],
+                'nDPS' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['nDPS'],
+                'serieDps' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['serie'],
+            ];
+
+            if(isset($nota['ListaEvento'])){
+                if(isset($nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['e101101'])){
+                    $dadosEvento = $nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['dhEvento'];
+                    $dadosEventoCancelamento = $nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['e101101'];
+                    $inserirAtualizar[$key]['motivo_cancelamento'] = $dadosEventoCancelamento['cMotivo'];
+                    $inserirAtualizar[$key]['motivo'] = $dadosEventoCancelamento['xDesc'] .' - '.$dadosEventoCancelamento['xMotivo'];
+                    $inserirAtualizar[$key]['data_evento'] = $dadosEvento;
+                }
+            }
+        }
+
+        $insertBatch = [];
+
+        foreach($inserirAtualizar as $novoRegistros){
+            $tomador = Tomador::where('empresa_id', $empresa->id)->where('cpf_cnpj', $novoRegistros['cpf_cnpj'])->first();
+            
+            if(is_null($tomador)){
+                $dadosTomador = Utilitarios::consultarEmpresaCNPJ( $novoRegistros['cpf_cnpj'] );
+                $tomador = new Tomador();
+                $dadosTomador['empresa_id'] = $empresa->id;
+
+                $municipio = Municipio::with('estado')
+                    ->where('municipio', $dadosTomador['municipio'])
+                    ->whereHas('estado', function ($query) use ($dadosTomador) {
+                        $query->where('sigla', $dadosTomador['uf']);
+                    })
+                    ->first();
+                $dadosTomador['cidade_id'] = $municipio->codigo;
+                $tomador->fill($dadosTomador);
+                $tomador->save();
+            }
+
+            $existe = NotaEmitida::where('empresa_id', $empresa->id)
+                ->where('num_nfse', $novoRegistros['nNfse'])
+                ->first();
+            
+            if(is_null($existe)){
+                $xmlNfse =$this->obterXml($empresa, $novoRegistros['nNfse']);
+
+                $insertBatch[] = [
+                    'empresa_id' => $empresa->id,
+                    'tomador_id' => $tomador->id,
+                    'nfse_xml'   => $xmlNfse,
+                    'num_nfse'   => $novoRegistros['nNfse'],
+                    'valor'      => $novoRegistros['valor'],
+                    'dados_emissao' => [],
+                    'cancelada' => isset($novoRegistros['motivo']) ? 1 : 0,
+                    'motivo_cancelamento' => isset($novoRegistros['motivo']) ? $novoRegistros['motivo'] : '-',
+                    'data_cancelamento' => isset($novoRegistros['motivo']) ? date('Y-m-d', strtotime($novoRegistros['data_evento'])) : null,
+                ];
+            }
+        }
+
+        NotaEmitida::insert($insertBatch);
     }
 }

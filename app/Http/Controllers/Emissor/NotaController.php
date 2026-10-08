@@ -417,4 +417,21 @@ class NotaController extends Controller
         header('Content-type: "text/xml"; charset="utf8"');
         readfile($caminhoDownload);
     }
+
+    public function consultarServicosPrestados(Request $request){
+        if($request->method() == 'GET'){
+            $data = [
+                'data_inicio' => request()->data_inicio ?? Carbon::today()->subDays(30)->format('Y-m-d'),
+                'data_fim'    => request()->data_fim ?? Carbon::today()->format('Y-m-d'),
+            ];
+            return view('notas.servicos-prestados')->with([
+                'data' => $data
+            ]);
+        }else{
+            $this->emissorService->consultarServicosPrestados($request->all());
+            
+            session()->flash('success', 'Nota Atualizadas com Sucesso.');
+            return redirect()->route('nota.index');
+        }
+    }
 }

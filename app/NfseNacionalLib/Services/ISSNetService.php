@@ -314,6 +314,6 @@ class ISSNetService
             $cert
         );
 
-        dd($this->parse($response));
+        return $this->parse($response);
     }
 }
