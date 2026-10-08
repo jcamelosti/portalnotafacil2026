@@ -541,6 +541,7 @@ class EmissorNotaService
                 'cpf_cnpj' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['toma']['CNPJ'],
                 'nDPS' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['nDPS'],
                 'serieDps' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['serie'],
+                'data_criacao' => $nota['NFSe']['infNFSe']['dhProc']
             ];
 
             if(isset($nota['ListaEvento'])){
@@ -588,10 +589,11 @@ class EmissorNotaService
                     'nfse_xml'   => $xmlNfse,
                     'num_nfse'   => $novoRegistros['nNfse'],
                     'valor'      => $novoRegistros['valor'],
-                    'dados_emissao' => [],
+                    'dados_emissao' => null,
                     'cancelada' => isset($novoRegistros['motivo']) ? 1 : 0,
                     'motivo_cancelamento' => isset($novoRegistros['motivo']) ? $novoRegistros['motivo'] : '-',
                     'data_cancelamento' => isset($novoRegistros['motivo']) ? date('Y-m-d', strtotime($novoRegistros['data_evento'])) : null,
+                    'created_at' => date('Y-m-d G:i:s', strtotime($novoRegistros['data_criacao']))
                 ];
             }
         }
