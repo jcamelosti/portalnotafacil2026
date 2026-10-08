@@ -13,6 +13,8 @@ use JCamelo\NfseNacionalLib\Services\NFSeService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use JCamelo\NfseNacionalLib\DTO\EnderecoObraDTO;
+use JCamelo\NfseNacionalLib\DTO\ObraDataDTO;
 
 class EmissorNotaService
 {
@@ -192,6 +194,31 @@ class EmissorNotaService
                 mdic: 0,
             );
         }
+
+        $dados['txtNumeroObras'] = '150';
+        $obra = null;
+        if(
+            isset($dados['txtEnderecoObras']) && !empty($dados['txtEnderecoObras']) &&
+            isset($dados['txtNumeroObras']) && !empty($dados['txtNumeroObras']) &&
+            isset($dados['txtComplementoObras']) && !empty($dados['txtComplementoObras']) &&
+            isset($dados['txtUFObras']) && !empty($dados['txtUFObras']) &&
+            isset($dados['txtCidadeObras']) && !empty($dados['txtCidadeObras']) &&
+            isset($dados['txtCepObras']) && !empty($dados['txtCepObras']) &&
+            isset($dados['txtBairroObras']) && !empty($dados['txtBairroObras'])
+        ){
+            $obra = new ObraDataDTO(
+                inscImobFisc: null,
+                nProcessoObra: null,
+                end: new EnderecoObraDTO(
+                    cMun: $dados['txtCidadeObras'],
+                    CEP: preg_replace('/[^0-9]/', '', $dados['txtCepObras']),
+                    xLgr: $dados['txtEnderecoObras'],
+                    nro: $dados['txtNumeroObras'],
+                    xCpl: $dados['txtComplementoObras'],
+                    xBairro: $dados['txtBairroObras'],
+                )
+            );
+        }
         
         $dataSN = new DPSDataSnDTO(
             ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
@@ -296,6 +323,9 @@ class EmissorNotaService
             cstIbsCbs: $dados['ddlSituacaoTributaria'],
             cClassTrib: $dados['ddlClassificacaoTributaria'],
             informacaoComplementar: $dados['txtInfoComplementares'] ?? null,
+
+            //dados da obra
+            obra: $obra,
         );
         
         //validar Xml

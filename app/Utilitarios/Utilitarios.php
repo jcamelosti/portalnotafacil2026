@@ -89,7 +89,13 @@ class Utilitarios
             'txtAliqPIS',
             'txtAliqCOFINS',
             'txtValorCSLL',
-            'comex_vserv_moeda'
+            'comex_vserv_moeda',
+            'txtFederal',
+            'txtEstadual',
+            'txtMunicipal',
+            'percentualTribFederal',
+            'percentualTribEstadual',
+            'percentualTribMunicipal'
         ];
 
         $semPontuacao = [

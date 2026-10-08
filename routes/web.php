@@ -120,6 +120,8 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             Route::get('/nfse/{nota}/danfse', [DanfseController::class, 'pdf'])
                 //->where('filename', '.*')
                 ->name('nfse.danfse.pdf');
+
+            Route::any('nota/consultar/servicos-prestados', [NotaController::class, 'consultarServicosPrestados']) ->name('nfse.consultar-servicos-prestados');
         });
 
         Route::group(['prefix' => 'emissor-nacional-mei'], function () {

@@ -58,6 +58,10 @@
             if(select2Check > 0)
                 $('.select2').select2();
         });
+
+        setInterval(function() {
+            location.reload();
+        }, 5000); // 5000 milissegundos = 5 segundos
     </script>
 </body>
 

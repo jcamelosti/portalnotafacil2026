@@ -120,5 +120,7 @@ class DPSDataSnDTO
         // Versão
         public readonly string $versao = '1.01',
         public readonly string $verAplic = '1.01',
+
+        public readonly ?ObraDataDTO $obra = null,
     ) {}
 }
