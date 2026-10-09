@@ -32,14 +32,14 @@ class NotaCreateRequest extends FormRequest
                     $valor = str_replace(',', '.', $valor);
 
                     if ((float) $valor <= 0) {
-                        $fail('O valor líquido deve ser maior que zero.');
+                        $fail('O valor total deve ser maior que zero.');
                     }
                 },
             ],
 
             'txtBaseCalc' => [
                 'required',
-                'regex:/^\d{1,3}(?:\.\d{3})*,\d{2}$|^\d+,\d{2}$/',
+                //'regex:/^\d{1,3}(?:\.\d{3})*,\d{2}$|^\d+,\d{2}$/',
                 function ($attribute, $value, $fail) {
                     $valor = str_replace('.', '', $value);
                     $valor = str_replace(',', '.', $valor);
@@ -101,8 +101,9 @@ class NotaCreateRequest extends FormRequest
             'txtTotal.required' =>
                 'O valor do Serviço é obrigatório.',
 
-            'txtBaseCalc.regex' =>
-                'O valor do cálculo da Base de Cálculo Informe um valor válido no formato 10,00 ou 1.000,00.',
+            'txtBaseCalc.required' => 'O valor da Base de Cálculo deve ser calculado. Confira cada campo de valor.',
+            /*'txtBaseCalc.regex' =>
+                'O valor do cálculo da Base de Cálculo Informe um valor válido no formato 10,00 ou 1.000,00.',*/
 
             'txtDescServicos.required' =>
                 'A descrição dos serviços é obrigatória.',

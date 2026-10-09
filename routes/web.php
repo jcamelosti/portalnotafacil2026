@@ -61,7 +61,7 @@ Route::post('/retorno/mercadopago', [MercadoPagoController::class, 'index'])->na
 Route::post('/webhook/mercadopago/capture', [MercadoPagoController::class, 'webHookResponse'])->name('mercadopago.webhook-response');//mercado pago webhook
 Route::post('/webhook/infinitepay/capture', [InfinitePayWebHookController::class, 'webHookResponse'])->name('infinitypay.webhook-response');//infinitypay webhook
 
-Route::get('/foto/{hash}', function ($hash) {
+/*Route::get('/foto/{hash}', function ($hash) {
     abort_unless(auth()->check(), 403);
 
     $path = storage_path("app/public/profile-photos/{$hash}");
@@ -69,7 +69,7 @@ Route::get('/foto/{hash}', function ($hash) {
     abort_unless(file_exists($path), 404);
     
     return response()->file($path);
-})->name('foto');
+})->name('foto');*/
 
 
 //TESTES SPEDY

@@ -176,11 +176,11 @@
                                     </a-->
                                 @endif
 
-                                @if(!empty($nota->dados_emissao_json))
-                                    <!--a href="{{ route('notas.duplicar', base64_encode($nota->id)) }}"
+                                @if(!empty($nota->dados_emissao))
+                                    <a href="{{ route('notas.duplicar', base64_encode($nota->id)) }}"
                                     class="px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded hover:bg-blue-700">
                                         Duplicar
-                                    </a-->
+                                    </a>
                                 @endif
                             </div>
                         </div>

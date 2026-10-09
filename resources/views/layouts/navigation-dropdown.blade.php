@@ -74,8 +74,9 @@
               <li class="relative">
                   <button class="align-middle rounded-full focus:shadow-outline-purple focus:outline-none" @click="toggleProfileMenu" @keydown.escape="closeProfileMenu" aria-label="Account" aria-haspopup="true">
                       @if(isset(Auth::user()->profile_photo_url))
+                        <img class="object-cover w-8 h-8 rounded-full" src="#" alt="{{ Auth::user()->name }}" aria-hidden="true" />
                         <!--img class="object-cover w-8 h-8 rounded-full" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" aria-hidden="true" /-->
-                        <img class="object-cover w-8 h-8 rounded-full" src="{{ route('foto', basename(parse_url(Auth::user()->profile_photo_url, PHP_URL_PATH))) }}" alt="{{ Auth::user()->name }}" aria-hidden="true" />
+                        <!--img class="object-cover w-8 h-8 rounded-full" src="{ { route('foto', basename(parse_url(Auth::user()->profile_photo_url, PHP_URL_PATH))) }}" alt="{{ Auth::user()->name }}" aria-hidden="true" /-->
                       @endif
                   </button>
                   <template x-if="isProfileMenuOpen">

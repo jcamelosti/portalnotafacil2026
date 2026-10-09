@@ -959,7 +959,7 @@ $(document).ready(function () {
 
         if ($.inArray(codigo, itens) !== -1) {
             // É um dos códigos
-            console.log('Código válido:', codigo);                 
+            //console.log('Código válido:', codigo);                 
             $grupoDadosObra.show();
             //campoObrigatorio($txtInscImob);        
             campoObrigatorio($txtCepObras);        
