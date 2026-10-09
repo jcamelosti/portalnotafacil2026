@@ -50,22 +50,11 @@ class NfseNacional extends Controller
             $cert = \NFePHP\Common\Certificate::readPfx($content, $password);
             $tools = new \Hadder\NfseNacional\Tools($configJson, $cert);
             
-            
-            //Informar chave NFSe
-            /*$response = $tools->consultarDanfse('52011082224685881000190000000000008226013544016309');
-            header("Content-Type: application/pdf");
-            header('Content-Disposition: inline; filename="NFSe.pdf"');
-            header('Content-Transfer-Encoding: binary');
-            //header('Content-Length: ' . filesize($file));
-            header('Accept-Ranges: bytes');
-            echo $response;*/
-
             //Consultar Xml Por Chave
-            //$response = $tools->consultarNfseChave('52011082224685881000190000000000007025123659579096');
-            //echo $response;
+            $response = $tools->consultarNfseChave('52011082224685881000190000000000007025123659579096');
+            echo $response;
 
-            $response = $tools->consultarAliquotas('5201108', '8599-6/03', '2026-07-08');
-            dd($response);
+
         } catch (\Exception $e) {
             dd($e->getMessage(), $e);
         }
