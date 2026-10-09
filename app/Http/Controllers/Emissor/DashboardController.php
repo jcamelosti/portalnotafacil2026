@@ -8,6 +8,7 @@ use App\Models\CreditoUser;
 use App\Models\Empresa;
 use App\Models\EmpresaCompartilhada;
 use App\Models\License;
+use App\Models\NotaEmitida;
 //use App\Models\NotaEmitida;
 use App\Models\PlanoVariacao;
 use App\Utilitarios\Utilitarios;
@@ -24,13 +25,15 @@ class DashboardController extends Controller
     private $creditoUserModel;
     private $empresaCompartilhadaModel;
     private $variacaoPlanoModel;
+    private $notasEmitidas;
 
     public function __construct(Empresa $empresaModel, CreditoUser $creditoUserModel, 
-    EmpresaCompartilhada $empresaCompartilhadaModel, PlanoVariacao $variacaoPlanoModel){
+    EmpresaCompartilhada $empresaCompartilhadaModel, PlanoVariacao $variacaoPlanoModel, NotaEmitida $notasEmitidas){
         $this->empresaModel = $empresaModel;
         $this->creditoUserModel = $creditoUserModel;
         $this->empresaCompartilhadaModel = $empresaCompartilhadaModel;
         $this->variacaoPlanoModel = $variacaoPlanoModel;
+        $this->notasEmitidas = $notasEmitidas;
     }
 
     public function index(){
@@ -76,6 +79,22 @@ class DashboardController extends Controller
         $notasEmitidasTotal= [];
         $notasCanceladasTotal= [];
         $notas= [];   
+
+        $notas = $this->notasEmitidas
+            ->where('empresa_id', Session::get('empresa_selecionada'))
+            /*->when(!empty($data['data_inicio']) && !empty($data['data_fim']), function ($query) use ($data) {
+                $query->whereBetween('created_at', [
+                    $data['data_inicio'].' 00:00:00',
+                    $data['data_fim'].' 23:59:59'
+                ]);
+            })
+            ->where(function($query) use($campos) {
+                if(isset($campos['tomador_id']) && $campos['tomador_id'] != '0'){
+                    $query->where('tomador_id', $campos['tomador_id']);
+                }
+            })*/
+            ->orderBy('num_nfse', 'desc')
+            ->paginate(10);
 
         return view('dashboard_cliente')->with([
             'empresa' => $this->empresa,
@@ -155,7 +174,8 @@ class DashboardController extends Controller
             'empresa' => $empresas->first(),
             'quantCompartilhamentosSolicitados' => $liberarCompartilhamentoEmpresa,
             'variacaoPlanos' => $valorPlano,
-            'cores' => $cores
+            'cores' => $cores,
+            'empresas' => $empresas
         ]);
     }
 

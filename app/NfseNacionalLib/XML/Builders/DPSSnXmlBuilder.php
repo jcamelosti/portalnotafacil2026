@@ -177,19 +177,24 @@ class DPSSnXmlBuilder
             $data->opSimpNac
         );
 
-        $this->appendOptionalText(
-            $dom,
-            $regTrib,
-            'regApTribSN',
-            $data->regApTribSN
-        );
+        if($data->opSimpNac == 3){
+            $this->appendOptionalText(
+                $dom,
+                $regTrib,
+                'regApTribSN',
+                $data->regApTribSN
+            );
+        }
 
+       
+    
         $this->appendOptionalText(
             $dom,
             $regTrib,
             'regEspTrib',
             $data->regEspTrib
         );
+    
 
         /*
          * =========================================================
@@ -539,10 +544,142 @@ class DPSSnXmlBuilder
             );
         }
 
+        //Grupo de Informações da Obra
+        
+        if(!is_null($data->obra)){
+            $obra = $dom->createElement(
+                'obra'
+            );
+
+            $serv->appendChild($obra);
+
+            //inscImobFisc
+             $this->appendOptionalText(
+                $dom,
+                $obra,
+                'inscImobFisc',
+                $data->obra->inscImobFisc
+            );
+
+            //nProcessoObra
+            $this->appendOptionalText(
+                $dom,
+                $obra,
+                'nProcessoObra',
+                $data->obra->nProcessoObra
+            );
+
+            //end
+            $end = $dom->createElement(
+                'end'
+            );
+            $obra->appendChild($end);
+
+            /*<endNac>
+            <!--  Informação obrigatória. Código do município do endereço da obra. (Tabela do IBGE)  -->
+            <cMun> ? </cMun>
+            <!--  Código de Endereçamento Postal numérico do endereço nacional da obra.  -->
+            <CEP> ? </CEP>
+            </endNac>*/
+            
+            if(!is_null($data->obra->end->cMun)){
+                $endNac = $dom->createElement(
+                    'endNac'
+                );
+                $end->appendChild($endNac);
+
+                $this->appendText(
+                    $dom,
+                    $endNac,
+                    'cMun',
+                    $data->obra->end->cMun
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endNac,
+                    'CEP',
+                    $data->obra->end->CEP
+                );
+            }else{
+                /*<endExt>
+                <!--  Código do país do endereço da obra. (Tabela de Países ISO)  -->
+                <cPais> ? </cPais>
+                <!--  Código de Endereçamento Postal alfanumérico do endereço no exterior da obra.  -->
+                <cEndPost> ? </cEndPost>
+                <!--  Nome da cidade no exterior, local da obra.  -->
+                <xCidade> ? </xCidade>
+                <!--  Estado, província ou região da cidade no exterior, local da obra.  -->
+                <xEstProvReg> ? </xEstProvReg>
+                </endExt>
+                */
+                $endExt = $dom->createElement(
+                    'endExt'
+                );
+                $end->appendChild($endExt);
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'cPais',
+                    $data->obra->end->cPais
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'cEndPost',
+                    $data->obra->end->cEndPost
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'xCidade',
+                    $data->obra->end->xCidade
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'xEstProvReg',
+                    $data->obra->end->xEstProvReg
+                );
+            }
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'xLgr',
+                $data->obra->end->xLgr
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'nro',
+                $data->obra->end->nro
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'xCpl',
+                $data->obra->end->xCpl
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'xBairro',
+                $data->obra->end->xBairro
+            );
+        }
+
         /*
          * infoCompl
          */
-        if (!empty($data->informacaoComplementar)) {
+        if (!empty($data->informacaoComplementar) || strlen($data->informacaoComplementar) > 0) {
 
             $infoCompl = $dom->createElement(
                 //self::NS_NFSE,
@@ -767,8 +904,39 @@ class DPSSnXmlBuilder
 
         $trib->appendChild($totTrib);
 
+        //Nâo Optante do Simples
         if($data->opSimpNac == 1){
-            if($data->tipoInfoTributos == 1){
+            /*if (
+                (
+                    !is_null($data->valorTribFederal) &&
+                    !is_null($data->valorTribEstadual) &&
+                    !is_null($data->valorTribMunicipal) &&
+                    (float)$this->decimal($data->valorTribFederal) > 0.0 &&
+                    (float)$this->decimal($data->valorTribEstadual) > 0.0 &&
+                    (float)$this->decimal($data->valorTribMunicipal) > 0.0
+                ) ||
+                (
+                    !is_null($data->percentualTribFederal) &&
+                    !is_null($data->percentualTribEstadual) &&
+                    !is_null($data->percentualTribMunicipal) &&
+                    (float)$this->decimal($data->percentualTribFederal) > 0.0 &&
+                    (float)$this->decimal($data->percentualTribEstadual) > 0.0 &&
+                    (float)$this->decimal($data->percentualTribMunicipal) > 0.0
+                )
+            ) {
+                dd($data);
+            }else{
+                //if(isset($data->indicadorTotalTributos) && !empty($data->indicadorTotalTributos)){
+                    $this->appendOptionalText(
+                        $dom,
+                        $totTrib,
+                        'indTotTrib',
+                        0 //valor possível 0
+                    );
+                //}
+            }*/
+                
+            if($data->tipoInfoTributos != 1){
                 $vTotTrib = $dom->createElement(
                     'vTotTrib'
                 );
@@ -778,21 +946,21 @@ class DPSSnXmlBuilder
                     $dom,
                     $vTotTrib,
                     'vTotTribFed',
-                    $this->decimal($data->percentualTribFederal)
+                    $this->decimal($data->valorTribFederal)
                 );
 
                 $this->appendOptionalText(
                     $dom,
                     $vTotTrib,
                     'vTotTribEst',
-                    $this->decimal($data->percentualTribEstadual)
+                    $this->decimal($data->valorTribEstadual)
                 );
 
                 $this->appendOptionalText(
                     $dom,
                     $vTotTrib,
                     'vTotTribMun',
-                    $this->decimal($data->percentualTribMunicipal)
+                    $this->decimal($data->valorTribMunicipal)
                 );
             }else{
                 $pTotTrib = $dom->createElement(
@@ -804,34 +972,25 @@ class DPSSnXmlBuilder
                     $dom,
                     $pTotTrib,
                     'pTotTribFed',
-                    $this->decimal($data->valorTribFederal)
+                    $this->decimal($data->percentualTribFederal)
                 );
 
                 $this->appendOptionalText(
                     $dom,
                     $pTotTrib,
                     'pTotTribEst',
-                    $this->decimal($data->valorTribEstadual)
+                    $this->decimal($data->percentualTribEstadual)
                 );
 
                 $this->appendOptionalText(
                     $dom,
                     $pTotTrib,
                     'pTotTribMun',
-                    $this->decimal($data->valorTribMunicipal)
+                    $this->decimal($data->percentualTribMunicipal)
                 );
             }
         }
 
-        if(isset($data->indicadorTotalTributos) && !empty($data->indicadorTotalTributos)){
-            $this->appendOptionalText(
-                $dom,
-                $totTrib,
-                'indTotTrib',
-                $data->indicadorTotalTributos //valor possível 0
-            );
-        }
-        
         if($data->opSimpNac == 3){
             $this->appendOptionalText(
                 $dom,

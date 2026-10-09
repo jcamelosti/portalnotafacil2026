@@ -1,4 +1,6 @@
 $(document).ready(function () {
+    const $txtDescServicos = $('#txtDescServicos');
+    const $txtInfoComplementares = $('txtInfoComplementares');
     // ==========================================
     // CAMPOS TRIBUTÁRIOS FEDERAIS
     // ==========================================
@@ -52,6 +54,16 @@ $(document).ready(function () {
 
     const $ddlPaisResult        = $('#ddlPaisResult');
 
+    //grupo de obras
+    const $txtInscImob          = $('#txtInscImob');
+    const $txtCepObras          = $('#txtCepObras');
+    const $txtEnderecoObras     = $('#txtEnderecoObras');
+    const $txtNumeroObras       = $('#txtNumeroObras');
+    const $txtBairroObras       = $('#txtBairroObras');
+    const $txtCidadeObras       = $('#txtCidadeObras');
+    const $txtUFObras           = $('#txtUFObras');
+    const $txtComplementoObras  = $('#txtComplementoObras');
+
     // ==========================================
     // CONTAINERS
     // ==========================================
@@ -65,6 +77,8 @@ $(document).ready(function () {
     const $divValorCSLL       = $('#divValorCSLL');
     const $divValorIRRF       = $('#divValorIRRF');
     const $divValorCP         = $('#divValorCP');
+
+    const $grupoDadosObra     = $('#grupoDadosObra');
 
     const cstsCredito = [
         '50', '51', '52', '53', '54', '55', '56',
@@ -100,6 +114,14 @@ $(document).ready(function () {
     desabilitarCampo($ddlClassificacaoTributaria);
 
     resetarTributacaoFederal();
+
+    $txtDescServicos.on('input', function () {
+        this.value = this.value.replace(/[\r\n]+/g, '');
+    });
+
+    $txtInfoComplementares.on('input', function () {
+        this.value = this.value.replace(/[\r\n]+/g, '');
+    });
 
     $tipoRetFederal.on('change', function (event) {
         event.preventDefault();
@@ -879,7 +901,7 @@ $(document).ready(function () {
 
     function obterAtividade(codigoAtividade){
         $.getJSON('/c/emissor/obter/percentual-atividade-mun?q=' + codigoAtividade, function (data) {
-            $('#txtAliquota').val(formatoBrasileiro(data.aliquota));
+            //$('#txtAliquota').val(formatoBrasileiro(data.aliquota));
         });
     }
 
@@ -917,6 +939,47 @@ $(document).ready(function () {
     $('#cTribNac').on('change', function (event) {
         event.preventDefault();
         consultarPercentualTribNac($(this).val());
+
+        const itens = [
+            '070201',
+            '070202',
+            '070401',
+            '070501',
+            '070502',
+            '070601',
+            '070602',
+            '070701',
+            '070801',
+            '071701',
+            '071901'
+        ];
+
+        // Remove os pontos
+        const codigo = $(this).val().replace(/\./g, '');
+
+        if ($.inArray(codigo, itens) !== -1) {
+            // É um dos códigos
+            console.log('Código válido:', codigo);                 
+            $grupoDadosObra.show();
+            //campoObrigatorio($txtInscImob);        
+            campoObrigatorio($txtCepObras);        
+            campoObrigatorio($txtEnderecoObras);   
+            campoObrigatorio($txtNumeroObras);     
+            campoObrigatorio($txtBairroObras);     
+            campoObrigatorio($txtCidadeObras);     
+            campoObrigatorio($txtUFObras);
+            campoObrigatorio($txtComplementoObras);
+        }else{
+            campoNaoObrigatorio($txtInscImob);        
+            campoNaoObrigatorio($txtCepObras);        
+            campoNaoObrigatorio($txtEnderecoObras);   
+            campoNaoObrigatorio($txtNumeroObras);     
+            campoNaoObrigatorio($txtBairroObras);     
+            campoNaoObrigatorio($txtCidadeObras);     
+            campoNaoObrigatorio($txtUFObras);      
+            campoNaoObrigatorio($txtComplementoObras);   
+            $grupoDadosObra.hide();
+        }
     });
 
     function consultarPercentualTribNac(cTribNac){
@@ -1425,6 +1488,9 @@ $(document).ready(function () {
         if($tipoRetencao.val() != 1){
             //calcularValorIssqn();
             calculoReduzindoISSQN = formatoBrasileiro(converterNumero($valorTotalServico.val()) - converterNumero($txtValorRetido.val()));
+            $txtBaseCalc.val(formatarMoeda(calculoReduzindoISSQN));
+        }else{
+            calculoReduzindoISSQN = formatoBrasileiro(converterNumero($valorTotalServico.val()));
             $txtBaseCalc.val(formatarMoeda(calculoReduzindoISSQN));
         }
 

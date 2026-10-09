@@ -115,24 +115,69 @@
                         </dd>
                     </div>
 
-                    <!-- Data de emissão -->
+                    @if($nota->cancelada ==! '0')
+                    <!-- Data de Cancelamento -->
                     <div>
                         <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">
                             Data de Cancelamento
                         </dt>
 
                         <dd class="mt-1 text-sm text-gray-900">
-                            {{ $nota->data_cancelamento?->format('d/m/Y H:i:s') ?? '-' }}
+                            {{ $nota->data_cancelamento->format('d/m/Y') ?? '-' }}
                         </dd>
                     </div>
+                    <div>
+                        <dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                            Motivo
+                        </dt>
+
+                        <dd class="mt-1 text-sm text-gray-900">
+                            {{ $nota->motivo_cancelamento ?? '-' }}
+                        </dd>
+                    </div>
+                    @endif
                 </div>
             </div>
-
-            <a target="_blank"
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <a target="_blank"
                 href="{{ route('nfse.danfse.pdf', $nota->id) }}"
-                class="px-3 py-1 text-xl font-semibold text-white bg-green-600 rounded hover:bg-green-700">
-                    Imprimir Danfe - NFS-e
-            </a>
+                class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-green-600 rounded hover:bg-green-700">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="w-5 h-5"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <path d="M14 2v6h6M8 13h8M8 17h5"/>
+                    </svg>
+
+                    Imprimir DANFSe - NFS-e
+                </a>
+                <a href="{{ route('notas.visualizar-xml', $nota->id) }}"
+                target="_blank"
+                class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-blue-500 rounded hover:bg-blue-600">
+
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="w-6 h-6"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round">
+
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <path d="M14 2v6h6"/>
+                        <path d="m10 12-2 2 2 2"/>
+                        <path d="m14 12 2 2-2 2"/>
+                    </svg>
+
+                    Exportar XML
+                </a>
+            </div>
         </div>  
     </div>
 </x-area-empresa-layout>

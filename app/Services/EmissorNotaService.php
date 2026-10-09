@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Models\Empresa;
+use App\Models\Municipio;
 use App\Models\NotaEmitida;
 use App\Models\Tomador;
 use App\Utilitarios\Utilitarios;
@@ -13,6 +14,8 @@ use JCamelo\NfseNacionalLib\Services\NFSeService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use JCamelo\NfseNacionalLib\DTO\EnderecoObraDTO;
+use JCamelo\NfseNacionalLib\DTO\ObraDataDTO;
 
 class EmissorNotaService
 {
@@ -192,6 +195,31 @@ class EmissorNotaService
                 mdic: 0,
             );
         }
+
+        $dados['txtNumeroObras'] = '150';
+        $obra = null;
+        if(
+            isset($dados['txtEnderecoObras']) && !empty($dados['txtEnderecoObras']) &&
+            isset($dados['txtNumeroObras']) && !empty($dados['txtNumeroObras']) &&
+            isset($dados['txtComplementoObras']) && !empty($dados['txtComplementoObras']) &&
+            isset($dados['txtUFObras']) && !empty($dados['txtUFObras']) &&
+            isset($dados['txtCidadeObras']) && !empty($dados['txtCidadeObras']) &&
+            isset($dados['txtCepObras']) && !empty($dados['txtCepObras']) &&
+            isset($dados['txtBairroObras']) && !empty($dados['txtBairroObras'])
+        ){
+            $obra = new ObraDataDTO(
+                inscImobFisc: null,
+                nProcessoObra: null,
+                end: new EnderecoObraDTO(
+                    cMun: $dados['txtCidadeObras'],
+                    CEP: preg_replace('/[^0-9]/', '', $dados['txtCepObras']),
+                    xLgr: $dados['txtEnderecoObras'],
+                    nro: $dados['txtNumeroObras'],
+                    xCpl: $dados['txtComplementoObras'],
+                    xBairro: $dados['txtBairroObras'],
+                )
+            );
+        }
         
         $dataSN = new DPSDataSnDTO(
             ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
@@ -296,6 +324,9 @@ class EmissorNotaService
             cstIbsCbs: $dados['ddlSituacaoTributaria'],
             cClassTrib: $dados['ddlClassificacaoTributaria'],
             informacaoComplementar: $dados['txtInfoComplementares'] ?? null,
+
+            //dados da obra
+            obra: $obra,
         );
         
         //validar Xml
@@ -483,5 +514,90 @@ class EmissorNotaService
         ];
 
         return $retorno;
+    }
+
+    public function consultarServicosPrestados(array $dados){
+        $empresa = $this->empresaModel->find(Session::get('empresa_selecionada'));
+
+        $retorno = $this->nfse->consultarNfseServicosTomados(
+            'issnet',
+            $empresa->id,
+            $empresa->cpf_cnpj,//cnpj            
+            $empresa->inscricao_municipal,
+            null,
+            $dados['data_inicio'],//dt ini
+            $dados['data_fim'],//dt fim
+            null
+        );
+
+        $lista = $retorno['ConsultarNfseServicoTomadoResponse']['ConsultarNfseServicoTomadoResposta']['ListaNfse']['CompNfse'];
+
+        $inserirAtualizar = [];
+
+        foreach($lista as $key => $nota){
+            $inserirAtualizar[$key] = [
+                'nNfse' => $nota['NFSe']['infNFSe']['nNFSe'],
+                'valor' => $nota['NFSe']['infNFSe']['valores']['vBC'],
+                'cpf_cnpj' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['toma']['CNPJ'],
+                'nDPS' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['nDPS'],
+                'serieDps' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['serie'],
+                'data_criacao' => $nota['NFSe']['infNFSe']['dhProc']
+            ];
+
+            if(isset($nota['ListaEvento'])){
+                if(isset($nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['e101101'])){
+                    $dadosEvento = $nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['dhEvento'];
+                    $dadosEventoCancelamento = $nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['e101101'];
+                    $inserirAtualizar[$key]['motivo_cancelamento'] = $dadosEventoCancelamento['cMotivo'];
+                    $inserirAtualizar[$key]['motivo'] = $dadosEventoCancelamento['xDesc'] .' - '.$dadosEventoCancelamento['xMotivo'];
+                    $inserirAtualizar[$key]['data_evento'] = $dadosEvento;
+                }
+            }
+        }
+
+        $insertBatch = [];
+
+        foreach($inserirAtualizar as $novoRegistros){
+            $tomador = Tomador::where('empresa_id', $empresa->id)->where('cpf_cnpj', $novoRegistros['cpf_cnpj'])->first();
+            
+            if(is_null($tomador)){
+                $dadosTomador = Utilitarios::consultarEmpresaCNPJ( $novoRegistros['cpf_cnpj'] );
+                $tomador = new Tomador();
+                $dadosTomador['empresa_id'] = $empresa->id;
+
+                $municipio = Municipio::with('estado')
+                    ->where('municipio', $dadosTomador['municipio'])
+                    ->whereHas('estado', function ($query) use ($dadosTomador) {
+                        $query->where('sigla', $dadosTomador['uf']);
+                    })
+                    ->first();
+                $dadosTomador['cidade_id'] = $municipio->codigo;
+                $tomador->fill($dadosTomador);
+                $tomador->save();
+            }
+
+            $existe = NotaEmitida::where('empresa_id', $empresa->id)
+                ->where('num_nfse', $novoRegistros['nNfse'])
+                ->first();
+            
+            if(is_null($existe)){
+                $xmlNfse =$this->obterXml($empresa, $novoRegistros['nNfse']);
+
+                $insertBatch[] = [
+                    'empresa_id' => $empresa->id,
+                    'tomador_id' => $tomador->id,
+                    'nfse_xml'   => $xmlNfse,
+                    'num_nfse'   => $novoRegistros['nNfse'],
+                    'valor'      => $novoRegistros['valor'],
+                    'dados_emissao' => null,
+                    'cancelada' => isset($novoRegistros['motivo']) ? 1 : 0,
+                    'motivo_cancelamento' => isset($novoRegistros['motivo']) ? $novoRegistros['motivo'] : '-',
+                    'data_cancelamento' => isset($novoRegistros['motivo']) ? date('Y-m-d', strtotime($novoRegistros['data_evento'])) : null,
+                    'created_at' => date('Y-m-d G:i:s', strtotime($novoRegistros['data_criacao']))
+                ];
+            }
+        }
+
+        NotaEmitida::insert($insertBatch);
     }
 }

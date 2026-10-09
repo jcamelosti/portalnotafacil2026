@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Emissor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Empresa;
+use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
@@ -75,6 +76,6 @@ class TesteNfeNacionalController extends Controller
             null
         );*/
 
-        
+        Utilitarios::sendMessage("Mensagem Para Vários Usuários do ChatBot");
     }
 }

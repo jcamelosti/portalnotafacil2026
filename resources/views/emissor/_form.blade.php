@@ -133,6 +133,116 @@
                             </label>
                         </div>
 
+                        <div id="grupoDadosObra" style="display: none">
+                            <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
+                                Dados Relacionados à Obra de Construção Cívil
+                            </h4>
+                            
+                            <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Inscrição Imobiliária:</span>
+                                    {!! Form::text('txtInscImob', old('txtInscImob'), ['class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtInscImob']) !!}
+                                    @if ($errors->has('txtInscImob'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtInscImob') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                 <label class="block text-sm">
+                                    <span class="text-gray-700 ">CEP:</span>
+                                    {!! Form::text('txtCepObras', old('txtCepObras'), ['required', 'maxlength'=>'9' ,'class'=>'cep block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtCepObras']) !!}
+                                    @if ($errors->has('txtCepObras'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtCepObras') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Logradouro:</span>
+                                    {!! Form::text('txtEnderecoObras', old('txtEnderecoObras'), ['required','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtEnderecoObras']) !!}
+                                    @if ($errors->has('logradouro'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtEnderecoObras') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Número:</span>
+                                    {!! Form::text('txtNumeroObras', old('txtNumeroObras'), ['required','maxlength' => '6','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe informe 0(Zero)','id'=>'txtNumeroObras']) !!}
+                                    @if ($errors->has('txtNumeroObras'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtNumeroObras') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+                            </div>
+                             
+                            <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Complemento</span>
+                                    {!! Form::text('txtComplementoObras', old('txtComplementoObras'), ['required','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtComplementoObras']) !!}
+                                    @if ($errors->has('txtComplementoObras'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtComplementoObras') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Bairro:</span>
+                                    {!! Form::text('txtBairroObras', old('txtBairroObras'), ['maxlength' => '255','required','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'Bairro', 'id'=>'txtBairroObras']) !!}
+                                    @if ($errors->has('txtBairroObras'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtBairroObras') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+                               
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">UF:</span>
+                                    {!! Form::select(' txtUFObras',
+                                    $estados
+                                    ,old('txtUFObras'), ['id'=>'txtUFObras', 'required','class'=>'block w-full mt-1 text-sm  
+                                    form-select
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                    @if ($errors->has('txtUFObras'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtUFObras') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <div id="containerCidade">
+                                    <label class="block text-sm w-10/12" id="cidade_id">
+                                        <span class="text-gray-700 ">Cidade:</span>
+                                        {!! Form::select('txtCidadeObras', $cidades, old('txtCidadeObras'), ['maxlength' => '255','required','class'=>'block w-full mt-1 text-sm  
+                                        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                        :shadow-outline-gray form-input', 'placeholder'=>'', 'id' => 'txtCidadeObras']) !!}
+                                        @if ($errors->has('txtCidadeObras'))
+                                            <span class="text-xs text-red-600 ">
+                                            <strong>{{ $errors->first('txtCidadeObras') }}</strong>
+                                        </span>
+                                        @endif
+                                    </label>
+                                </div>
+                            </div>                            
+                        </div>
+
                         <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
                             Local da Prestação do Serviço
                         </h4>
@@ -1104,7 +1214,7 @@
                                 <span class="text-gray-700 ">Informações Complementares(*) - Caracteres Restantes:</span>
                                 <span id="LblLines2" class="aspLabel">2000</span>
                                 {!!
-                                Form::textarea('txtInfoComplementares', old('txtInfoComplementares') ?? '.', [
+                                Form::textarea('txtInfoComplementares', old('txtInfoComplementares'), [
                                     'name'=>"txtInfoComplementares",
                                     'id'=>"txtInfoComplementares",
                                     'style'=>"height: 60px !important;",
@@ -1114,7 +1224,7 @@
                                     'class'=>'block w-full mt-1 text-sm  
                                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                                     :shadow-outline-gray form-input',
-                                    'placeholder'=>'Descrição do Serviço - Este Campo é Obrigatório',
+                                    'placeholder'=>'Campo livre para preenchimento pelo contribuinte',
                                 ]) !!}
                             </label>
                         </div>

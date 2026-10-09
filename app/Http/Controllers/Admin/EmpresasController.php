@@ -249,7 +249,17 @@ class EmpresasController extends Controller
     {
         $dados = $request->all();
         
-        $empresa = $this->empresaModel->find($id);     
+        $empresa = $this->empresaModel->find($id); 
+        
+        if($dados['is_optante_simples_nac'] == 1){
+            $dados['op_simp_nac'] = 3;
+            $dados['tp_reg_apuracao_sn'] = "1";
+
+            if($dados['is_mei'] != "0"){
+                $dados['op_simp_nac'] = 2;
+            }
+        }
+
         $empresa->update($dados);
 
         session()->flash('message', 'Registro Atualizado com Sucesso.');
