@@ -174,7 +174,8 @@ class DashboardController extends Controller
             'empresa' => $empresas->first(),
             'quantCompartilhamentosSolicitados' => $liberarCompartilhamentoEmpresa,
             'variacaoPlanos' => $valorPlano,
-            'cores' => $cores
+            'cores' => $cores,
+            'empresas' => $empresas
         ]);
     }
 

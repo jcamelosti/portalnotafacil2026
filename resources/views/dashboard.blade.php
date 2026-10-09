@@ -42,23 +42,27 @@
         @endif
         
         <!-- LICENÇA -->
-        @if(!$temLicencaValida)
-            <div class="w-full mb-4">
-                <div class="bg-red-500 text-white px-4 py-2 font-bold">ATENÇÃO</div>
-                <div class="bg-red-100 px-4 py-3 text-red-700">
-                    <p>Você não possui licença ativa.</p>
-                </div>
-            </div>
-        @else
-            @if($license)
+        @if($empresas->count() == 1)
+            @if(!$temLicencaValida)
                 <div class="w-full mb-4">
-                    <div class="bg-teal-100 px-4 py-3 shadow">
-                        <p class="font-bold">Licença Ativada</p>
-                        <p class="text-sm">
-                            Vencimento: <strong>{{ $license->validate_pt_br }}</strong>
-                        </p>
+                    <div class="bg-red-500 text-white px-4 py-2 font-bold">ATENÇÃO</div>
+                    <div class="bg-red-100 px-4 py-3 text-red-700">
+                        <p>Você não possui licença ativa, para continuar emitindo suas notas fiscais de serviço renove sua licença.</p>
+
+                        <a href="{{ route('licenca.renovacao', ['id'=> $empresa->id]) }}" class="px-3 py-1 text-xl font-semibold text-white bg-red-600 rounded hover:bg-red-700">Renovar Licença</a>
                     </div>
                 </div>
+            @else
+                @if($license)
+                    <div class="w-full mb-4">
+                        <div class="bg-teal-100 px-4 py-3 shadow">
+                            <p class="font-bold">Licença Ativada</p>
+                            <p class="text-sm">
+                                Vencimento: <strong>{{ $license->validate_pt_br }}</strong>
+                            </p>
+                        </div>
+                    </div>
+                @endif
             @endif
         @endif
 
@@ -68,7 +72,7 @@
                 Aviso Importante
             </div>
             <p class="text-gray-700 text-center mb-4">
-                Informamos que a nova tabela de valores das licenças, vigente a partir de 01/07/2026, é aplicável aos novos clientes, conforme valores apresentados abaixo:
+                Informamos que a nova tabela de valores das licenças, vigente a partir de 08/10/2026, é aplicável para todos os clientes, conforme valores apresentados abaixo:
             </p>
             <div class="mx-12 space-y-12 lg:space-y-0 lg:flex lg:gap-4 lg:items-center lg:justify-center">
                 @foreach($variacaoPlanos as $chaveCor => $vPlano)
