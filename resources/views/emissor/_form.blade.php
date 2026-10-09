@@ -1214,7 +1214,7 @@
                                 <span class="text-gray-700 ">Informações Complementares(*) - Caracteres Restantes:</span>
                                 <span id="LblLines2" class="aspLabel">2000</span>
                                 {!!
-                                Form::textarea('txtInfoComplementares', old('txtInfoComplementares') ?? '.', [
+                                Form::textarea('txtInfoComplementares', old('txtInfoComplementares'), [
                                     'name'=>"txtInfoComplementares",
                                     'id'=>"txtInfoComplementares",
                                     'style'=>"height: 60px !important;",
@@ -1224,7 +1224,7 @@
                                     'class'=>'block w-full mt-1 text-sm  
                                     focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
                                     :shadow-outline-gray form-input',
-                                    'placeholder'=>'Descrição do Serviço - Este Campo é Obrigatório',
+                                    'placeholder'=>'Campo livre para preenchimento pelo contribuinte',
                                 ]) !!}
                             </label>
                         </div>

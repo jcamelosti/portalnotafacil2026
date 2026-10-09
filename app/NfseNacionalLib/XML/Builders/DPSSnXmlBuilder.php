@@ -679,7 +679,7 @@ class DPSSnXmlBuilder
         /*
          * infoCompl
          */
-        if (!empty($data->informacaoComplementar)) {
+        if (!empty($data->informacaoComplementar) || strlen($data->informacaoComplementar) > 0) {
 
             $infoCompl = $dom->createElement(
                 //self::NS_NFSE,

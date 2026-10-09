@@ -115,7 +115,7 @@ class DPSDataSnDTO
         public readonly ?string $cstIbsCbs = null,
         public readonly ?string $cClassTrib = null,
         
-        public readonly string $informacaoComplementar,
+        public readonly ?string $informacaoComplementar = null,
 
         // Versão
         public readonly string $versao = '1.01',

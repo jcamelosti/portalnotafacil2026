@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Emissor;
 
 use App\Business\NotasBO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\NotaCreateRequest;
 use App\Models\Certificado;
 use App\Models\ClassificacaoTributaria;
 use App\Models\CorrelacaoTribMunTribNac;
@@ -289,7 +290,7 @@ class NotaController extends Controller
         ]);
     }
 
-    public function store(Request $request){
+    public function store(NotaCreateRequest $request){
         try{
             $empresaSessao = request()->session()->get('empresa_selecionada');
             $empresaSessao = $this->empresaModel->find($empresaSessao);
@@ -304,6 +305,13 @@ class NotaController extends Controller
             return redirect()->route('notas.show', $retorno['registro']->id);
         } catch (\Throwable $e) {
             session()->flash('danger', $e->getMessage());
+            DB::insert(
+                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                [
+                    $empresaSessao->id,
+                    $e->getMessage()
+                ]
+            );
             return back()
                 ->withInput();
                 /*->with(
@@ -312,14 +320,14 @@ class NotaController extends Controller
                 );*/
         }catch(\Exception $e){
             session()->flash('danger', $e->getMessage());
-            /*DB::insert(
+            DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
                     $empresaSessao->id,
                     $e->getMessage()
                 ]
             );
-            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');*/
+            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');
             return back()
                 ->withInput();
         }
