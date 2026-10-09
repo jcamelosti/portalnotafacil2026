@@ -430,20 +430,29 @@ class NotaController extends Controller
     }
 
     public function consultarServicosPrestados(Request $request){
-        /*if($request->method() == 'GET'){
+        if($request->method() == 'GET'){
             $data = [
-                'data_inicio' => request()->data_inicio ?? Carbon::today()->subDays(30)->format('Y-m-d'),
+                'data_inicio' => request()->data_inicio ?? Carbon::today()->subDays(4)->format('Y-m-d'),
                 'data_fim'    => request()->data_fim ?? Carbon::today()->format('Y-m-d'),
             ];
             return view('notas.servicos-prestados')->with([
                 'data' => $data
             ]);
         }else{
+            $dataInicio = Carbon::parse($request->data_inicio)->startOfDay();
+            $dataFim = Carbon::parse($request->data_fim)->startOfDay();
+
+            if ($dataInicio->diffInDays($dataFim) > 10) {
+                return back()->withErrors([
+                    'data_fim' => 'O período não pode ser superior a 5 dias.'
+                ]);
+            }
+
             $this->emissorService->consultarServicosPrestados($request->all());
             
             session()->flash('success', 'Nota Atualizadas com Sucesso.');
             return redirect()->route('nota.index');
-        }*/
+        }
 
         session()->flash('danger', 'Recurso não Disponível.');
         return redirect()->route('nota.index');
