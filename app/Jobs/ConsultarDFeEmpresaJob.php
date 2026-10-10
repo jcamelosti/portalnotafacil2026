@@ -88,7 +88,13 @@ class ConsultarDFeEmpresaJob implements ShouldQueue
             $empresa = Empresa::find(1);
             $certificadoCliente = Certificado::where('empresa_id', $empresa->id)
                 ->first();
-            $certificado = getenv("CAMINHO_CERTIFICADO_LOCAL").$certificadoCliente->arquivo;
+            //$certificado = getenv("CAMINHO_CERTIFICADO_LOCAL").$certificadoCliente->arquivo;
+            if(getenv("AMBIENTE_PRODUCAO") == 0){
+                //desenvolvimento
+                $certificado = getenv("CAMINHO_CERTIFICADO_LOCAL").$certificadoCliente->arquivo;
+            }else{
+                $certificado = getenv("CAMINHO_CERTIFICADO_PROD").$certificadoCliente->arquivo;
+            }
 
             $config = new \stdClass();
             $config->tpamb = 1; //1 - Produção, 2 - Homologação
@@ -160,9 +166,6 @@ class ConsultarDFeEmpresaJob implements ShouldQueue
                 if ($cnpjTomador !== $cnpjEmpresa) {
                     continue;
                 }
-
-                Log::info($xml);
-                Log::info($dados);
 
                 DocumentoFiscalRecebido::updateOrCreate(
                     [

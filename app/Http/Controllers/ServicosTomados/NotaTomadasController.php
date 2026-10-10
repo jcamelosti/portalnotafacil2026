@@ -184,7 +184,13 @@ class NotaTomadasController extends Controller
         $empresa = Empresa::where('id', session()->get('empresa_selecionada'))->first();
         $certificadoCliente = Certificado::where('empresa_id', $empresa->id)
             ->first();
-        $certificado = getenv("CAMINHO_CERTIFICADO_LOCAL").$certificadoCliente->arquivo;
+
+        if(getenv("AMBIENTE_PRODUCAO") == 0){
+            //desenvolvimento
+            $certificado = getenv("CAMINHO_CERTIFICADO_LOCAL").$certificadoCliente->arquivo;
+        }else{
+            $certificado = getenv("CAMINHO_CERTIFICADO_PROD").$certificadoCliente->arquivo;
+        }
         
         try {
             $config = new \stdClass();
