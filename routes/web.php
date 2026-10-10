@@ -107,7 +107,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             Route::get('teste/nfse-nacional', [\App\Http\Controllers\Emissor\NfseNacional::class, 'teste']);
 
             //novas rotas - 17/08/2026
-            Route::get('nfse-nacional/testes', [\App\Http\Controllers\Emissor\TesteNfeNacionalController::class, 'teste']);
+            //Route::get('nfse-nacional/testes', [\App\Http\Controllers\Emissor\TesteNfeNacionalController::class, 'teste']);
             
             //pesquisar
             Route::get('/obter/tributacao-nacional/por-tributacao-mun', [NotaController::class, 'obterTributacaoNacionalPorAtividadeMun']);

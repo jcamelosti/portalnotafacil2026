@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Emissor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ServicoCreateRequest;
-use App\Http\Requests\ServicoUpdateRequest;
 use App\Models\Certificado;
 use App\Models\CodigoTribNacional;
 use App\Models\Empresa;
@@ -32,10 +31,11 @@ class NfseNacional extends Controller
 
     public function teste(){
         set_time_limit(900);
-        $certificadoCliente = Certificado::where('empresa_id', 1)
-            ->first();
+        
         
         $empresa = Empresa::find(1);
+        $certificadoCliente = Certificado::where('empresa_id', $empresa->id)
+            ->first();
         $certificado = getenv("CAMINHO_CERTIFICADO_LOCAL").$certificadoCliente->arquivo;
         
         try {
@@ -46,15 +46,20 @@ class NfseNacional extends Controller
 
             $content = file_get_contents($certificado);
             $password = base64_decode($certificadoCliente->senha);
-
+           
             $cert = \NFePHP\Common\Certificate::readPfx($content, $password);
             $tools = new \Hadder\NfseNacional\Tools($configJson, $cert);
             
             //Consultar Xml Por Chave
-            $response = $tools->consultarNfseChave('52011082224685881000190000000000007025123659579096');
-            echo $response;
+            /*$response = $tools->consultarNfseChave('52011082224685881000190000000000007025123659579096');
+            echo $response;*/
 
+            //Consultar Danfe
+            /*$response = $tools->consultarDanfse('52011082224685881000190000000000007025123659579096');
+            dd($response);*/
 
+            $response = $tools->consultaDocumentosFiscaisServico(1, $empresa->cpf_cnpj);
+            dd($response);
         } catch (\Exception $e) {
             dd($e->getMessage(), $e);
         }

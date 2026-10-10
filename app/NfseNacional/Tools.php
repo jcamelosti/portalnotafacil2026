@@ -12,6 +12,52 @@ class Tools extends RestCurl
         parent::__construct($config, $cert);
     }
 
+    public function consultaDocumentosFiscaisServico(string $nsu, string $cnpj){
+        $operacao = 'contribuintes/DFe/' . $nsu .'?cnpjConsulta='.$cnpj .'&lote=true';
+        
+        $retorno = $this->fazerRequisicao($operacao, null, 2);
+
+        if (isset($retorno['erro'])) {
+            return $retorno;
+        }
+
+        if ($retorno) {
+            /*$base_decode = base64_decode($retorno['nfseXmlGZipB64'], true);
+
+            if ($base_decode === false) {
+                return ['erro' => 'Falha ao decodificar o Base64.'];
+            }
+
+            $gz_decode = gzdecode($base_decode);
+
+            if ($gz_decode === false) {
+                return ['erro' => 'Falha ao descompactar o XML GZip.'];
+            }
+
+            // Retorna o XML em UTF-8, sem conversão desnecessária.
+            return $gz_decode;*/
+
+            if(isset($retorno['StatusProcessamento'])){
+                foreach($retorno['LoteDFe'] as $key => $data){
+                    $base_decode = base64_decode($data['ArquivoXml'], true);
+                    if ($base_decode === false) {
+                        $retorno['LoteDFe'][$key]['xml_status'] = 'Falha ao decodificar o Base64.';
+                    }
+                    
+                    $gz_decode = gzdecode($base_decode);
+
+                    if ($gz_decode === false) {
+                        dd('Falha ao descompactar o XML GZip.');
+                    }
+                    $retorno['LoteDFe'][$key]['ConteudoXml'] = $gz_decode;
+                }
+            }
+
+            return $retorno;
+        }
+        return null;
+    }
+
     public function consultarNfseChave($chave)
     {
         $operacao = 'nfse/' . $chave;
@@ -20,12 +66,7 @@ class Tools extends RestCurl
         if (isset($retorno['erro'])) {
             return $retorno;
         }
-        /*if ($retorno) {
-            $base_decode = base64_decode($retorno['nfseXmlGZipB64']);
-            $gz_decode = gzdecode($base_decode);
-            return mb_convert_encoding($gz_decode, 'ISO-8859-1', 'UTF-8');
-        }*/
-
+       
         if ($retorno) {
             $base_decode = base64_decode($retorno['nfseXmlGZipB64'], true);
 
@@ -73,6 +114,7 @@ class Tools extends RestCurl
         if (isset($retorno['erro'])) {
             return $retorno;
         }
+        
         if ($retorno) {
             return $retorno;
         }
