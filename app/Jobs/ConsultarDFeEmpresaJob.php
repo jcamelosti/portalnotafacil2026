@@ -12,6 +12,7 @@ use Illuminate\Queue\SerializesModels;
 
 
 use App\Models\DfeConsulta;
+use App\Models\DocumentoFiscalRecebido;
 use App\Models\Empresa;
 use App\Services\Nfse\DanfseXmlParser;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
@@ -180,6 +181,21 @@ class ConsultarDFeEmpresaJob implements ShouldQueue
                  *     ]
                  * );
                  */
+
+                Log::info($empresa->id);
+                Log::info($nsu);
+
+                DocumentoFiscalRecebido::updateOrCreate(
+                    [
+                        'empresa_id' => $empresa->id,
+                        'nsu' => $nsu,
+                    ],
+                    [
+                        'tipo_documento' => 'NFSE',
+                        'xml' => $xml,
+                        'dados' => $dados,
+                    ]
+                );
             }
 
             /*
