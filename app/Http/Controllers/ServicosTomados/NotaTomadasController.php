@@ -134,7 +134,7 @@ class NotaTomadasController extends Controller
     }
 
     public function index(){
-        $dataLiberado = '2026-10-10';
+        $dataLiberado = '2026-10-16';
 
         if(is_null(session()->get('empresa_selecionada'))){
             session()->flash('info', 'É necessário selecionar uma Empresa');
@@ -145,7 +145,7 @@ class NotaTomadasController extends Controller
 
         //data atual menor ou igual ao limite dataLiberado
         if (Carbon::today()->lte(Carbon::parse($dataLiberado))) {
-            //
+            session()->flash('info', 'Seu plano atual não possui acesso ao Recurso de Consultar de Notas(DF-e). <br /> Deixamos o recurso disponível por alguns dias(16/10/2026).');
         }else{
             if($empresa->plano->consulta_dfe == 0){
                 session()->flash('info', 'Seu plano atual não possui acesso ao Recurso de Consultar de Notas(DF-e)');
