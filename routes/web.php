@@ -6,7 +6,6 @@ use App\Http\Controllers\Emissor\DanfseController;
 use App\Http\Controllers\Emissor\DashboardController;
 use App\Http\Controllers\Emissor\NfseNacional;
 use App\Http\Controllers\Emissor\NotaController;
-use App\Http\Controllers\Emissor\ProtocoloController;
 use App\Http\Controllers\Emissor\TesteNfeNacionalController;
 use App\Http\Controllers\Empresas\CodTribMunCodTribNacController;
 use App\Http\Controllers\Empresas\EmpresasController;
@@ -16,6 +15,7 @@ use App\Http\Controllers\Empresas\SolicitarCreditoController;
 use App\Http\Controllers\InfinitePayWebHookController;
 use App\Http\Controllers\Irpj\RelatorioController;
 use App\Http\Controllers\MercadoPagoController;
+use App\Http\Controllers\ServicosTomados\NotaTomadasController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\TestSpedyController;
 use App\Http\Controllers\Tomadores\TomadoresController;
@@ -83,7 +83,11 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
         Route::get('/sinc/notas/{empresaId}', [\App\Http\Controllers\Emissor\NotaController::class, 'sincronizarNotasRecentes'])->name('sincronizarNotasRecentes');*/
     
         Route::get('/', [\App\Http\Controllers\Emissor\DashboardController::class, 'dashboard'])->name('dashboard');
-        
+
+        Route::group(['prefix' => 'servicos-tomados'], function () {
+            Route::get('index', [NotaTomadasController::class, 'index'])->name('servicos-tomados.index');
+        }); 
+
         Route::group(['prefix' => 'emissor'], function () {
             Route::get('nota/listagem', [\App\Http\Controllers\Emissor\NotaController::class, 'index'])->name('nota.index');
             Route::get('nota/criar', [\App\Http\Controllers\Emissor\NotaController::class, 'create'])->name('nota.emitir');
