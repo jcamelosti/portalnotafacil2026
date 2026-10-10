@@ -88,6 +88,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             Route::any('selecionar/empresa', [NotaTomadasController::class, 'selecionarEmpresa'])->name('servicos-tomados.selecionar-empresa');
             Route::get('index', [NotaTomadasController::class, 'index'])->name('servicos-tomados.index');
             Route::get('download/xml/{nota}', [NotaTomadasController::class, 'visualizarXmlNota'])->name('servicos-tomados.visualizar-xml');
+            Route::get('sincronizar/via-dfe', [NotaTomadasController::class, 'sincronizar'])->name('servicos-tomados.sincronizar');
         }); 
 
         Route::group(['prefix' => 'emissor'], function () {

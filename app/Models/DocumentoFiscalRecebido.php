@@ -16,11 +16,15 @@ class DocumentoFiscalRecebido extends Model
         'tipo_documento',
         'xml',
         'dados',
+        'doc_prestador',
+        'razao_social',
+        'data_emissao_nfse'
     ];
 
     protected $casts = [
         'nsu' => 'integer',
         'dados' => 'array',
+        'data_emissao_nfse' => 'date'
     ];
 
     public function empresa(): BelongsTo

@@ -15,6 +15,7 @@ use App\Models\DfeConsulta;
 use App\Models\DocumentoFiscalRecebido;
 use App\Models\Empresa;
 use App\Services\Nfse\DanfseXmlParser;
+use Carbon\Carbon;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -161,29 +162,7 @@ class ConsultarDFeEmpresaJob implements ShouldQueue
                 }
 
                 Log::info($xml);
-
-                /*
-                 * Persistir aqui a nota em sua tabela definitiva.
-                 *
-                 * Use uma chave única composta por empresa_id + NSU
-                 * para tornar o processamento idempotente.
-                 *
-                 * Exemplo:
-                 * DocumentoFiscalRecebido::updateOrCreate(
-                 *     [
-                 *         'empresa_id' => $empresa->id,
-                 *         'nsu' => $nsu,
-                 *     ],
-                 *     [
-                 *         'tipo_documento' => 'NFSE',
-                 *         'xml' => $xml,
-                 *         'dados' => $dados,
-                 *     ]
-                 * );
-                 */
-
-                Log::info($empresa->id);
-                Log::info($nsu);
+                Log::info($dados);
 
                 DocumentoFiscalRecebido::updateOrCreate(
                     [
@@ -194,6 +173,12 @@ class ConsultarDFeEmpresaJob implements ShouldQueue
                         'tipo_documento' => 'NFSE',
                         'xml' => $xml,
                         'dados' => $dados,
+                        'doc_prestador' => $dados['prestador']['cnpj'],
+                        'razao_social' => $dados['prestador']['nome'],
+                        'data_emissao_nfse' => Carbon::createFromFormat(
+                            'd/m/Y H:i:s',
+                            $dados['header']['emissao_nfse']
+                        )->format('Y-m-d')
                     ]
                 );
             }

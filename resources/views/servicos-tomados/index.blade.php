@@ -1,4 +1,4 @@
-<x-area-empresa-layout title="Notas Emitidas">
+<x-area-cliente-layout title="Notas Emitidas">
     <div class="py-10 mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg py-1">
             <h1 class="px-4 py-3">
@@ -11,7 +11,7 @@
 
         <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row">
             <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
-                <a href=""
+                <a href="{{ route('servicos-tomados.sincronizar') }}"
                    class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-white text-base leading-6 font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
                     Sincronizar Notas de Serviços Tomados
                 </a>
@@ -92,21 +92,21 @@
                                     <div>
                                         <p class="text-xs text-gray-500">CNPJ</p>
                                         <p class="font-semibold text-sm">
-                                            {{ $doc->dados['prestador']['cnpj'] }}
+                                            {{ $doc->doc_prestador }}
                                         </p>
                                     </div>
 
                                     <div>
                                         <p class="text-xs text-gray-500">Razão Social</p>
                                         <p class="font-semibold text-sm">
-                                            {{ Str::limit($doc->dados['prestador']['nome'] , 25, '...') }}
+                                            {{ Str::limit($doc->razao_social , 25, '...') }}
                                         </p>
                                     </div>
 
                                     <div>
                                         <p class="text-xs text-gray-500">Emissão em</p>
                                         <p class="font-semibold text-sm">
-                                           {{ $doc->dados['header']['emissao_nfse'] }}
+                                           {{ $doc->data_emissao_nfse }}
                                         </p>
                                     </div>
 
@@ -143,4 +143,12 @@
     </div>
     {{ $documentos->render('pagination') }}
     </div>
-</x-area-empresa-layout>
+
+@section('jquery')
+<script>
+    setInterval(function() {
+        location.reload();
+    }, 10000);
+</script>
+@endsection
+</x-area-cliente-layout>

@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\ServicosTomados;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\ConsultarDFeEmpresaJob;
+use App\Models\Certificado;
+use App\Models\DfeConsulta;
 use App\Models\DocumentoFiscalRecebido;
 use App\Models\Empresa;
 use App\Models\License;
@@ -175,5 +178,53 @@ class NotaTomadasController extends Controller
         header('Content-disposition: attachment; filename="' . $nomeArquivo . '"');
         header('Content-type: "text/xml"; charset="utf8"');
         readfile($caminhoDownload);
+    }
+
+    public function sincronizar(){
+        $empresa = Empresa::where('id', session()->get('empresa_selecionada'))->first();
+        $certificadoCliente = Certificado::where('empresa_id', $empresa->id)
+            ->first();
+        $certificado = getenv("CAMINHO_CERTIFICADO_LOCAL").$certificadoCliente->arquivo;
+        
+        try {
+            $config = new \stdClass();
+            $config->tpamb = 1; //1 - Produção, 2 - Homologação
+            //$config->formatOutput = true; // Para debug retorna XML formatado
+            $configJson = json_encode($config);
+
+            $content = file_get_contents($certificado);
+            $password = base64_decode($certificadoCliente->senha);
+           
+            $cert = \NFePHP\Common\Certificate::readPfx($content, $password);
+            $tools = new \Hadder\NfseNacional\Tools($configJson, $cert);
+
+            $consulta = DfeConsulta::firstOrCreate(
+                ['empresa_id' => $empresa->id],
+                ['ult_nsu' => 0, 'max_nsu' => 0, 'status' => 'pendente']
+            );
+
+            if ($consulta->status === 'processando') {
+                return response()->json([
+                    'message' => 'A consulta desta empresa já está em andamento.',
+                ], 202);
+            }
+
+            $consulta->update([
+                'status' => 'pendente',
+                'erro' => null,
+                'finalizada_em' => null,
+            ]);
+
+            ConsultarDFeEmpresaJob::dispatch($empresa->id);
+            session()->flash('success', 'Consulta fiscal adicionada à fila. As notas tomadas serão consultas e dentro de poucos minutos apareceram na listagem.');
+            /*return response()->json([
+                'message' => 'Consulta fiscal adicionada à fila.',
+                'status' => 'pendente',
+            ], 202);*/
+
+            return redirect()->route('servicos-tomados.index');
+        } catch (\Exception $e) {
+            dd($e->getMessage(), $e);
+        }
     }
 }
