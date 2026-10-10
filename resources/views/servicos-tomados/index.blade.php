@@ -106,7 +106,7 @@
                                     <div>
                                         <p class="text-xs text-gray-500">Emissão em</p>
                                         <p class="font-semibold text-sm">
-                                           {{ $doc->data_emissao_nfse }}
+                                           {{ $doc->data_emissao_nfse->format('d/m/Y') }}
                                         </p>
                                     </div>
 
