@@ -85,7 +85,9 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
         Route::get('/', [\App\Http\Controllers\Emissor\DashboardController::class, 'dashboard'])->name('dashboard');
 
         Route::group(['prefix' => 'servicos-tomados'], function () {
+            Route::any('selecionar/empresa', [NotaTomadasController::class, 'selecionarEmpresa'])->name('servicos-tomados.selecionar-empresa');
             Route::get('index', [NotaTomadasController::class, 'index'])->name('servicos-tomados.index');
+            Route::get('download/xml/{nota}', [NotaTomadasController::class, 'visualizarXmlNota'])->name('servicos-tomados.visualizar-xml');
         }); 
 
         Route::group(['prefix' => 'emissor'], function () {
