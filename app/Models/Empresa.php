@@ -57,6 +57,7 @@ class Empresa extends Model
         'focunfe_id',
         'focunfe_token_hmg',
         'focunfe_token_prd',
+        'is_mei'
     ];
 
     /*public function getCepAttribute($value)

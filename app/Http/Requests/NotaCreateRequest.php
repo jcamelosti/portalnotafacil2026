@@ -24,9 +24,22 @@ class NotaCreateRequest extends FormRequest
     public function rules()
     {
        return [
-            'txtTotalValorLiquido' => [
+            'txtTotal' => [
                 'required',
                 'regex:/^\d{1,3}(?:\.\d{3})*,\d{2}$|^\d+,\d{2}$/',
+                function ($attribute, $value, $fail) {
+                    $valor = str_replace('.', '', $value);
+                    $valor = str_replace(',', '.', $valor);
+
+                    if ((float) $valor <= 0) {
+                        $fail('O valor total deve ser maior que zero.');
+                    }
+                },
+            ],
+
+            'txtBaseCalc' => [
+                'required',
+                //'regex:/^\d{1,3}(?:\.\d{3})*,\d{2}$|^\d+,\d{2}$/',
                 function ($attribute, $value, $fail) {
                     $valor = str_replace('.', '', $value);
                     $valor = str_replace(',', '.', $valor);
@@ -36,6 +49,35 @@ class NotaCreateRequest extends FormRequest
                     }
                 },
             ],
+
+            'cTribNac' => [
+                'required'
+            ],
+
+            'nbs'=>[
+                'required'
+            ],
+
+            'ddlSituacaoTributaria' => [
+                'required'
+            ],
+
+            'ddlSitTribFederal' => [
+                'required'
+            ],
+
+            'ddlTipoRetFederal' => [
+                'required'
+            ],
+
+            'ddlIndicadorOperacao' =>[
+                'required'
+            ],
+
+            'ddlClassificacaoTributaria' =>[
+                'required'
+            ],
+
             'txtDescServicos' => [
                 'required',
                 'string',
@@ -43,7 +85,7 @@ class NotaCreateRequest extends FormRequest
             ],
 
             'txtInfoComplementares' => [
-                'required',
+                'nullable',
                 'string',
                 'max:2000'
             ],
@@ -53,14 +95,24 @@ class NotaCreateRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'txtTotalValorLiquido.required' =>
-                'O valor líquido é obrigatório.',
+            'cTribNac.required' => 'É necessário Informar o Código de Tributação Nacional',
+            'nbs.required' => 'É necessário informar o NBS',
 
-            'txtTotalValorLiquido.regex' =>
-                'Informe um valor válido no formato 10,00 ou 1.000,00.',
+            'txtTotal.required' =>
+                'O valor do Serviço é obrigatório.',
+
+            'txtBaseCalc.required' => 'O valor da Base de Cálculo deve ser calculado. Confira cada campo de valor.',
+            /*'txtBaseCalc.regex' =>
+                'O valor do cálculo da Base de Cálculo Informe um valor válido no formato 10,00 ou 1.000,00.',*/
 
             'txtDescServicos.required' =>
                 'A descrição dos serviços é obrigatória.',
+
+            'ddlSitTribFederal.required' => 'A Situação Tributária do PIS/COFINS deve ser informada.',
+            'ddlTipoRetFederal.required' => 'O Tipo de Retenção do PIS/COFINS/CSLL deve ser informado.',
+            'ddlIndicadorOperacao.required' => 'A Indicação da Operação deve ser informada.',
+            'ddlSituacaoTributaria.required' => 'A Situação Tributária deve ser informada.',
+            'ddlClassificacaoTributaria.required' => 'A Classificação Tributária deve ser informada.',
         ];
     }
 }

@@ -8,6 +8,8 @@
                 </p>
             </h1>
 
+            @include('components.mensagens')
+
             <div class="px-4 py-3 mb-8 bg-white ">
                 {!! Form::open(['route' => 'admin.notas.index', 'method' => 'GET']) !!}
                 <label class="block text-sm">

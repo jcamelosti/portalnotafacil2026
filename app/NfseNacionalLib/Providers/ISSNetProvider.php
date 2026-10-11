@@ -54,4 +54,14 @@ class ISSNetProvider implements NFSeProviderInterface
         return app(ISSNetService::class)
             ->recepcionarLoteDpsSincrono($xml, $empresaId);
     }
+
+    public function consultarNfseServicosPrestados(string $xml, int $empresaId){
+        return app(ISSNetService::class)
+            ->consultarNfseServicosPrestados($xml, $empresaId);
+    }
+
+    public function consultarNfseServicosTomados(string $xml, int $empresaId){
+        return app(ISSNetService::class)
+            ->consultarNfseServicosTomados($xml, $empresaId);
+    }
 }

@@ -24,8 +24,8 @@
     </label>
 
     <label class="block text-sm">
-        <span class="text-gray-700 ">Código Tributação Nacional:</span>
-        {!! Form::text('cTribNac', null, ['maxlength' => '255','required','class'=>'block w-full mt-1 text-sm  
+        <span class="text-gray-700 ">Código Tributação Nacional(Código com 6 digitos):</span>
+        {!! Form::text('cTribNac', null, ['minlength' => 6, 'maxlength' => '6','required','class'=>'block w-full mt-1 text-sm  
         focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
         :shadow-outline-gray form-input', 'placeholder'=>'Código de Tributação Nacional']) !!}
         @if ($errors->has('cTribNac'))
@@ -49,7 +49,7 @@
 
     <label class="block text-sm">
         <span class="text-gray-700 ">Alíquota(%):</span>
-        {!! Form::number('aliquota', null, ['required','class'=>'block w-full mt-1 text-sm  
+        {!! Form::number('aliquota', null, [ 'step'=>'0.01', 'min' => '0', 'required','class'=>'block w-full mt-1 text-sm  
         focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
         :shadow-outline-gray form-input', 'placeholder'=>'Alíquota(%)']) !!}
         @if ($errors->has('aliquota'))

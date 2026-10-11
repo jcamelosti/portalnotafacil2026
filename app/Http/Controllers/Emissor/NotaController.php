@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Emissor;
 
 use App\Business\NotasBO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\NotaCreateRequest;
 use App\Models\Certificado;
 use App\Models\ClassificacaoTributaria;
 use App\Models\CorrelacaoTribMunTribNac;
@@ -21,6 +22,7 @@ use App\Models\Temp;
 use App\Models\Tomador;
 use App\Models\Uf;
 use App\Services\EmissorNotaService;
+use App\Services\NotaFiscalAuthorization;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -50,19 +52,19 @@ class NotaController extends Controller
     private $paisesModel;
 
     private EmissorNotaService $emissorService;
+    protected NotaFiscalAuthorization $notaAuthorization;
     
-    public function __construct(Empresa $empresaModel, Tomador $tomadorModel, 
+    public function __construct(
+        Empresa $empresaModel, Tomador $tomadorModel, 
         Uf $estadoModel, Municipio $municipioModel,
         EmpresaAtividade $atividadeModel,
         Nbs $nbsModel, IndOpIbsCbs $indOperModel, CstIbsCbs $cstIbsCsbModel, 
-        ClassificacaoTributaria $classificacaoTributariaModel, Temp $tempModel,
-        NFSeService $nfse, EmissorNotaService $emissorService, NotaEmitida $notasEmitidas, Moeda $moedaModel,
-        Pais $paisesModel
+        ClassificacaoTributaria $classificacaoTributariaModel,
+        EmissorNotaService $emissorService, NotaEmitida $notasEmitidas, Moeda $moedaModel,
+        Pais $paisesModel, NotaFiscalAuthorization $notaAuthorization
     ){
-        //$this->notaBO = NotasBO::newInstance();
         $this->empresaModel = $empresaModel;
         $this->tomadorModel = $tomadorModel;
-        //$this->notasModel = $notasModel;
         $this->estadoModel = $estadoModel;
         $this->municipioModel = $municipioModel;
         $this->atividadeModel = $atividadeModel;
@@ -76,6 +78,8 @@ class NotaController extends Controller
         $this->notasEmitidas = $notasEmitidas;
         $this->moedaModel = $moedaModel;
         $this->paisesModel = $paisesModel;    
+
+        $this->notaAuthorization = $notaAuthorization;
     }
 
     public function index(){
@@ -128,6 +132,11 @@ class NotaController extends Controller
         $tomador = $this->tomadorModel->find(Session::get('tomador_selecionado'));
         $empresa = $this->empresaModel->with(['atividadesEmpresa'])
             ->find(Session::get('empresa_selecionada'));
+
+        /*if(is_null($empresa->codigo_atividade)){
+            session()->flash('danger', 'Opss! A empresa não possui uma Atividade no Municipio selecionada. Sincronize os dados com Issnet e selecione uma Atividade no Municipio para prosseguir com a emissão da NFS-e.');
+            return redirect()->route('empresas.edit', $empresa->id);
+        }*/
         
         $estados = $this->estadoModel->getListaEstados();
         $uf_id = $empresa->cidade()->first()->uf_id;
@@ -280,11 +289,11 @@ class NotaController extends Controller
             'indOpIbsCbs' => $indOpIbsCbs,
             'cstIbsCsb' => $cstIbsCsb,
             'moedas' => $moedas,
-            'paises' => $paises
+            'paises' => $paises,
         ]);
     }
 
-    public function store(Request $request){
+    public function store(NotaCreateRequest $request){
         try{
             $empresaSessao = request()->session()->get('empresa_selecionada');
             $empresaSessao = $this->empresaModel->find($empresaSessao);
@@ -293,12 +302,19 @@ class NotaController extends Controller
             $dados = $request->except('_token');
 
             $dados = $this->notaBO->tratarDados($dados);
-                        
+            
             $retorno = $this->emissorService->emitir($dados);
 
             return redirect()->route('notas.show', $retorno['registro']->id);
         } catch (\Throwable $e) {
             session()->flash('danger', $e->getMessage());
+            DB::insert(
+                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                [
+                    $empresaSessao->id,
+                    $e->getMessage()
+                ]
+            );
             return back()
                 ->withInput();
                 /*->with(
@@ -307,14 +323,14 @@ class NotaController extends Controller
                 );*/
         }catch(\Exception $e){
             session()->flash('danger', $e->getMessage());
-            /*DB::insert(
+            DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
                     $empresaSessao->id,
                     $e->getMessage()
                 ]
             );
-            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');*/
+            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');
             return back()
                 ->withInput();
         }
@@ -411,5 +427,234 @@ class NotaController extends Controller
         header('Content-disposition: attachment; filename="' . $nomeArquivo . '"');
         header('Content-type: "text/xml"; charset="utf8"');
         readfile($caminhoDownload);
+    }
+
+    public function consultarServicosPrestados(Request $request){
+        if($request->method() == 'GET'){
+            $data = [
+                'data_inicio' => request()->data_inicio ?? Carbon::today()->subDays(4)->format('Y-m-d'),
+                'data_fim'    => request()->data_fim ?? Carbon::today()->format('Y-m-d'),
+            ];
+            return view('notas.servicos-prestados')->with([
+                'data' => $data
+            ]);
+        }else{
+            $dataInicio = Carbon::parse($request->data_inicio)->startOfDay();
+            $dataFim = Carbon::parse($request->data_fim)->startOfDay();
+
+            if ($dataInicio->diffInDays($dataFim) > 10) {
+                return back()->withErrors([
+                    'data_fim' => 'O período não pode ser superior a 5 dias.'
+                ]);
+            }
+
+            $this->emissorService->consultarServicosPrestados($request->all());
+            
+            session()->flash('success', 'Nota Atualizadas com Sucesso.');
+            return redirect()->route('nota.index');
+        }
+
+        session()->flash('danger', 'Recurso não Disponível.');
+        return redirect()->route('nota.index');
+    }
+
+    public function duplicar(string $id){
+        $id = base64_decode($id);
+        $nota = $this->notasEmitidas->find($id);
+
+        $this->notaAuthorization->autorizar($nota, $nota->empresa);
+
+        //dados da nota a ser duplicada
+        $nota = $nota->dados_emissao;
+        
+        $nota['txtTotal'] = number_format($nota['txtTotal'], 2, ',', '.');
+        if($nota['txtDeducaoBaseCalculo'] > 0){
+            $nota['txtDeducaoBaseCalculo'] = number_format($nota['txtDeducaoBaseCalculo'], 2, ',', '.');
+        }else{
+            $nota['txtDeducaoBaseCalculo'] = null;
+        }
+
+        $nota['txtAliquota'] = number_format($nota['txtAliquota'], 2, ',', '.');
+
+        $campos = [
+            'txtBaseCalcFederal',
+            'txtAliqCOFINS',
+            'txtAliqPIS',
+            'txtAliqCOFINS',
+            'txtValorIRRF',
+            'txtValorCSLL',
+            'txtValorCP',
+        ];
+
+        foreach ($campos as $campo) {
+            if (isset($nota[$campo]) && (float) $nota[$campo] == 0) {
+                $nota[$campo] = null;
+            }
+        }
+        
+        //recriando os itens na tela preenchidos
+        $tomador = $this->tomadorModel->find($nota['tomador_id']);
+        $empresa = $this->empresaModel->with(['atividadesEmpresa'])
+            ->find(Session::get('empresa_selecionada'));
+
+        /*if(is_null($empresa->codigo_atividade)){
+            session()->flash('danger', 'Opss! A empresa não possui uma Atividade no Municipio selecionada. Sincronize os dados com Issnet e selecione uma Atividade no Municipio para prosseguir com a emissão da NFS-e.');
+            return redirect()->route('empresas.edit', $empresa->id);
+        }*/
+        
+        $estados = $this->estadoModel->getListaEstados();
+        $uf_id = $empresa->cidade()->first()->uf_id;
+        $cidades = $this->municipioModel->municipios($uf_id);
+
+        $dadosCadastrais = json_decode($empresa->dados_cadastrais);
+
+        $verificar_validade_atividade = $empresa->atividadesEmpresa()
+            ->where('id', $empresa->empresa_atividade_id)
+            ->where(function ($query) {
+                $query->whereNull('vigencia_final')
+                    ->orWhere('vigencia_final', '>=', now());
+            })
+            ->first();
+        
+        if(!is_null($verificar_validade_atividade)){
+            if (!isNull($verificar_validade_atividade->vigencia_final) && Carbon::parse($verificar_validade_atividade->vigencia_final)->isPast()) {
+                session()->flash('danger', 'Opss! A vigência da Atividade no Municipio('. $verificar_validade_atividade->descricao_atividade .') selecionada está Expirada!');
+                return redirect()->route('empresas.edit', $empresa->id);
+            }
+        }
+
+        $certificadoCliente = Certificado::where('empresa_id', $empresa->id)
+            ->first();
+
+        if(is_null($certificadoCliente)){
+            session()->flash('danger', 'Opss! A empresa não possui um Certificado Digital válido cadastrado.');
+            return redirect()->route('empresas.edit', $empresa->id);
+        }
+    
+        $atividades = $this->atividadeModel->atividadesByCTribMunList($empresa->id);
+        $atividade = $this->atividadeModel
+            ->where('empresa_id', $empresa->id)
+            ->where('id', $empresa->empresa_atividade_id)->first();
+
+        $data_competencia = date('Y-m-d');
+
+        $cod_trib_nac = [null => 'Selecione o Código de Tributação Nacional'] + CorrelacaoTribMunTribNac::select(
+                'cTribNac',
+                DB::raw("concat(cTribNac, ' - ', IFNULL(xTribNac, '')) as field1")
+            )
+            ->where('cTribMun', $atividade->codigo_atividade)
+            ->where('empresa_id', $empresa->id)
+            ->orderBy('cTribMun', 'asc')
+            ->pluck('field1', 'cTribNac')
+            ->all();
+
+        $situacao_simples_nacional = Empresa::getOpcaoSimplesNacional();//Regime de Apuração Tributária pelo Simples Nacional, campo regApTribSN em regTrib
+        //Regime de Apuração Tributária pelo Simples Nacional.
+        $regimes_apuracao_sn = Empresa::getRegimeApuracaoSimplesNacional();
+        //Tipos de Regimes Especiais de Tributação Municipal:
+        
+        $situacao_simples_nacional = array_filter($situacao_simples_nacional, function($chave) use ($empresa) {
+            return (int)$chave === (int)$empresa->op_simp_nac;
+        }, ARRAY_FILTER_USE_KEY);
+        
+        $regimes_apuracao_sn = array_filter($regimes_apuracao_sn, function($chave) use ($empresa) {
+            return (int)$chave === (int)$empresa->tp_reg_apuracao_sn;
+        }, ARRAY_FILTER_USE_KEY);
+
+        ///Campo ddlTribISSQN
+        $dadosCadastrais = json_decode($empresa->dados_cadastrais, true);
+        
+        $tributacaoIssqnList = [
+            null => 'Selecione',
+            1 => 'Operação Tributável',
+		    2 => 'Imunidade',
+			3 => 'Exportação de serviço',
+			4 => 'Não Incidência',
+        ];
+
+        $tributacoesPermitidas = $dadosCadastrais['tributacoesPermitidas']['tribISSQN'];
+        $tributacaoIssqnPermitidas = [null => 'Selecione'] + array_filter(
+            $tributacaoIssqnList,
+            fn ($descricao, $id) =>
+                in_array((int) $id, array_map('intval', $tributacoesPermitidas)),
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        $tiposImunidadeList = [
+            null => 'Selecione',
+            0 => 'Imunidade',
+            1 => 'Patrimônio, renda ou serviços, uns dos outros (CF88, Art 150, VI, a)',
+            2 => 'Templos de qualquer culto (CF88, Art 150, VI, b)',
+            3 => 'Patrimônio, renda ou serviços dos partidos políticos, inclusive suas fundações, das entidades sindicais dos trabalhadores, das instituições de educação e de assistência social, sem fins lucrativos, atendidos os requisitos da lei (CF88, Art 150, VI, c)',
+            4 => 'Livros, jornais, periódicos e o papel destinado a sua impressão (CF88, Art 150, VI, d)',
+            5 => 'Fonogramas e videofonogramas musicais produzidos no Brasil contendo obras musicais ou literomusicais de autores brasileiros e/ou obras em geral interpretadas por artistas brasileiros bem como os suportes materiais ou arquivos digitais que os contenham, salvo na etapa de replicação industrial de mídias ópticas de leitura a laser. (CF88, Art 150, VI, e)',
+        ];
+
+        $tiposSuspencaoExigibilidade = [
+            null => 'Selecione',
+            1 => 'Exigibilidade Suspensa por Decisão Judicial',
+			2 => 'Exigibilidade Suspensa por Processo Administrativo'
+        ];
+
+        $tipos_regime_esp_trib_mun = Empresa::getTiposRegimeEspecialTributacaoMunicipio();
+        
+        $tipos_regime_esp_trib_mun = array_filter($tipos_regime_esp_trib_mun, function($chave) use ($empresa) {
+            return (int)$chave === (int)$empresa->tp_regime_esp_trib_mun;
+        }, ARRAY_FILTER_USE_KEY);
+        
+        $tipos_regime_esp_trib_mun = ['' => 'Selecione'] + $tipos_regime_esp_trib_mun;
+
+        $tipos_retencoes = [
+            1 => 'Não retido',
+            2 => 'Retido pelo Tomador',
+            3 => 'Retido pelo Intermediário'
+        ];
+
+        //$municipio_incidencia = $empresa->cidade_id;
+        $municipio_incidencia = Municipio::where('codigo', $empresa->cidade_id)->first();
+
+        //indicador de operação
+        $indOpIbsCbs = $this->indOperModel->indicadorOperacoes();
+        $cstIbsCsb = $this->cstIbsCsbModel->listar();
+
+        $dados_cadastrais = json_decode($empresa->dados_cadastrais, true);
+
+        $moedas = $this->moedaModel->getListaMoedas();
+        
+        $paises = $this->paisesModel->paises(); 
+        
+        if(empty($tomador->cpf_cnpj) && $tomador->codigo_pais_bacen != '1058'){
+            $paises = [
+                '' => 'Selecione o Pais',
+                $tomador->pais => $paises[$tomador->pais]
+            ];
+        }
+
+        return view('emissor.duplicar', [
+            'dados_cadastrais' => $dados_cadastrais,
+            'data_competencia' => $data_competencia,
+            'tomador' => $tomador,
+            'empresa' => $empresa,
+            'estados' => $estados,
+            'uf_id' => $uf_id,
+            'cidades' => $cidades,
+            'dados_cadastrais' => $dadosCadastrais,
+            'atividades' => $atividades,
+            'cod_trib_nac' => $cod_trib_nac,
+            'atividade' => $atividade,
+            'situacao_simples_nacional' => $situacao_simples_nacional,
+            'regimes_apuracao_sn' => $regimes_apuracao_sn,
+            'tributacao_issqn_list' => $tributacaoIssqnPermitidas,
+            'tiposImunidadeList' => $tiposImunidadeList,
+            'tiposSuspencaoExigibilidade' => $tiposSuspencaoExigibilidade,
+            'tipos_regime_esp_trib_mun' => $tipos_regime_esp_trib_mun,
+            'tipos_retencoes' => $tipos_retencoes,
+            'municipio_incidencia' => $municipio_incidencia,
+            'indOpIbsCbs' => $indOpIbsCbs,
+            'cstIbsCsb' => $cstIbsCsb,
+            'moedas' => $moedas,
+            'paises' => $paises,
+            'nota' => $nota
+        ]);
     }
 }

@@ -19,6 +19,7 @@ class NotaEmitida extends Model
     ];
 
     protected $casts = [
+        'data_cancelamento' => 'date',
         'valor' => 'decimal:2',
         'dados_emissao' => 'array',
     ];

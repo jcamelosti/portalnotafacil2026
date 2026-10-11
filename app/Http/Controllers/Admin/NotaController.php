@@ -144,7 +144,13 @@ class NotaController extends Controller
             return response()->json(['error' => 'Nota não encontrada'], 404);
         }
 
-        $urlNfse = $this->emissorService->consultarUrlNota($nota->empresa, $nota->num_nfse);
-        return response()->json(['url' => $urlNfse]);
+        $consulta = $this->emissorService->consultarUrlNota($nota->empresa, $nota->num_nfse);
+
+        if($consulta['error']){
+            session()->flash('danger', $consulta['message']);
+            return redirect()->back();
+        }
+        
+        return $consulta;
     }
 }

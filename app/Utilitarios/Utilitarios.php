@@ -89,7 +89,13 @@ class Utilitarios
             'txtAliqPIS',
             'txtAliqCOFINS',
             'txtValorCSLL',
-            'comex_vserv_moeda'
+            'comex_vserv_moeda',
+            'txtFederal',
+            'txtEstadual',
+            'txtMunicipal',
+            'percentualTribFederal',
+            'percentualTribEstadual',
+            'percentualTribMunicipal'
         ];
 
         $semPontuacao = [
@@ -234,19 +240,31 @@ class Utilitarios
 
     public static function sendMessage($messagem) {
         $token = "8269207890:AAHrjuGzKPjlWMrEjl0NiwaNe4WecMTnpcA";
-        $chatid = "7011003487";
+        
+        $chatsIds = [
+            "6582419759",
+            "7011003487"
+        ];
+        
+        $url = "https://api.telegram.org/bot{$token}/sendMessage";
 
-        $url = "https://api.telegram.org/bot" . $token . "/sendMessage?chat_id=" . $chatid;
-        $url = $url . "&text=" . urlencode($messagem);
-        $ch = curl_init();
-        $optArray = array(
-            CURLOPT_URL => $url,
-            CURLOPT_RETURNTRANSFER => true
-        );
-        curl_setopt_array($ch, $optArray);
-        $result = curl_exec($ch);
-        curl_close($ch);
-        return $result;
+        foreach ($chatsIds as $chatId) {
+            $ch = curl_init();
+            curl_setopt_array($ch, [
+                CURLOPT_URL => $url,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => [
+                    'chat_id' => $chatId,
+                    'text' => $messagem,
+                ],
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 10,
+                CURLOPT_CONNECTTIMEOUT => 5,
+            ]);
+            $resultados[$chatId] = curl_exec($ch);
+        }
+
+        return null;
     }
 
     public static function proximoDiaUtil($data, $saida = 'd/m/Y') {
