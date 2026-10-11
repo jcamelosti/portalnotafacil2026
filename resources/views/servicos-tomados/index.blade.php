@@ -1,4 +1,4 @@
-<x-area-cliente-layout title="Notas Emitidas">
+<x-area-cliente-layout title="Notas Tomadas">
     <div class="py-10 mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg py-1">
             <h1 class="px-4 py-3">
@@ -26,21 +26,8 @@
                     class="bg-white p-4 rounded-lg shadow mb-6">
 
                     <div class="grid grid-cols-1 gap-4">
-
-                        <!-- Tomador (linha inteira) -->
-                        <label class="block text-sm">
-                            <span class="text-gray-700">Emitente:</span>
-                            <!--{ ! ! Form::select(
-                                'tomador_id',
-                                $tomadoresList,
-                                request()->tomador_id ?? null,
-                                ['class'=>'select2 block w-full mt-1 text-sm form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple']
-                            ) ! ! } -->
-                        </label>
-
                         <!-- Linha de baixo -->
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-
                             <!-- Data Inicial -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -80,60 +67,57 @@
 
                 </form>
 
-                <div class="grid gap-4 mt-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
                     @foreach($documentos as $doc)
-                        <div class="p-4 rounded-lg shadow flex flex-col md:flex-row md:items-center md:justify-between
-                        {{ ($doc->id > '0') ? 'bg-green-50' : 'bg-red-50' }}">
+                        <div class="p-5 rounded-xl shadow-sm border border-green-200 bg-green-50 hover:shadow-md transition">
 
-                            <!-- DADOS -->
-                            <div class="flex-1">
-                                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                            {{-- CABEÇALHO --}}
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <p class="text-xs text-gray-500 uppercase tracking-wide">
+                                        Período
+                                    </p>
 
-                                    <div>
-                                        <p class="text-xs text-gray-500">CNPJ</p>
-                                        <p class="font-semibold text-sm">
-                                            {{ $doc->doc_prestador }}
-                                        </p>
-                                    </div>
+                                    <h3 class="font-semibold text-gray-800 text-base">
+                                        {{ Str::ucfirst($doc->mes_ano) }}
+                                    </h3>
+                                </div>
 
-                                    <div>
-                                        <p class="text-xs text-gray-500">Razão Social</p>
-                                        <p class="font-semibold text-sm">
-                                            {{ Str::limit($doc->razao_social , 25, '...') }}
-                                        </p>
-                                    </div>
+                                <div class="bg-green-100 text-green-700 rounded-full p-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        class="w-6 h-6"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="1.8"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round">
 
-                                    <div>
-                                        <p class="text-xs text-gray-500">Emissão em</p>
-                                        <p class="font-semibold text-sm">
-                                           {{ $doc->data_emissao_nfse->format('d/m/Y') }}
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <p class="text-xs text-gray-500">Núm. NFSE</p>
-                                        <p class="font-semibold text-sm">
-                                             {{ $doc->dados['header']['numero_nfse'] }}
-                                        </p>
-                                    </div>
-
-                                    <div>
-                                        <p class="text-xs text-gray-500">Valor</p>
-                                        <p class="font-bold text-green-600 text-sm">
-                                           {{ $doc->dados['totais']['operacao']  }}
-                                        </p>
-                                    </div>
-
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                        <path d="M14 2v6h6"/>
+                                        <path d="m10 12-2 2 2 2"/>
+                                        <path d="m14 12 2 2-2 2"/>
+                                    </svg>
                                 </div>
                             </div>
 
-                            <!-- AÇÕES -->
-                            <div class="mt-4 md:mt-0 flex flex-wrap gap-2 md:justify-end">
-                                <a href="{{ route('servicos-tomados.visualizar-xml', $doc->id) }}"
-                                class="px-3 py-1 text-xs font-semibold text-white bg-green-500 rounded hover:bg-green-600">
-                                    XML
-                                </a>
+                            {{-- TOTAL --}}
+                            <div class="mb-5">
+                                <p class="text-xs text-gray-500 mb-1">
+                                    Total de NFS-e
+                                </p>
 
+                                <p class="text-3xl font-bold text-green-600">
+                                    {{ $doc->total }}
+                                </p>
+                            </div>
+
+                            {{-- AÇÃO --}}
+                            <div class="border-t border-green-200 pt-4">
+                                <a href="{{ route('servicos-tomados.visualizar-xml-periodo', $doc->periodo) }}"
+                                class="flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition">
+                                    Baixar XMLs
+                                </a>
                             </div>
                         </div>
                     @endforeach
@@ -146,9 +130,9 @@
 
 @section('jquery')
 <script>
-    setInterval(function() {
+    /*setInterval(function() {
         location.reload();
-    }, 10000);
+    }, 10000);*/
 </script>
 @endsection
 </x-area-cliente-layout>

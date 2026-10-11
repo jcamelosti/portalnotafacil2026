@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class NotaTomadasController extends Controller
 {
@@ -153,14 +154,40 @@ class NotaTomadasController extends Controller
             }
         }
 
-        $documentos = DocumentoFiscalRecebido::query()
-            ->where('empresa_id', $empresa->id)
-            ->where('tipo_documento', 'NFSE')
-            ->orderByDesc('nsu')
-            ->paginate(20);
+        $data = [
+            'data_inicio' => request()->data_inicio ?? Carbon::today()->subDays(30)->format('Y-m-d'),
+            'data_fim'    => request()->data_fim ?? Carbon::today()->format('Y-m-d'),
+        ];
+
+        // converter para Carbon
+        $inicio = Carbon::parse($data['data_inicio']);
+        $fim    = Carbon::parse($data['data_fim']);
+
+        $documentos = DocumentoFiscalRecebido::select(
+            DB::raw("DATE_FORMAT(data_emissao_nfse, '%Y-%m') as periodo"),
+            DB::raw('COUNT(*) as total')
+        )
+        ->when(!empty($data['data_inicio']) && !empty($data['data_fim']), function ($query) use ($data) {
+            $query->whereBetween('data_emissao_nfse', [
+                $data['data_inicio'].' 00:00:00',
+                $data['data_fim'].' 23:59:59'
+            ]);
+        })
+        ->groupBy(DB::raw("DATE_FORMAT(data_emissao_nfse, '%Y-%m')"))
+        ->orderBy('periodo', 'desc')
+        ->paginate(6)
+        ->through(function ($item) {
+            $item->mes_ano = Carbon::createFromFormat(
+                'Y-m',
+                $item->periodo
+            )->locale('pt_BR')->translatedFormat('F/Y');
+
+            return $item;
+        });
 
         return view('servicos-tomados.index')->with([
             'documentos' => $documentos,
+            'data' => $data,
         ]);
     }
 
@@ -232,5 +259,66 @@ class NotaTomadasController extends Controller
         } catch (\Exception $e) {
             dd($e->getMessage(), $e);
         }
+    }
+
+    public function downloadPorPeriodo(string $periodo){
+        // Validar o formato YYYY-MM
+        abort_unless(
+            preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $periodo),
+            422,
+            'Período inválido.'
+        );
+
+        $dataInicio = Carbon::createFromFormat('!Y-m', $periodo)->startOfMonth();
+        $dataFim = $dataInicio->copy()->endOfMonth();
+
+        // Buscar as notas do período
+        $documentos = DocumentoFiscalRecebido::query()
+            ->whereBetween('data_emissao_nfse', [
+                $dataInicio->toDateString(),
+                $dataFim->toDateString(),
+            ])
+            // Se necessário, filtre também pela empresa:
+            // ->where('empresa_id', $empresaId)
+            ->whereNotNull('xml')
+            ->where('xml', '<>', '')
+            ->orderBy('data_emissao_nfse')
+            ->get(['id', 'nsu', 'xml', 'dados' ,'data_emissao_nfse']);
+
+            if ($documentos->isEmpty()) {
+                session()->flash('success', 'Nenhum XML encontrado para o período selecionado.');
+                return back();
+            }
+
+            // Criar arquivo ZIP temporário
+            $caminhoZip = tempnam(sys_get_temp_dir(), 'nfse_');
+            $zip = new \ZipArchive();
+
+            if ($zip->open($caminhoZip, \ZipArchive::OVERWRITE) !== true) {
+                @unlink($caminhoZip);
+
+                abort(500, 'Não foi possível criar o arquivo ZIP.');
+            }
+
+            foreach ($documentos as $doc) {
+                // Nome único para cada XML
+                $nomeArquivo = sprintf(
+                    'NFSE-CHAVE_%s_%s.xml',
+                    preg_replace('/[^a-zA-Z0-9_-]/', '_', (string) $doc->dados['header']['chave']),
+                    $doc->dados['header']['numero_nfse']
+                );
+
+                $zip->addFromString($nomeArquivo, $doc->xml);
+            }
+
+            $zip->close();
+
+        return response()
+            ->download(
+                $caminhoZip,
+                "PortalNotaFacil-NFSEs_{$periodo}.zip",
+                ['Content-Type' => 'application/zip']
+            )
+            ->deleteFileAfterSend(true);
     }
 }
