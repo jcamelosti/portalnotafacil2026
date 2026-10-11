@@ -4,14 +4,16 @@ namespace App\Http\Controllers\Emissor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ServicoCreateRequest;
-use App\Http\Requests\ServicoUpdateRequest;
+use App\Jobs\ConsultarDFeEmpresaJob;
 use App\Models\Certificado;
 use App\Models\CodigoTribNacional;
+use App\Models\DfeConsulta;
 use App\Models\Empresa;
 use App\Models\Municipio;
 use App\Models\Nbs;
 use App\Models\Servico;
 use App\Models\Tomador;
+use App\Services\Nfse\DanfseXmlParser;
 use App\Utilitarios\Utilitarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -30,12 +32,13 @@ class NfseNacional extends Controller
         $this->empresaModel = $empresaModel;
     }
 
-    public function teste(){
+    public function teste( DanfseXmlParser $parser ){
         set_time_limit(900);
-        $certificadoCliente = Certificado::where('empresa_id', 1)
-            ->first();
+        
         
         $empresa = Empresa::find(1);
+        $certificadoCliente = Certificado::where('empresa_id', $empresa->id)
+            ->first();
         $certificado = getenv("CAMINHO_CERTIFICADO_LOCAL").$certificadoCliente->arquivo;
         
         try {
@@ -46,29 +49,64 @@ class NfseNacional extends Controller
 
             $content = file_get_contents($certificado);
             $password = base64_decode($certificadoCliente->senha);
-
+           
             $cert = \NFePHP\Common\Certificate::readPfx($content, $password);
             $tools = new \Hadder\NfseNacional\Tools($configJson, $cert);
             
-            
-            //Informar chave NFSe
-            /*$response = $tools->consultarDanfse('52011082224685881000190000000000008226013544016309');
-            header("Content-Type: application/pdf");
-            header('Content-Disposition: inline; filename="NFSe.pdf"');
-            header('Content-Transfer-Encoding: binary');
-            //header('Content-Length: ' . filesize($file));
-            header('Accept-Ranges: bytes');
+            //Consultar Xml Por Chave
+            /*$response = $tools->consultarNfseChave('52011082224685881000190000000000007025123659579096');
             echo $response;*/
 
-            //Consultar Xml Por Chave
-            //$response = $tools->consultarNfseChave('52011082224685881000190000000000007025123659579096');
-            //echo $response;
+            //Consultar Danfe
+            /*$response = $tools->consultarDanfse('52011082224685881000190000000000007025123659579096');
+            dd($response);*/
 
-            $response = $tools->consultarAliquotas('5201108', '8599-6/03', '2026-07-08');
-            dd($response);
+            /*$dados_resposta = $tools->consultaDocumentosFiscaisServico(51, $empresa->cpf_cnpj);
+
+            $ult_nsu = 0;
+            foreach($dados_resposta['LoteDFe'] as $key => $nota){
+                $ult_nsu = $nota['NSU'];
+                if($nota['TipoDocumento'] !== 'EVENTO'){
+                    $arrayNota = $parser->parseDFe($nota['ConteudoXml']);
+                    
+                    //notas aonde sou tomador do serviço
+                    if($arrayNota['tomador']['cnpj'] == $empresa->cpf_cnpj){
+                        echo "<pre>";
+                        var_dump($arrayNota);
+                    }
+                }                  
+            }
+            dd($ult_nsu);*/
+
         } catch (\Exception $e) {
             dd($e->getMessage(), $e);
         }
+
+        //agendando
+
+        $consulta = DfeConsulta::firstOrCreate(
+            ['empresa_id' => $empresa->id],
+            ['ult_nsu' => 0, 'max_nsu' => 0, 'status' => 'pendente']
+        );
+
+        if ($consulta->status === 'processando') {
+            return response()->json([
+                'message' => 'A consulta desta empresa já está em andamento.',
+            ], 202);
+        }
+
+        $consulta->update([
+            'status' => 'pendente',
+            'erro' => null,
+            'finalizada_em' => null,
+        ]);
+
+        ConsultarDFeEmpresaJob::dispatch($empresa->id);
+
+        return response()->json([
+            'message' => 'Consulta fiscal adicionada à fila.',
+            'status' => 'pendente',
+        ], 202);
     }
 
     public function index(Request $request){

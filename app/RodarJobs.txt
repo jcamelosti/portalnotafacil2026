@@ -1,0 +1,8 @@
+#localmente
+
+php artisan queue:work database --queue=fiscal,default --tries=5 --timeout=120
+
+
+#servidor
+
+cd /home/SEU_USUARIO/sistema && /usr/local/bin/php artisan queue:work database --queue=fiscal,default --stop-when-empty --tries=5 --timeout=120

@@ -13,7 +13,7 @@ class CreateMoedasTable extends Migration
      */
     public function up()
     {
-        Schema::create('moedas', function (Blueprint $table) {
+        /*Schema::create('moedas', function (Blueprint $table) {
             $table->id();
 
             $table->string('codigo_numerico', 3)
@@ -36,7 +36,7 @@ class CreateMoedasTable extends Migration
 
             $table->index('codigo_pais');
             $table->index('nome');
-        });
+        });*/
     }
 
     /**
