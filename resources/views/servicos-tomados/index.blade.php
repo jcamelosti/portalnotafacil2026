@@ -1,5 +1,7 @@
 <x-area-cliente-layout title="Notas Tomadas">
-    <div class="py-10 mx-auto sm:px-6 lg:px-8">
+    <div class="mx-auto sm:px-6 lg:px-8 py-2">
+        @include('components.empresa-selecionada')
+
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg py-1">
             <h1 class="px-4 py-3">
                 Notas Fiscais de Serviço Tomadas
@@ -14,6 +16,13 @@
                 <a href="{{ route('servicos-tomados.sincronizar') }}"
                    class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-white text-base leading-6 font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
                     Sincronizar Notas de Serviços Tomados
+                </a>
+            </span>
+            
+            <span class="ml-4 mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
+                <a href="{{ route('servicos-tomados.selecionar-empresa') }}"
+                    class="inline-flex justify-center w-full rounded-md border border-blue-600 px-4 py-2 bg-white text-base leading-6 font-medium text-blue-700 shadow-sm hover:text-blue-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
+                    Trocar de Empresas
                 </a>
             </span>
         </div>

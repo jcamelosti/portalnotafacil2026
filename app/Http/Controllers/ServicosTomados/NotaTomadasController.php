@@ -173,6 +173,7 @@ class NotaTomadasController extends Controller
                 $data['data_fim'].' 23:59:59'
             ]);
         })
+        ->where('empresa_id', session()->get('empresa_selecionada'))
         ->groupBy(DB::raw("DATE_FORMAT(data_emissao_nfse, '%Y-%m')"))
         ->orderBy('periodo', 'desc')
         ->paginate(6)
@@ -188,6 +189,7 @@ class NotaTomadasController extends Controller
         return view('servicos-tomados.index')->with([
             'documentos' => $documentos,
             'data' => $data,
+            'empresa' => $empresa
         ]);
     }
 
