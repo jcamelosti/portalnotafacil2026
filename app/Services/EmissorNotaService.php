@@ -221,6 +221,8 @@ class EmissorNotaService
             );
         }
         
+        $numeroProximoDPS = $empresa->num_ultimo_dps + 1;
+        
         $dataSN = new DPSDataSnDTO(
             ambiente: $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1,
             //dataEmissao: Carbon::now('America/Sao_Paulo')->format('Y-m-d\TH:i:sP'),
@@ -228,7 +230,7 @@ class EmissorNotaService
                 ->setTimeFromTimeString(now()->format('H:i:s'))
                 ->format('Y-m-d\TH:i:sP'),
             serie: $empresa->serie_dps,
-            numDps: ($empresa->num_ultimo_dps + 1),
+            numDps: $numeroProximoDPS,
             dataCompetencia: Carbon::now(
                 'America/Sao_Paulo'
             )->format('Y-m-d'),

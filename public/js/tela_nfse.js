@@ -1,6 +1,6 @@
 $(document).ready(function () {
     const $txtDescServicos = $('#txtDescServicos');
-    const $txtInfoComplementares = $('txtInfoComplementares');
+    const $txtInfoComplementares = $('#txtInfoComplementares');
     // ==========================================
     // CAMPOS TRIBUTÁRIOS FEDERAIS
     // ==========================================
