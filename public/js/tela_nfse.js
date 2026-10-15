@@ -1518,20 +1518,18 @@ $(document).ready(function () {
     }
 
     function calculos(){
+        valorLiquido = converterNumero($valorTotalServico.val());
+
         if ($txtDescontoInCondicionado.length > 0 && $txtDescontoInCondicionado.is(':visible')) {
-            $txtBaseCalc.val(
-                formatarMoeda(
-                    converterNumero($valorTotalServico.val()) - converterNumero($txtDescontoInCondicionado.val())
-                )
-            );
+            valorLiquido = formatarMoeda(
+                    valorLiquido - converterNumero($txtDescontoInCondicionado.val())
+                );
         }
 
         if ($txtDescontoCondicionado.length > 0 && $txtDescontoCondicionado.is(':visible')) {
-            $txtBaseCalc.val(
-                formatarMoeda(
-                    converterNumero($valorTotalServico.val()) - converterNumero($txtDescontoCondicionado.val())
-                )
-            );
+            valorLiquido = formatarMoeda(
+                    valorLiquido - converterNumero($txtDescontoCondicionado.val())
+                );
         }
 
         //ISSQN
@@ -1544,12 +1542,9 @@ $(document).ready(function () {
                 valorIssqn = formatoBrasileiro(converterNumero($valorTotalServico.val()) * (converterNumero($txtAliquota.val()) / 100));
             }
             
-            $txtBaseCalc.val(
-                formatarMoeda(
-                    converterNumero($txtBaseCalc.val()) - converterNumero(valorIssqn)
-                )
-            );
+            valorLiquido = valorLiquido - converterNumero(valorIssqn);
         }
+
 
         //tributação federal calculos
         valorPis = 0;
@@ -1559,33 +1554,41 @@ $(document).ready(function () {
         const retidos = obterTributosRetidos();
         const baseFederal = converterNumero($baseCalcFederal.val());
 
-        // PIS: calcula somente se NÃO estiver retido
-        if (!retidos.pis && converterNumero($aliqPIS.val()) > 0) {
+        if (converterNumero($aliqPIS.val()) > 0) {
             valorPis = baseFederal * (converterNumero($aliqPIS.val()) / 100);
         }
 
-        // COFINS: calcula somente se NÃO estiver retido
-        if (!retidos.cofins && converterNumero($aliqCOFINS.val()) > 0) {
+        if (converterNumero($aliqCOFINS.val()) > 0) {
             valorCofins = baseFederal * (converterNumero($aliqCOFINS.val()) / 100);
         }
 
-        somaTributosFederais += valorPis + valorCofins;
+        if(valorPis != undefined || valorPis > 0){
+            if(retidos.pis){
+                somaTributosFederais += valorPis
+            }
+        }
 
-        // CSLL: desconta somente se NÃO estiver retida
-        if (!retidos.csll) {
+         if(valorCofins != undefined || valorCofins){
+            if(retidos.cofins){
+                somaTributosFederais += valorCofins
+            }
+        }
+
+        //CSLL
+        if (retidos.csll) {
             somaTributosFederais += converterNumero($valorCSLL.val());
         }
 
         // IRRF
         somaTributosFederais += converterNumero($valorIRRF.val());
-
+        
         // Contribuição previdenciária (CP)
         somaTributosFederais += converterNumero($valorCP.val());
 
-        // Atualiza a base de cálculo
-        $txtBaseCalc.val(
+        valorLiquido = valorLiquido - somaTributosFederais;
+         $txtBaseCalc.val(
             formatarMoeda(
-                converterNumero($txtBaseCalc.val()) - somaTributosFederais
+                valorLiquido
             )
         );
     }
