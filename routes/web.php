@@ -76,7 +76,7 @@ Route::post('/webhook/infinitepay/capture', [InfinitePayWebHookController::class
 Route::get('/testes/spedy', [TestSpedyController::class, 'index'])->name('spedy.testes');
 Route::get('/testes/focunfe', [TesteNfeNacionalController::class, 'cadastraEmpresaFocuNfe'])->name('focunfse.testes');
 
-Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', 'dados.faturamento']], function () {
+Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', 'dados.faturamento', 'checar.acesso.empresa']], function () {
     Route::group(['prefix' => 'c'], function() {
         /*Route::get('/pagamento-realizado', [DashboardController::class, 'pagamentoRealizado'])->name('pagamentoRealizado');
         Route::get('/trazernotas/{empresaId}', [\App\Http\Controllers\Emissor\NotaController::class, 'getNotasEmpresa'])->name('sincnotasempresa');
@@ -84,15 +84,21 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
     
         Route::get('/', [\App\Http\Controllers\Emissor\DashboardController::class, 'dashboard'])->name('dashboard');
 
-        Route::group(['prefix' => 'servicos-tomados'], function () {
+        Route::group([
+            //'middleware' => ['checar.acesso.empresa'],
+            'prefix' => 'servicos-tomados',
+        ], function () {
             Route::any('selecionar/empresa', [NotaTomadasController::class, 'selecionarEmpresa'])->name('servicos-tomados.selecionar-empresa');
             Route::get('index', [NotaTomadasController::class, 'index'])->name('servicos-tomados.index');
             Route::get('download/xml/{nota}', [NotaTomadasController::class, 'visualizarXmlNota'])->name('servicos-tomados.visualizar-xml');
             Route::get('download/periodo/{periodo}', [NotaTomadasController::class, 'downloadPorPeriodo'])->name('servicos-tomados.visualizar-xml-periodo');
+            Route::get('listar-documentos/periodo/{periodo}', [NotaTomadasController::class, 'visualizarDocumentosPeriodo'])->name('servicos-tomados.listar-documentos-periodo');
             Route::get('sincronizar/via-dfe', [NotaTomadasController::class, 'sincronizar'])->name('servicos-tomados.sincronizar');
         }); 
 
-        Route::group(['prefix' => 'emissor'], function () {
+        Route::group([
+            'prefix' => 'emissor',
+        ], function () {
             Route::get('nota/listagem', [\App\Http\Controllers\Emissor\NotaController::class, 'index'])->name('nota.index');
             Route::get('nota/criar', [\App\Http\Controllers\Emissor\NotaController::class, 'create'])->name('nota.emitir');
             Route::post('nota/salvar', [\App\Http\Controllers\Emissor\NotaController::class, 'store'])->name('notas.store');

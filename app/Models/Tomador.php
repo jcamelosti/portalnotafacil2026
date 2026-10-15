@@ -88,7 +88,11 @@ class Tomador extends Model
                 'id',
                 DB::raw("concat(cpf_cnpj, ' - ', IFNULL(razao_social, '')) as field1")
             )
-            ->where('empresa_id', $empresaId)
+            //->where('empresa_id', $empresaId)
+            ->where(function ($query) use ($empresaId) {
+                $query->where('empresa_id', $empresaId)
+                    ->orWhere('cpf_cnpj', '99999999999');
+            })
             ->orderBy('razao_social', 'asc')
             ->pluck('field1', 'id')
             ->all();

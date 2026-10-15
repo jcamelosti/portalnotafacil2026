@@ -88,25 +88,29 @@
                                     </p>
 
                                     <h3 class="font-semibold text-gray-800 text-base">
+                                        <a title="Visualizar Documentos" href="{{ route('servicos-tomados.listar-documentos-periodo', $doc->periodo) }}">
                                         {{ Str::ucfirst($doc->mes_ano) }}
+                                        </a>
                                     </h3>
                                 </div>
 
                                 <div class="bg-green-100 text-green-700 rounded-full p-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg"
-                                        class="w-6 h-6"
-                                        viewBox="0 0 24 24"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="1.8"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round">
+                                    <a title="Visualizar Documentos" href="{{ route('servicos-tomados.listar-documentos-periodo', $doc->periodo) }}">
+                                        <svg xmlns="http://www.w3.org/2000/svg"
+                                            class="w-6 h-6"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            stroke-width="1.8"
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round">
 
-                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                                        <path d="M14 2v6h6"/>
-                                        <path d="m10 12-2 2 2 2"/>
-                                        <path d="m14 12 2 2-2 2"/>
-                                    </svg>
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                                            <path d="M14 2v6h6"/>
+                                            <path d="m10 12-2 2 2 2"/>
+                                            <path d="m14 12 2 2-2 2"/>
+                                        </svg>
+                                    </a>
                                 </div>
                             </div>
 
@@ -117,7 +121,9 @@
                                 </p>
 
                                 <p class="text-3xl font-bold text-green-600">
+                                    <a title="Visualizar Documentos" href="{{ route('servicos-tomados.listar-documentos-periodo', $doc->periodo) }}">
                                     {{ $doc->total }}
+                                    </a>
                                 </p>
                             </div>
 

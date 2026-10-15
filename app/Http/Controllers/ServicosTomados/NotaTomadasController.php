@@ -9,8 +9,10 @@ use App\Models\DfeConsulta;
 use App\Models\DocumentoFiscalRecebido;
 use App\Models\Empresa;
 use App\Models\License;
+use App\Services\NotaFiscalAuthorization;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -263,7 +265,37 @@ class NotaTomadasController extends Controller
         }
     }
 
+    public function visualizarDocumentosPeriodo(string $periodo){
+        if(!request()->session()->has('empresa_selecionada')){
+             session()->flash('success', 'Nenhuma Empresa selecionada.');
+            return redirect()->route('dashboard');
+        }
+        $empresa = Empresa::where('id', session()->get('empresa_selecionada'))->first();
+        
+        $dataInicio = Carbon::createFromFormat('Y-m', $periodo)->startOfMonth();
+        $dataFim = Carbon::createFromFormat('Y-m', $periodo)->endOfMonth();
+
+        $documentos = DocumentoFiscalRecebido::
+            where('empresa_id', session()->get('empresa_selecionada'))
+            ->whereBetween('data_emissao_nfse', [
+                $dataInicio,
+                $dataFim,
+            ])
+            ->paginate(10);
+       
+        return view('servicos-tomados.listar')->with([
+            'documentos' => $documentos,
+            'empresa' => $empresa
+        ]);     
+    }
+
     public function downloadPorPeriodo(string $periodo){
+        if(!request()->session()->has('empresa_selecionada')){
+             session()->flash('success', 'Nenhuma Empresa selecionada.');
+            return redirect()->route('dashboard');
+        }
+        $empresa = Empresa::where('id', session()->get('empresa_selecionada'))->first();
+
         // Validar o formato YYYY-MM
         abort_unless(
             preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $periodo),
@@ -283,6 +315,7 @@ class NotaTomadasController extends Controller
             // Se necessário, filtre também pela empresa:
             // ->where('empresa_id', $empresaId)
             ->whereNotNull('xml')
+            ->where('empresa_id',  $empresa->id)
             ->where('xml', '<>', '')
             ->orderBy('data_emissao_nfse')
             ->get(['id', 'nsu', 'xml', 'dados' ,'data_emissao_nfse']);
