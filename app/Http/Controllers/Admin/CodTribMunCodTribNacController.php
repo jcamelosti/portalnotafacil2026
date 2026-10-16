@@ -129,12 +129,42 @@ class CodTribMunCodTribNacController extends Controller
                     ->where('c_trib_nac', $dados['cTribNac'])
                     ->get();
 
-                $registroNbsEmpresa = [];
+                //dd($consultaNbs);
+
+                /*$registroNbsEmpresa = [];
                 foreach ($consultaNbs as $reg) {
                     $registroNbsEmpresa[] = [
                         'empresa_id' => $empresa->id,
                         'correlaca_trib_id' => $ins->id,
                         'codigo' => $reg->c_nbs,
+                        'descricao' => $reg->x_nbs,
+                    ];
+                }
+
+                dd($registroNbsEmpresa);*/
+
+                $registroNbsEmpresa = [];
+                $registrosExistentes = [];
+
+                foreach ($consultaNbs as $reg) {
+                    $empresaId = $empresa->id;
+                    $correlacaoTribId = $ins->id;
+                    $codigo = (string) $reg->c_nbs;
+
+                    // Monta a chave composta
+                    $chave = "{$empresaId}|{$correlacaoTribId}|{$codigo}";
+
+                    // Ignora se a combinação já existir
+                    if (isset($registrosExistentes[$chave])) {
+                        continue;
+                    }
+
+                    $registrosExistentes[$chave] = true;
+
+                    $registroNbsEmpresa[] = [
+                        'empresa_id' => $empresaId,
+                        'correlaca_trib_id' => $correlacaoTribId,
+                        'codigo' => $codigo,
                         'descricao' => $reg->x_nbs,
                     ];
                 }
