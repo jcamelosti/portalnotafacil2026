@@ -136,6 +136,8 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
                 ->name('nfse.danfse.pdf');
 
             Route::any('nota/consultar/servicos-prestados', [NotaController::class, 'consultarServicosPrestados']) ->name('nfse.consultar-servicos-prestados');
+
+            Route::get('/obter/indicadores-operacao', [NotaController::class, 'retornarIndicadorOperacao']);
         });
 
         Route::group(['prefix' => 'emissor-nacional-mei'], function () {

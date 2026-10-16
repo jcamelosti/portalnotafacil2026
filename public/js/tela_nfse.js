@@ -1521,20 +1521,16 @@ $(document).ready(function () {
         valorLiquido = converterNumero($valorTotalServico.val());
 
         if ($txtDescontoInCondicionado.length > 0 && $txtDescontoInCondicionado.is(':visible')) {
-            valorLiquido = formatarMoeda(
-                    valorLiquido - converterNumero($txtDescontoInCondicionado.val())
-                );
+            valorLiquido = valorLiquido - converterNumero($txtDescontoInCondicionado.val())
         }
 
         if ($txtDescontoCondicionado.length > 0 && $txtDescontoCondicionado.is(':visible')) {
-            valorLiquido = formatarMoeda(
-                    valorLiquido - converterNumero($txtDescontoCondicionado.val())
-                );
+            valorLiquido = valorLiquido - converterNumero($txtDescontoCondicionado.val())
         }
 
         //ISSQN
         if($tipoRetencao.val() != 1){
-            if(converterNumero($txtDeducaoBaseCalculo.val()) > 0){
+            if(converterNumero($txtDeducaoBaseCalculo.val()) > 0 && converterNumero($txtAliquota.val()) > 0){
                 valorIssqn = formatoBrasileiro(
                     (converterNumero($valorTotalServico.val()) - converterNumero($txtDeducaoBaseCalculo.val())) * (converterNumero($txtAliquota.val()) / 100)
                 );
@@ -1586,7 +1582,8 @@ $(document).ready(function () {
         somaTributosFederais += converterNumero($valorCP.val());
 
         valorLiquido = valorLiquido - somaTributosFederais;
-         $txtBaseCalc.val(
+        
+        $txtBaseCalc.val(
             formatarMoeda(
                 valorLiquido
             )
