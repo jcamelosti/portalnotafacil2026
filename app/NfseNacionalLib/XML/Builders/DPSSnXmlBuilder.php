@@ -338,12 +338,14 @@ class DPSSnXmlBuilder
                 $data->numeroTomador
             );
 
-            $this->appendOptionalText(
-                $dom,
-                $end,
-                'xCpl',
-                $data->complementoTomador
-            );
+            if(!empty($data->complementoTomador)){
+                $this->appendOptionalText(
+                    $dom,
+                    $end,
+                    'xCpl',
+                    $data->complementoTomador
+                );
+            }
 
             $this->appendOptionalText(
                 $dom,
