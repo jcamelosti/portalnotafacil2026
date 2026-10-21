@@ -14,6 +14,7 @@ use App\Models\Nbs;
 use App\Models\Servico;
 use App\Models\Tomador;
 use App\Services\Nfse\DanfseXmlParser;
+use App\Services\NotaFiscalServico\DanfsePdfService;
 use App\Utilitarios\Utilitarios;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -536,54 +537,21 @@ class NfseNacional extends Controller
 
             $cert = \NFePHP\Common\Certificate::readPfx($content, $password);
             $tools = new \Hadder\NfseNacional\Tools($configJson, $cert);
-        
-            //Informar chave NFSe
-            $response = $tools->consultarDanfse($servico->chave_nfse);
-
-            header("Content-Type: application/pdf");
-            header('Content-Disposition: inline; filename="NFSe.pdf"');
-            header('Content-Transfer-Encoding: binary');
-            //header('Content-Length: ' . filesize($file));
-            header('Accept-Ranges: bytes');
-            echo $response;
-            
-            /*$arquivo = $servico->id. '.pdf';
-            return response()->streamDownload(function () use ($response) {
-                echo $response;
-            }, $arquivo, [
-                'Content-Type' => 'application/pdf',
-            ]);*/
 
             //Consultar Xml Por Chave
-            /*$response = $tools->consultarNfseChave('52011082224685881000190000000000007025123659579096');
-            echo $response;*/
+            $response = $tools->consultarNfseChave($servico->chave_nfse);
+            
+            $danfsePdfService = app(DanfsePdfService::class);
+            $pdf = $danfsePdfService->renderFromXml($response);
 
-            // Limpa buffers anteriores
-            /*if (ob_get_level()) {
-                ob_end_clean();
-            }
+            return response($pdf, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="NFSe.pdf"',
+                'Content-Transfer-Encoding' => 'binary',
+                'Accept-Ranges' => 'bytes',
+            ]);          
 
-            // Headers otimizados
-            header('Content-Type: application/pdf');
-            header('Content-Disposition: inline; filename="NFSe.pdf"');
-            header('Content-Transfer-Encoding: binary');
-            header('Cache-Control: public, must-revalidate, max-age=0');
-            header('Pragma: public');
-            header('Accept-Ranges: bytes');
-
-            // Define tamanho se disponível
-            header('Content-Length: ' . strlen($response));
-
-            // Envia imediatamente
-            echo $response;
-
-            // Força envio
-            flush();
-            exit;*/
-
-            /*return response($response)
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'inline; filename="NFSe.pdf"');*/
+           
         } catch (\Exception $e) {
             dd($e->getMessage(), $e);
         }
