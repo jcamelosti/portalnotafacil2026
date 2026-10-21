@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.0",
+        "barryvdh/laravel-dompdf": "2.2",
         "fideloper/proxy": "^4.2",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
@@ -20,6 +21,7 @@
         "livewire/livewire": "^2.0",
         "maatwebsite/excel": "^3.1",
         "maciejczyzewski/bottomline": "^0.2.0",
+        "milon/barcode": "^13.1",
         "mpdf/mpdf": "^8.3",
         "nfephp-org/sped-common": "^5.1",
         "ramsey/uuid": "^4.9",
@@ -55,7 +57,8 @@
             "FerFabricio\\Hydrator\\": "app/Hydrator",
             "NFePHP\\Common\\": "app/ClassesIssNet",
             "Hadder\\NfseNacional\\": "app/NfseNacional",
-            "JCamelo\\NfseNacionalLib\\": "app/NfseNacionalLib/"
+            "JCamelo\\NfseNacionalLib\\": "app/NfseNacionalLib/",
+            "Services\\NotaFiscal\\" : "app/Services/NotaFiscalServico"
         }
     },
     "autoload-dev": {

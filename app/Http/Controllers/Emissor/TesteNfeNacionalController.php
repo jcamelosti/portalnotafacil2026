@@ -4,12 +4,8 @@ namespace App\Http\Controllers\Emissor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Empresa;
-use App\Utilitarios\Utilitarios;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
-use JCamelo\NfseNacionalLib\DTO\DPSDataDTO;
-use JCamelo\NfseNacionalLib\DTO\DPSDataSnDTO;
-use JCamelo\NfseNacionalLib\Factories\DPSFactory;
+use App\Models\NotaEmitida;
+use App\Services\NotaFiscalServico\DanfsePdfService;
 use JCamelo\NfseNacionalLib\Manager\CertificateManager;
 use JCamelo\NfseNacionalLib\Services\NFSeService;
 
@@ -76,6 +72,18 @@ class TesteNfeNacionalController extends Controller
             null
         );*/
 
-        Utilitarios::sendMessage("Mensagem Para Vários Usuários do ChatBot");
+        //Utilitarios::sendMessage("Mensagem Para Vários Usuários do ChatBot");
+
+        $nota = NotaEmitida::where('id', 61)->first();
+        
+        $danfsePdfService = app(DanfsePdfService::class);
+        $pdf = $danfsePdfService->renderFromXml($nota->nfse_xml);
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="NFSe.pdf"',
+            'Content-Transfer-Encoding' => 'binary',
+            'Accept-Ranges' => 'bytes',
+        ]);
     }
 }
