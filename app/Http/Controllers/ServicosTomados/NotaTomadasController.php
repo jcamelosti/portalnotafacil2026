@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -137,7 +138,7 @@ class NotaTomadasController extends Controller
     }
 
     public function index(){
-        $dataLiberado = '2026-10-16';
+        //$dataLiberado = '2026-10-16';
 
         if(is_null(session()->get('empresa_selecionada'))){
             session()->flash('info', 'É necessário selecionar uma Empresa');
@@ -147,14 +148,14 @@ class NotaTomadasController extends Controller
         $empresa = Empresa::where('id', session()->get('empresa_selecionada'))->first();
 
         //data atual menor ou igual ao limite dataLiberado
-        if (Carbon::today()->lte(Carbon::parse($dataLiberado))) {
+        /*if (Carbon::today()->lte(Carbon::parse($dataLiberado))) {
             session()->flash('info', 'Seu plano atual não possui acesso ao Recurso de Consultar de Notas(DF-e). <br /> Deixamos o recurso disponível por alguns dias(16/10/2026).');
         }else{
             if($empresa->plano->consulta_dfe == 0){
                 session()->flash('info', 'Seu plano atual não possui acesso ao Recurso de Consultar de Notas(DF-e)');
                 return redirect()->back();
             }
-        }
+        }*/
 
         $data = [
             'data_inicio' => request()->data_inicio ?? Carbon::today()->subDays(30)->format('Y-m-d'),
@@ -318,7 +319,7 @@ class NotaTomadasController extends Controller
             ->where('empresa_id',  $empresa->id)
             ->where('xml', '<>', '')
             ->orderBy('data_emissao_nfse')
-            ->get(['id', 'nsu', 'xml', 'dados' ,'data_emissao_nfse']);
+            ->get(['id', 'nsu', 'xml', 'dados', 'tipo_nota', 'data_emissao_nfse']);
 
             if ($documentos->isEmpty()) {
                 session()->flash('success', 'Nenhum XML encontrado para o período selecionado.');
@@ -343,7 +344,25 @@ class NotaTomadasController extends Controller
                     $doc->dados['header']['numero_nfse']
                 );
 
-                $zip->addFromString($nomeArquivo, $doc->xml);
+
+                //adicionando na raiz
+                //$zip->addFromString($nomeArquivo, $doc->xml);
+
+                // Adiciona o XML dentro da pasta correspondente
+                /*$tipoNota = $doc->tipo_nota === 'E' ? 'RECEBIDAS' : 'EMITIDAS';
+                $caminhoArquivo = $tipoNota . '/' . $nomeArquivo;
+                $zip->addFromString($caminhoArquivo, $doc->xml);*/
+                
+                $tipo = $doc->tipo_nota;
+                $tipoNota = match ($tipo) {
+                    'S' => 'EMITIDAS',
+                    'E' => 'RECEBIDAS',
+                    default => 'OUTROS',
+                };
+
+                $caminhoArquivo = $tipoNota . '/' . $nomeArquivo;
+
+                $zip->addFromString($caminhoArquivo, $doc->xml);
             }
 
             $zip->close();

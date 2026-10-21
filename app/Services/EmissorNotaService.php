@@ -338,7 +338,7 @@ class EmissorNotaService
                 'INSERT INTO validacoes_xml(empresa_id, xml) VALUES (?, ?)',
                 [
                     $empresa->id,
-                    $validacaoRet->sBody->ValidarXmlResponse->asXML()
+                    $validacaoRet->sBody->ValidarXmlResponse->asXML() ?? ''
                 ]
         );
 
