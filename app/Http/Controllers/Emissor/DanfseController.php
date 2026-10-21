@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\NotaEmitida;
 use Mpdf\Mpdf;
 use App\Services\Nfse\DanfseXmlParser;
+use App\Services\NotaFiscalServico\DanfsePdfService;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -65,11 +66,21 @@ class DanfseController extends Controller
             }
         }
 
-        $data = $parser->parse($nota->nfse_xml);
+        /*$data = $parser->parse($nota->nfse_xml);
         
         return view('nfse.danfse', [
             'data' => $data,
             'nota' => $nota,
+        ]);*/
+
+        $danfsePdfService = app(DanfsePdfService::class);
+        $pdf = $danfsePdfService->renderFromXml($nota->nfse_xml);
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="NFSe.pdf"',
+            'Content-Transfer-Encoding' => 'binary',
+            'Accept-Ranges' => 'bytes',
         ]);
     }
 }

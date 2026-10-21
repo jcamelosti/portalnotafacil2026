@@ -264,7 +264,7 @@
 <body>
 @php
     $layout = \App\Services\NotaFiscalServico\DanfseLayout::build($data);
-    $logoPath = public_path('images/nfse-logo-horizontal.png');
+    $logoPath = public_path('img/nfse-logo-horizontal.png');
     $logoData = is_file($logoPath) ? base64_encode((string) file_get_contents($logoPath)) : null;
     $watermark = is_string($data['watermark'] ?? null) ? $data['watermark'] : null;
 @endphp

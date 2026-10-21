@@ -24,7 +24,7 @@ final class DanfseLayout
         'Nome / Nome Empresarial' => 80,
         'Município / Sigla UF' => 37,
         'Código IBGE / CEP' => 21,
-        'Endereço' => 80,
+        'Endereço' => 100,
         'E-mail' => 80,
         'Simples Nacional Na Data De Competência' => 40,
         'Regime De Apuração Tributária Pelo SN' => 80,
@@ -95,7 +95,7 @@ final class DanfseLayout
         ];
 
         $messages = [];
-        $rules = [1.48, 4.34, 6.92];
+        $rules = [1.48, 20.34, 6.92];
         $y = 6.92;
 
         $y = self::appendPersonBlock(
@@ -107,8 +107,12 @@ final class DanfseLayout
             true,
             'TOMADOR/ADQUIRENTE DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e',
         );
-        $rules[] = $y;
+
+        $rules[] = $y + 0.2; //8.86
+        
+        $y = 9.0;
         $y = self::appendRecipientBlock($cells, $messages, $recipient, $y, (bool) ($data['recipient_is_taker'] ?? false));
+        
         $rules[] = $y;
         $y = self::appendPersonBlock(
             $cells,
@@ -128,9 +132,9 @@ final class DanfseLayout
             self::cell('Código Da NBS', $service['nbs_code'], 10.51, $y, 5.09, 0.63),
             self::cell('Local Da Prestação / Sigla UF / País', $service['place'], 15.62, $y, 5.09, 0.63),
             self::cell('', $service['tax_code_description'], 0.30, $y + 0.65, 20.40, 0.38, 'no-label'),
-            self::cell('Descrição Do Serviço', $service['description'], 0.30, $y + 1.05, 20.40, 0.63),
+            self::cell('Descrição Do Serviço', $service['description'], 0.30, $y + 1.05, 20.40, 10.63),
         ];
-        $y += 1.69;
+        $y += 2.69;
 
         $rules[] = $y;
         if ($municipal['subject_to_issqn'] ?? true) {
@@ -208,7 +212,7 @@ final class DanfseLayout
         ];
         $y += 1.37;
 
-        $rules[] = $y;
+        $rules[] = $y + 10;
         $complementaryTop = $y + 0.41;
         $cells = [
             ...$cells,
@@ -251,8 +255,8 @@ final class DanfseLayout
             self::cell('Nome / Nome Empresarial', $person['name'], 0.30, $top + 0.64, 10.19, 0.63),
             self::cell('Município / Sigla UF', $person['city_state'], 10.51, $top + 0.64, 5.09, 0.63),
             self::cell('Código IBGE / CEP', $person['city_code_cep'], 15.62, $top + 0.64, 5.09, 0.63),
-            self::cell('Endereço', $person['address'], 0.30, $top + 1.30, 10.19, 0.63),
-            self::cell('E-mail', $person['email'], 10.51, $top + 1.30, 10.19, 0.63),
+            self::cell('Endereço', $person['address'], 0.30, $top + 1.30, 10.19, 10.63),
+            self::cell('E-mail', $person['email'], 10.51, $top + 1.30, 10.19, 10.63),
         ];
 
         return $cells;
@@ -295,6 +299,7 @@ final class DanfseLayout
         float $top,
         bool $recipientIsTaker,
     ): float {
+        //$top+= 0.32;//top item destinatário josue
         if (self::isEmptyPerson($recipient)) {
             $messages[] = self::message('DESTINATÁRIO DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e', $top);
 
