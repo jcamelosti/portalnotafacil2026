@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class NotaFiscalAuthorization
 {
-    /*public function autorizar($nota, $empresa_sessao): void
+    public function autorizar($nota, $empresa_sessao): void
     {
         $usuario = Auth::user();
 
@@ -94,5 +94,5 @@ class NotaFiscalAuthorization
                 'Acesso Negado.'
             );
         }
-    }*/
+    }
 }
