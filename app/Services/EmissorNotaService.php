@@ -331,30 +331,54 @@ class EmissorNotaService
             obra: $obra,
         );
         
-        //validar Xml
+        //validar se houver erro voltar para tela de emissão
         $validacaoRet = $this->nfse->validarXml($empresa->sigla_provedor, $dataSN, $empresa->id);
-        //salvado xml de validações para auxiliar na solução de erros dos clientes
-        
-        if(!is_null($validacaoRet->sBody->ValidarXmlResponse)){
-            DB::insert(
-                    'INSERT INTO validacoes_xml(empresa_id, xml) VALUES (?, ?)',
+        if ($validacaoRet === null) {
+            Log::error('Não foi possível interpretar o retorno da validação XML', [
+                'empresa_id' => $empresa->id,
+            ]);
+        } else {
+            $body = $validacaoRet->Body ?? null;
+
+            $resposta = $body?->ValidarXmlResponse ?? null;
+
+            // Salva a resposta da validação quando existir
+            if ($resposta !== null) {
+                DB::insert(
+                    'INSERT INTO validacoes_xml (empresa_id, xml) VALUES (?, ?)',
                     [
                         $empresa->id,
-                        $validacaoRet->sBody->ValidarXmlResponse->asXML()
+                        $resposta->asXML(),
                     ]
-            );
-        }
+                );
+            }
 
-        if(!isset($validacaoRet->sBody->ValidarXmlResponse->ValidarXmlResposta->ListaMensagemRetorno->MensagemRetorno->Codigo) 
-            && (string)$validacaoRet->sBody->ValidarXmlResponse->ValidarXmlResposta->ListaMensagemRetorno->MensagemRetorno->Codigo != 'S000'){
+            $mensagens = $resposta
+                ?->ValidarXmlResposta
+                ?->ListaMensagemRetorno
+                ?? null;
 
-            DB::insert(
-                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
-                [
-                    $empresa->id,
-                    json_encode($validacaoRet->sBody->ValidarXmlResponse->ValidarXmlResposta->ListaMensagemRetorno, true)
-                ]
-            );
+            if ($mensagens !== null) {
+                $listaMensagens = $mensagens->MensagemRetorno ?? [];
+
+                foreach ($listaMensagens as $mensagem) {
+                    $codigo = (string) ($mensagem->Codigo ?? '');
+
+                    // Registra somente mensagens de erro
+                    if ($codigo !== '' && $codigo !== 'S000') {
+                        DB::insert(
+                            'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                            [
+                                $empresa->id,
+                                json_encode(
+                                    $mensagem,
+                                    JSON_UNESCAPED_UNICODE
+                                ),
+                            ]
+                        );
+                    }
+                }
+            }
         }
         
         //Gerar NFSe
