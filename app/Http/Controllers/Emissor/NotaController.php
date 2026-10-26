@@ -315,7 +315,16 @@ class NotaController extends Controller
 
             return redirect()->route('notas.show', $retorno['registro']->id);
         } catch (\Throwable $e) {
+            Log::info('Erro ao emitir NFS-e', [
+                'empresa_id' => $empresaSessao->id ?? null,
+                'mensagem'   => $e->getMessage(),
+                'arquivo'    => $e->getFile(),
+                'linha'      => $e->getLine(),
+                'trace'      => $e->getTraceAsString(),
+            ]);
+
             session()->flash('danger', $e->getMessage());
+            
             DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
@@ -330,7 +339,14 @@ class NotaController extends Controller
                     $e->getMessage()
                 );*/
         }catch(\Exception $e){
-            session()->flash('danger', $e->getMessage());
+            Log::info('Erro ao emitir NFS-e', [
+                'empresa_id' => $empresaSessao->id ?? null,
+                'mensagem'   => $e->getMessage(),
+                'arquivo'    => $e->getFile(),
+                'linha'      => $e->getLine(),
+                'trace'      => $e->getTraceAsString(),
+            ]);
+            
             DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
@@ -338,7 +354,7 @@ class NotaController extends Controller
                     $e->getMessage()
                 ]
             );
-            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');
+            session()->flash('danger', 'EI002 - Opss! Houve falha na Emissão da NFS-e');
             return back()
                 ->withInput();
         }

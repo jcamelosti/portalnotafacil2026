@@ -54,6 +54,8 @@ class SendEmailLicensesJob implements ShouldQueue
         
         $data['registros'] = $rs;
 
+        Log::info($data);
+
         if(sizeof($data['registros']) > 0){
             Mail::to($data['responsavel'])
                     ->send(new AlertLicenses($data));

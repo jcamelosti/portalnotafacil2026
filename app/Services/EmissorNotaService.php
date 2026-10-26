@@ -334,13 +334,16 @@ class EmissorNotaService
         //validar Xml
         $validacaoRet = $this->nfse->validarXml($empresa->sigla_provedor, $dataSN, $empresa->id);
         //salvado xml de validações para auxiliar na solução de erros dos clientes
-        DB::insert(
-                'INSERT INTO validacoes_xml(empresa_id, xml) VALUES (?, ?)',
-                [
-                    $empresa->id,
-                    $validacaoRet->sBody->ValidarXmlResponse->asXML() ?? ''
-                ]
-        );
+        
+        if(!is_null($validacaoRet->sBody->ValidarXmlResponse)){
+            DB::insert(
+                    'INSERT INTO validacoes_xml(empresa_id, xml) VALUES (?, ?)',
+                    [
+                        $empresa->id,
+                        $validacaoRet->sBody->ValidarXmlResponse->asXML()
+                    ]
+            );
+        }
 
         if(!isset($validacaoRet->sBody->ValidarXmlResponse->ValidarXmlResposta->ListaMensagemRetorno->MensagemRetorno->Codigo) 
             && (string)$validacaoRet->sBody->ValidarXmlResponse->ValidarXmlResposta->ListaMensagemRetorno->MensagemRetorno->Codigo != 'S000'){
