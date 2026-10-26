@@ -14,11 +14,13 @@ class DocumentoFiscalRecebido extends Model
         'empresa_id',
         'nsu',
         'tipo_documento',
+        'tipo_nota',
         'xml',
         'dados',
         'doc_prestador',
         'razao_social',
-        'data_emissao_nfse'
+        'data_emissao_nfse',
+        'valor'
     ];
 
     protected $casts = [

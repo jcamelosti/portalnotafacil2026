@@ -4,19 +4,25 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\CorrelacaoTribMunTribNac;
+use App\Models\CorrelacaoTribNacNbs;
 use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CodTribMunCodTribNacController extends Controller
 {
     private $atividadeModel;
+    private $consultaCorrelacaoModel;
 
     public function __construct(
-        EmpresaAtividade $atividadeModel
+        EmpresaAtividade $atividadeModel,
+        CorrelacaoTribNacNbs $consultaCorrelacaoModel
     )
     {
         $this->atividadeModel = $atividadeModel;
+        $this->consultaCorrelacaoModel = $consultaCorrelacaoModel;
     }
 
     public function index(Request $request, Empresa $empresa){
@@ -68,12 +74,25 @@ class CodTribMunCodTribNacController extends Controller
     }
 
     public function store(Request $request, Empresa $empresa){
-        $correlacaoTribMunTribNac = new CorrelacaoTribMunTribNac();
+        /*$correlacaoTribMunTribNac = new CorrelacaoTribMunTribNac();
         $dados = $request->all();
 
         $atividade = $this->atividadeModel->where('codigo_atividade', $request->cTribMun)->first();
         $dados['xTribMun'] = $atividade->descricao_atividade;
         $dados['empresa_id'] = $empresa->id;
+        
+        $ins = $correlacaoTribMunTribNac->create($dados);
+
+        $consultaNbs = $this->consultaCorrelacaoModel->where('c_trib_nac', $dados['cTribNac'])
+            ->get(); 
+
+        foreach($consultaNbs as $reg){
+            
+        }
+
+        session()->flash('success', 'Registro adicionado com sucesso!');
+        
+        return redirect()->route('admin.codtrimun-codtribnac.index', [$empresa, $ins]);*/
 
         $existe = CorrelacaoTribMunTribNac::where('cTribMun', $request->cTribMun)
             ->where('cTribNac', $request->cTribNac)
@@ -85,9 +104,94 @@ class CodTribMunCodTribNacController extends Controller
             return redirect()->route('codtrimun-codtribnac.index', $empresa);
         }
 
-        $ins = $correlacaoTribMunTribNac->create($dados);
-        session()->flash('success', 'Registro adicionado com sucesso!');
         
-        return redirect()->route('admin.codtrimun-codtribnac.index', [$empresa, $ins]);
+        try {
+            $ins = DB::transaction(function () use ($request, $empresa) {
+                $correlacaoTribMunTribNac = new CorrelacaoTribMunTribNac();
+                $dados = $request->all();
+
+                $atividade = $this->atividadeModel
+                    ->where('codigo_atividade', $request->cTribMun)
+                    ->first();
+
+                if (!$atividade) {
+                    throw new \Exception('Atividade municipal não encontrada.');
+                }
+
+                $dados['xTribMun'] = $atividade->descricao_atividade;
+                $dados['empresa_id'] = $empresa->id;
+
+                // Insere a correlação
+                $ins = $correlacaoTribMunTribNac->create($dados);
+
+                // Consulta as correlações tributárias nacionais
+                $consultaNbs = $this->consultaCorrelacaoModel
+                    ->where('c_trib_nac', $dados['cTribNac'])
+                    ->get();
+
+                //dd($consultaNbs);
+
+                /*$registroNbsEmpresa = [];
+                foreach ($consultaNbs as $reg) {
+                    $registroNbsEmpresa[] = [
+                        'empresa_id' => $empresa->id,
+                        'correlaca_trib_id' => $ins->id,
+                        'codigo' => $reg->c_nbs,
+                        'descricao' => $reg->x_nbs,
+                    ];
+                }
+
+                dd($registroNbsEmpresa);*/
+
+                $registroNbsEmpresa = [];
+                $registrosExistentes = [];
+
+                foreach ($consultaNbs as $reg) {
+                    $empresaId = $empresa->id;
+                    $correlacaoTribId = $ins->id;
+                    $codigo = (string) $reg->c_nbs;
+
+                    // Monta a chave composta
+                    $chave = "{$empresaId}|{$correlacaoTribId}|{$codigo}";
+
+                    // Ignora se a combinação já existir
+                    if (isset($registrosExistentes[$chave])) {
+                        continue;
+                    }
+
+                    $registrosExistentes[$chave] = true;
+
+                    $registroNbsEmpresa[] = [
+                        'empresa_id' => $empresaId,
+                        'correlaca_trib_id' => $correlacaoTribId,
+                        'codigo' => $codigo,
+                        'descricao' => $reg->x_nbs,
+                    ];
+                }
+
+                foreach (array_chunk($registroNbsEmpresa, 500) as $lote) {
+                    DB::table('empresa_nbs')->insert($lote);
+                }
+
+                return $ins;
+            });
+
+            session()->flash('success', 'Registro adicionado com sucesso!');
+
+            return redirect()->route(
+                'admin.codtrimun-codtribnac.index',
+                [$empresa, $ins]
+            );
+
+        } catch (\Throwable $e) {
+            Log::error('Erro ao cadastrar correlação tributária.', [
+                'empresa_id' => $empresa->id,
+                'erro' => $e->getMessage(),
+            ]);
+
+            session()->flash('danger', 'Não foi possível salvar o registro. Nenhuma alteração da transação foi mantida.');
+            return back()
+                ->withInput();
+        }
     }
 }

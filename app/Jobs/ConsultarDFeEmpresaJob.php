@@ -15,6 +15,7 @@ use App\Models\DfeConsulta;
 use App\Models\DocumentoFiscalRecebido;
 use App\Models\Empresa;
 use App\Services\Nfse\DanfseXmlParser;
+use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\DB;
@@ -163,9 +164,9 @@ class ConsultarDFeEmpresaJob implements ShouldQueue
                 );
 
                 // Mantém apenas NFS-e em que a empresa é tomadora.
-                if ($cnpjTomador !== $cnpjEmpresa) {
+                /*if ($cnpjTomador !== $cnpjEmpresa) {
                     continue;
-                }
+                }*/
 
                 DocumentoFiscalRecebido::updateOrCreate(
                     [
@@ -175,13 +176,15 @@ class ConsultarDFeEmpresaJob implements ShouldQueue
                     [
                         'tipo_documento' => 'NFSE',
                         'xml' => $xml,
+                        'tipo_nota' => $cnpjTomador !== $cnpjEmpresa ? 'S' : 'E', 
                         'dados' => $dados,
                         'doc_prestador' => $dados['prestador']['cnpj'],
                         'razao_social' => $dados['prestador']['nome'],
                         'data_emissao_nfse' => Carbon::createFromFormat(
                             'd/m/Y H:i:s',
                             $dados['header']['emissao_nfse']
-                        )->format('Y-m-d')
+                        )->format('Y-m-d'),
+                        'valor' => Utilitarios::converterValorParaMySQL($dados['totais']['liquido_nfse'])
                     ]
                 );
             }

@@ -67,4 +67,32 @@ class NotaFiscalAuthorization
             );
         }
     }
+
+    public function checarPermissaoAcesso(Empresa $empresa){
+        $usuarioId = Auth::user()->id;
+        // Verifica se o usuário possui acesso à empresa
+        $empresaCompartilhada = Empresa::query()
+            ->where('empresas.id', $empresa->id)
+            ->where(function ($query) use ($usuarioId) {
+
+                // 1. Verifica se o usuário é o proprietário
+                $query->where('empresas.user_id', $usuarioId)
+                    // 2. Caso não seja, verifica se possui compartilhamento autorizado
+                    ->orWhereExists(function ($sub) use ($usuarioId) {
+                        $sub->selectRaw('1')
+                            ->from('empresas_compartilhadas as ec')
+                            ->whereColumn('ec.empresa_id', 'empresas.id')
+                            ->where('ec.solicitante_user_id', $usuarioId)
+                            ->where('ec.autorizado', 'S');
+                    });
+            })
+            ->exists();
+
+        if(!$empresaCompartilhada){
+             abort(
+                Response::HTTP_FORBIDDEN,
+                'Acesso Negado.'
+            );
+        }
+    }
 }

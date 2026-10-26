@@ -109,5 +109,6 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca']],
         Route::get('atualiza/dados/empresas/{id}', [EmpresasController::class, 'atualizarRegimeEspecial'])->name('empresas.dados-receita');
 
         Route::get("erros", [NotaController::class, 'errosUsuarios'])->name('erros-sistema');
+        Route::get("validacoes", [NotaController::class, 'validacoes'])->name('validacoes-xml-sistema');
     });
 });

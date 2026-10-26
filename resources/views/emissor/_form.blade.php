@@ -1011,9 +1011,9 @@
 
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Tipo de Retenção do PIS/COFINS/CSLL*:</span>
-                                <select name="ddlTipoRetFederal" onchange="" language="javascript" id="ddlTipoRetFederal" 
+                                <select required name="ddlTipoRetFederal" onchange="" language="javascript" id="ddlTipoRetFederal" 
                                 class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray" onclick="">
-                                    <option>Selecione</option>
+                                    <option value="">Selecione</option>
                                     <option {{ old('ddlTipoRetFederal', $nota['ddlTipoRetFederal'] ?? null) == '0' ? 'selected' : '' }} value="0">PIS/COFINS/CSLL Não Retidos</option>
                                     <option {{ old('ddlTipoRetFederal', $nota['ddlTipoRetFederal'] ?? null) == '1' ? 'selected' : '' }} value="1">PIS/COFINS Retido</option>
                                     <option {{ old('ddlTipoRetFederal', $nota['ddlTipoRetFederal'] ?? null) == '2' ? 'selected' : '' }} value="2">PIS/COFINS Não Retido</option>

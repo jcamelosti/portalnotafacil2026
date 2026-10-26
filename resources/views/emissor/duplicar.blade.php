@@ -238,8 +238,32 @@
                 $campoSelectNbs.on('change', function () {
                     $campoSelectDdlSitTribFederal.prop("disabled", false);
                     $campoSelectDdlSitTribFederal.css('background-color', '');
+
+                    buscarIndicadoresOper();
                 });
             });
+
+            function buscarIndicadoresOper(){
+                let cTribNacSelect  = $('#cTribNac');
+                let cNbsSelect      = $('#nbs');
+                let cIndOper        = $('#ddlIndicadorOperacao');
+
+                cIndOper.empty();
+                cIndOper.append('<option value="">Selecione</option>');
+
+                $.getJSON('/c/emissor/obter/indicadores-operacao?c_trib_nac=' + cTribNacSelect.val() + '&c_nbs=' + cNbsSelect.val(), function (data) {
+                    $.each(data, function (_, indOper) {
+                        cIndOper.append(
+                            $('<option>', {
+                                value: indOper.codigo,
+                                text: indOper.codigo + ' - ' + indOper.descricao,
+                                //selected: indOper.id == tribNacSelecionada
+                            })
+                        );
+
+                    });
+                });
+            }
 
             function carregarCodTributacaoNac(tribNacSelecionada = null, cTribMun) {
                 let cTribNacSelect = $('#cTribNac');
