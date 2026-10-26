@@ -9,10 +9,13 @@ use App\Models\DfeConsulta;
 use App\Models\DocumentoFiscalRecebido;
 use App\Models\Empresa;
 use App\Models\License;
+use App\Services\NotaFiscalAuthorization;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -135,7 +138,7 @@ class NotaTomadasController extends Controller
     }
 
     public function index(){
-        $dataLiberado = '2026-10-16';
+        //$dataLiberado = '2026-10-16';
 
         if(is_null(session()->get('empresa_selecionada'))){
             session()->flash('info', 'É necessário selecionar uma Empresa');
@@ -145,14 +148,14 @@ class NotaTomadasController extends Controller
         $empresa = Empresa::where('id', session()->get('empresa_selecionada'))->first();
 
         //data atual menor ou igual ao limite dataLiberado
-        if (Carbon::today()->lte(Carbon::parse($dataLiberado))) {
+        /*if (Carbon::today()->lte(Carbon::parse($dataLiberado))) {
             session()->flash('info', 'Seu plano atual não possui acesso ao Recurso de Consultar de Notas(DF-e). <br /> Deixamos o recurso disponível por alguns dias(16/10/2026).');
         }else{
             if($empresa->plano->consulta_dfe == 0){
                 session()->flash('info', 'Seu plano atual não possui acesso ao Recurso de Consultar de Notas(DF-e)');
                 return redirect()->back();
             }
-        }
+        }*/
 
         $data = [
             'data_inicio' => request()->data_inicio ?? Carbon::today()->subDays(30)->format('Y-m-d'),
@@ -263,7 +266,37 @@ class NotaTomadasController extends Controller
         }
     }
 
+    public function visualizarDocumentosPeriodo(string $periodo){
+        if(!request()->session()->has('empresa_selecionada')){
+             session()->flash('success', 'Nenhuma Empresa selecionada.');
+            return redirect()->route('dashboard');
+        }
+        $empresa = Empresa::where('id', session()->get('empresa_selecionada'))->first();
+        
+        $dataInicio = Carbon::createFromFormat('Y-m', $periodo)->startOfMonth();
+        $dataFim = Carbon::createFromFormat('Y-m', $periodo)->endOfMonth();
+
+        $documentos = DocumentoFiscalRecebido::
+            where('empresa_id', session()->get('empresa_selecionada'))
+            ->whereBetween('data_emissao_nfse', [
+                $dataInicio,
+                $dataFim,
+            ])
+            ->paginate(10);
+       
+        return view('servicos-tomados.listar')->with([
+            'documentos' => $documentos,
+            'empresa' => $empresa
+        ]);     
+    }
+
     public function downloadPorPeriodo(string $periodo){
+        if(!request()->session()->has('empresa_selecionada')){
+             session()->flash('success', 'Nenhuma Empresa selecionada.');
+            return redirect()->route('dashboard');
+        }
+        $empresa = Empresa::where('id', session()->get('empresa_selecionada'))->first();
+
         // Validar o formato YYYY-MM
         abort_unless(
             preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $periodo),
@@ -283,9 +316,10 @@ class NotaTomadasController extends Controller
             // Se necessário, filtre também pela empresa:
             // ->where('empresa_id', $empresaId)
             ->whereNotNull('xml')
+            ->where('empresa_id',  $empresa->id)
             ->where('xml', '<>', '')
             ->orderBy('data_emissao_nfse')
-            ->get(['id', 'nsu', 'xml', 'dados' ,'data_emissao_nfse']);
+            ->get(['id', 'nsu', 'xml', 'dados', 'tipo_nota', 'data_emissao_nfse']);
 
             if ($documentos->isEmpty()) {
                 session()->flash('success', 'Nenhum XML encontrado para o período selecionado.');
@@ -310,7 +344,25 @@ class NotaTomadasController extends Controller
                     $doc->dados['header']['numero_nfse']
                 );
 
-                $zip->addFromString($nomeArquivo, $doc->xml);
+
+                //adicionando na raiz
+                //$zip->addFromString($nomeArquivo, $doc->xml);
+
+                // Adiciona o XML dentro da pasta correspondente
+                /*$tipoNota = $doc->tipo_nota === 'E' ? 'RECEBIDAS' : 'EMITIDAS';
+                $caminhoArquivo = $tipoNota . '/' . $nomeArquivo;
+                $zip->addFromString($caminhoArquivo, $doc->xml);*/
+                
+                $tipo = $doc->tipo_nota;
+                $tipoNota = match ($tipo) {
+                    'S' => 'EMITIDAS',
+                    'E' => 'RECEBIDAS',
+                    default => 'OUTROS',
+                };
+
+                $caminhoArquivo = $tipoNota . '/' . $nomeArquivo;
+
+                $zip->addFromString($caminhoArquivo, $doc->xml);
             }
 
             $zip->close();

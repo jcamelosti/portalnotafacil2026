@@ -32,11 +32,53 @@ class ISSNetService
             $cert
         );
 
-        Log::info($response);
+        /*Log::info($response);
 
         $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
         $retorno = simplexml_load_string( $response );
         
+        return $retorno;*/
+
+        Log::info('Resposta SOAP ValidarXml', [
+            'response' => $response,
+        ]);
+
+        // Remove eventual BOM UTF-8
+        $response = preg_replace('/^\xEF\xBB\xBF/', '', $response);
+
+        // Remove os prefixos dos namespaces, como s: e ds:
+        $response = preg_replace(
+            '/(<\/?)[a-zA-Z0-9_-]+:([^>]*>)/',
+            '$1$2',
+            $response
+        );
+
+        libxml_use_internal_errors(true);
+
+        $retorno = simplexml_load_string(
+            $response,
+            \SimpleXMLElement::class,
+            LIBXML_NONET
+        );
+        
+        if ($retorno === false) {
+            $erros = array_map(
+                fn ($erro) => trim($erro->message),
+                libxml_get_errors()
+            );
+
+            libxml_clear_errors();
+
+            Log::error('Erro ao interpretar resposta SOAP', [
+                'erros' => $erros,
+                'response' => $response,
+            ]);
+
+            return null;
+        }
+
+        libxml_clear_errors();
+
         return $retorno;
     }
 

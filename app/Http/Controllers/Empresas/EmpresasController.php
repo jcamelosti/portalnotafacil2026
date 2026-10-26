@@ -170,7 +170,7 @@ class EmpresasController extends Controller
             'ambientes_emissao' => $ambientes_emissao,
             'regimes' => $regimes,
             'situacao_simples_nacional' => Empresa::getOpcaoSimplesNacional(),
-            'mtipos_regime_esp_trib_mun' => Empresa::getTiposRegimeEspecialTributacaoMunicipio(),
+            'tipos_regime_esp_trib_mun' => Empresa::getTiposRegimeEspecialTributacaoMunicipio(),
         ]);
     }
 

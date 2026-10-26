@@ -27,8 +27,13 @@ class DashboardController extends Controller
     private $variacaoPlanoModel;
     private $notasEmitidas;
 
-    public function __construct(Empresa $empresaModel, CreditoUser $creditoUserModel, 
-    EmpresaCompartilhada $empresaCompartilhadaModel, PlanoVariacao $variacaoPlanoModel, NotaEmitida $notasEmitidas){
+    public function __construct(
+        Empresa $empresaModel, 
+        CreditoUser $creditoUserModel, 
+        EmpresaCompartilhada $empresaCompartilhadaModel, 
+        PlanoVariacao $variacaoPlanoModel, 
+        NotaEmitida $notasEmitidas
+    ){
         $this->empresaModel = $empresaModel;
         $this->creditoUserModel = $creditoUserModel;
         $this->empresaCompartilhadaModel = $empresaCompartilhadaModel;
@@ -93,8 +98,10 @@ class DashboardController extends Controller
                     $query->where('tomador_id', $campos['tomador_id']);
                 }
             })*/
-            ->orderBy('num_nfse', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate(10);
+        
+        
 
         return view('dashboard_cliente')->with([
             'empresa' => $this->empresa,

@@ -68,7 +68,7 @@ class Empresa extends Model
     public function getCidadeIdAttribute(){
         $cidade_id = $this->attributes['cidade_id'];
         
-        if($this->attributes['ambiente_emissao'] === 'HOMOLOGACAO'){
+        if($this->attributes['ambiente_emissao'] === 'HOMOLOGACAO' && $this->attributes['sigla_provedor'] === 'issnet'){
             $cidade_id = '5002704'; // Se estive setado $this->attributes['ambiente_emissao'] === 'HOMOLOGACAO', em hmg só funciona com campo grande
         }
 
@@ -183,6 +183,7 @@ class Empresa extends Model
         return [
             '' => 'Nenhum Provedor Selecionado',
             'issnet' => 'Nota Control - ISSNET',
+            'outros' => 'Outros Provedores',
         ];
     }
 

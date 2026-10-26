@@ -153,4 +153,71 @@ class NotaController extends Controller
         
         return $consulta;
     }
+
+    public function validacoes(){
+        DB::table('validacoes_xml')
+            ->where('created_at', '<', DB::raw('NOW() - INTERVAL 1 HOUR'))
+            ->delete();
+
+        $registros = DB::table('validacoes_xml as il')
+            ->join('empresas as e', 'e.id', '=', 'il.empresa_id')
+            ->select(
+                'e.cpf_cnpj',
+                'e.razao_social',
+                'il.xml',
+                DB::raw('COUNT(*) as total')
+            )
+            ->groupBy('e.cpf_cnpj', 'e.razao_social', 'il.xml')
+            ->orderByDesc('total')
+            ->get();
+        
+        $resultados = [];
+
+    foreach ($registros as $registro) {
+
+            $xml = simplexml_load_string($registro->xml);
+
+            if ($xml === false) {
+                $resultados[] = [
+                    'cpf_cnpj' => $registro->cpf_cnpj,
+                    'razao_social' => $registro->razao_social,
+                    'codigo' => null,
+                    'mensagem' => 'Não foi possível interpretar o XML.',
+                    'sucesso' => false,
+                ];
+
+                continue;
+            }
+
+            $mensagens = $xml->xpath(
+                '//*[local-name()="MensagemRetorno"]'
+            );
+
+            foreach ($mensagens as $item) {
+
+                $codigoNode = $item->xpath('./*[local-name()="Codigo"]');
+                $mensagemNode = $item->xpath('./*[local-name()="Mensagem"]');
+
+                $codigo = isset($codigoNode[0])
+                    ? (string) $codigoNode[0]
+                    : '';
+
+                $mensagem = isset($mensagemNode[0])
+                    ? (string) $mensagemNode[0]
+                    : 'Mensagem não informada.';
+
+                $resultados[] = [
+                    'cpf_cnpj' => $registro->cpf_cnpj,
+                    'razao_social' => $registro->razao_social,
+                    'codigo' => $codigo,
+                    'mensagem' => $mensagem,
+                    'sucesso' => $codigo === 'S000',
+                ];
+            }
+        }
+        
+        return view('admin.notas-emitidas.validacoes', [
+            'resultados' => $resultados,
+        ]);
+    }
 }

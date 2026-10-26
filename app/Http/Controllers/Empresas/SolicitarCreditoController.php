@@ -30,7 +30,7 @@ class SolicitarCreditoController extends Controller
 
         if (collect([56,78,79,86])->contains(auth()->id())) {
             //combinado com blessed - quando precisar ajustar ajustar no valor
-            $planosValores = PlanoVariacao::where('plano_id', 2)->first();
+            $planosValores = PlanoVariacao::where('plano_id', 1)->first();
         }else{
             $planosValores = PlanoVariacao::where('plano_id', 4)->first();
         }
@@ -41,7 +41,6 @@ class SolicitarCreditoController extends Controller
             //}
         }
         
-       
         return view('solicitarcredito.solicitarcredito', compact('valores'));
     }
 

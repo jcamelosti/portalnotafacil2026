@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'controle.acesso' => \App\Http\Middleware\ControleAcessoMiddleware::class,
         'controle.licenca' => \App\Http\Middleware\ValidateLicenseMiddleware::class,
         'dados.faturamento' => \App\Http\Middleware\EnsureDadosFaturamento::class,//atualizar dados do Faturamento - Meu Cliente
+        'checar.acesso.empresa' => \App\Http\Middleware\VerificarAcessoEmpresa::class,
     ];
 }

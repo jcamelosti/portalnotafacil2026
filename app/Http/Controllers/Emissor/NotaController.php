@@ -8,6 +8,7 @@ use App\Http\Requests\NotaCreateRequest;
 use App\Models\Certificado;
 use App\Models\ClassificacaoTributaria;
 use App\Models\CorrelacaoTribMunTribNac;
+use App\Models\CorrelacaoTribNacNbs;
 use App\Models\CstIbsCbs;
 use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
@@ -18,7 +19,6 @@ use App\Models\Municipio;
 use App\Models\Nbs;
 use App\Models\NotaEmitida;
 use App\Models\Pais;
-use App\Models\Temp;
 use App\Models\Tomador;
 use App\Models\Uf;
 use App\Services\EmissorNotaService;
@@ -53,6 +53,7 @@ class NotaController extends Controller
 
     private EmissorNotaService $emissorService;
     protected NotaFiscalAuthorization $notaAuthorization;
+    private $consultaCorrelacaoModel;
     
     public function __construct(
         Empresa $empresaModel, Tomador $tomadorModel, 
@@ -61,7 +62,8 @@ class NotaController extends Controller
         Nbs $nbsModel, IndOpIbsCbs $indOperModel, CstIbsCbs $cstIbsCsbModel, 
         ClassificacaoTributaria $classificacaoTributariaModel,
         EmissorNotaService $emissorService, NotaEmitida $notasEmitidas, Moeda $moedaModel,
-        Pais $paisesModel, NotaFiscalAuthorization $notaAuthorization
+        Pais $paisesModel, NotaFiscalAuthorization $notaAuthorization,
+        CorrelacaoTribNacNbs $consultaCorrelacaoModel
     ){
         $this->empresaModel = $empresaModel;
         $this->tomadorModel = $tomadorModel;
@@ -80,6 +82,7 @@ class NotaController extends Controller
         $this->paisesModel = $paisesModel;    
 
         $this->notaAuthorization = $notaAuthorization;
+        $this->consultaCorrelacaoModel = $consultaCorrelacaoModel;
     }
 
     public function index(){
@@ -174,6 +177,11 @@ class NotaController extends Controller
 
         $data_competencia = date('Y-m-d');
 
+        if(is_null($atividade)){
+            session()->flash('danger', 'Opss! É necessário informar a atividade principal no Cadastro da Empresa. Altere o campo "Atividade no Município" e Salve. Depois tente emitir a NFSe."');
+            return redirect()->route('empresas.edit', $empresa->id);
+        }
+        
         $cod_trib_nac = [null => 'Selecione o Código de Tributação Nacional'] + CorrelacaoTribMunTribNac::select(
                 'cTribNac',
                 DB::raw("concat(cTribNac, ' - ', IFNULL(xTribNac, '')) as field1")
@@ -307,7 +315,16 @@ class NotaController extends Controller
 
             return redirect()->route('notas.show', $retorno['registro']->id);
         } catch (\Throwable $e) {
+            Log::info('Erro ao emitir NFS-e', [
+                'empresa_id' => $empresaSessao->id ?? null,
+                'mensagem'   => $e->getMessage(),
+                'arquivo'    => $e->getFile(),
+                'linha'      => $e->getLine(),
+                'trace'      => $e->getTraceAsString(),
+            ]);
+
             session()->flash('danger', $e->getMessage());
+            
             DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
@@ -322,7 +339,14 @@ class NotaController extends Controller
                     $e->getMessage()
                 );*/
         }catch(\Exception $e){
-            session()->flash('danger', $e->getMessage());
+            Log::info('Erro ao emitir NFS-e', [
+                'empresa_id' => $empresaSessao->id ?? null,
+                'mensagem'   => $e->getMessage(),
+                'arquivo'    => $e->getFile(),
+                'linha'      => $e->getLine(),
+                'trace'      => $e->getTraceAsString(),
+            ]);
+            
             DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
@@ -330,7 +354,7 @@ class NotaController extends Controller
                     $e->getMessage()
                 ]
             );
-            session()->flash('danger', 'Opss! Houve falha na Emissão da NFS-e');
+            session()->flash('danger', 'EI002 - Opss! Houve falha na Emissão da NFS-e');
             return back()
                 ->withInput();
         }
@@ -538,6 +562,11 @@ class NotaController extends Controller
 
         $data_competencia = date('Y-m-d');
 
+        if(is_null($atividade)){
+            session()->flash('danger', 'Opss! É necessário informar a atividade principal no Cadastro da Empresa. Altere o campo "Atividade no Município" e Salve. Depois tente emitir a NFSe."');
+            return redirect()->route('empresas.edit', $empresa->id);
+        }
+
         $cod_trib_nac = [null => 'Selecione o Código de Tributação Nacional'] + CorrelacaoTribMunTribNac::select(
                 'cTribNac',
                 DB::raw("concat(cTribNac, ' - ', IFNULL(xTribNac, '')) as field1")
@@ -656,5 +685,24 @@ class NotaController extends Controller
             'paises' => $paises,
             'nota' => $nota
         ]);
+    }
+
+    public function retornarIndicadorOperacao(Request $request){
+        /*$retIndOps = $this->consultaCorrelacaoModel->select('c_ind_op')
+            ->where('c_trib_nac', $request->c_trib_nac)
+            ->where('c_nbs', $request->c_nbs)
+            ->get();*/
+
+        $retIndOps = $this->consultaCorrelacaoModel
+            ->where('c_trib_nac', $request->c_trib_nac)
+            ->where('c_nbs', $request->c_nbs)
+            ->pluck('c_ind_op')
+            ->unique()
+            ->values()
+            ->toArray();
+
+        
+        $indOpIbsCbs = $this->indOperModel->whereIn('codigo', $retIndOps)->get();
+        return response()->json($indOpIbsCbs,200,[],JSON_UNESCAPED_UNICODE);
     }
 }

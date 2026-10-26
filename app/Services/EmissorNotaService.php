@@ -254,7 +254,7 @@ class EmissorNotaService
             codigoMunicipioTomador: $tomador->cidade()->first()->codigo,
             cepTomador: preg_replace('/[^0-9]/', '', $tomador->cep) ?? null,
             logradouroTomador: $tomador->logradouro,
-            numeroTomador: $tomador->numero ?? null,
+            numeroTomador: $tomador->numero ?? '0',
             complementoTomador: $tomador->complemento ?? null,
             bairroTomador: $tomador->bairro ?? null,
             foneTomador: preg_replace('/[^0-9]/', '', $tomador->telefone1) ?? null,
@@ -331,24 +331,65 @@ class EmissorNotaService
             obra: $obra,
         );
         
-        //validar Xml
+        //validar se houver erro voltar para tela de emissão
         $validacaoRet = $this->nfse->validarXml($empresa->sigla_provedor, $dataSN, $empresa->id);
+        
+        if ($validacaoRet === null) {
+            Log::error('Não foi possível interpretar o retorno da validação XML.', [
+                'empresa_id' => $empresa->id,
+            ]);
+            throw new \DomainException('Não foi possível validar o Xml Gerado! Geralmente ocorre por uma falha de comunicação com o Servidor da Prefeitura(Issnet). Tente novamente.');
+        } else {
+            $body = $validacaoRet->Body ?? null;
 
-        if(!isset($validacaoRet->sBody->ValidarXmlResponse->ValidarXmlResposta->ListaMensagemRetorno->MensagemRetorno->Codigo) 
-            && (string)$validacaoRet->sBody->ValidarXmlResponse->ValidarXmlResposta->ListaMensagemRetorno->MensagemRetorno->Codigo != 'S000'){
+            $resposta = $body?->ValidarXmlResponse ?? null;
 
-            DB::insert(
-                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
-                [
-                    $empresa->id,
-                    json_encode($validacaoRet->sBody->ValidarXmlResponse->ValidarXmlResposta->ListaMensagemRetorno, true)
-                ]
-            );
+            // Salva a resposta da validação quando existir
+            if ($resposta !== null) {
+                DB::insert(
+                    'INSERT INTO validacoes_xml (empresa_id, xml) VALUES (?, ?)',
+                    [
+                        $empresa->id,
+                        $resposta->asXML(),
+                    ]
+                );
+            }
+
+            $mensagens = $resposta
+                ?->ValidarXmlResposta
+                ?->ListaMensagemRetorno
+                ?? null;
+
+            if ($mensagens !== null) {
+                $listaMensagens = $mensagens->MensagemRetorno ?? [];
+
+                foreach ($listaMensagens as $mensagem) {
+                    $codigo = (string) ($mensagem->Codigo ?? '');
+
+                    // Registra somente mensagens de erro
+                    if ($codigo !== '' && $codigo !== 'S000') {
+                        DB::insert(
+                            'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                            [
+                                $empresa->id,
+                                json_encode(
+                                    $mensagem,
+                                    JSON_UNESCAPED_UNICODE
+                                ),
+                            ]
+                        );
+                    }
+                }
+            }
         }
         
         //Gerar NFSe
         $retorno = $this->nfse->gerarNfse($empresa->sigla_provedor, $dataSN, $empresa->id);
-        
+    
+        if($retorno === null || empty($retorno)){
+            throw new \DomainException('A transmissão da NFS-e com DPS Nº: #<b>'. $dataSN->numDps . '</b> não foi efetivada! Geralmente ocorre por uma falha de comunicação com o Servidor da Prefeitura(Issnet). Tente novamente.');
+        }
+
         if(isset($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno)){
             $retornoLista = $retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno;
             $mensagens = [];

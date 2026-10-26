@@ -142,9 +142,9 @@
 
         <label class="block text-sm">
             <span class="text-gray-700 ">Número:</span>
-            {!! Form::text('numero', !empty($empresa->numero) ? $empresa->numero : ' ', ['maxlength' => '6','class'=>'block w-full mt-1 text-sm  
+            {!! Form::number('numero', !empty($empresa->numero) ? $empresa->numero : ' ', ['required','maxlength' => '6','class'=>'block w-full mt-1 text-sm  
             focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
-            :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe em Vazio','id'=>'number']) !!}
+            :shadow-outline-gray form-input', 'placeholder'=>'0','id'=>'number']) !!}
             @if ($errors->has('numero'))
                 <span class="text-xs text-red-600 ">
                 <strong>{{ $errors->first('numero') }}</strong>

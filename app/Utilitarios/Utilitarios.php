@@ -352,4 +352,16 @@ class Utilitarios
                 
         return $valorRetorno;
     }
+
+    public static function converterValorParaMySQL($valor)
+    {
+        // Remove R$, espaços e outros caracteres não numéricos
+        $valor = preg_replace('/[^\d,.-]/', '', $valor);
+
+        // Remove separador de milhar e troca vírgula por ponto
+        $valor = str_replace('.', '', $valor);
+        $valor = str_replace(',', '.', $valor);
+
+        return $valor;
+    }
 }

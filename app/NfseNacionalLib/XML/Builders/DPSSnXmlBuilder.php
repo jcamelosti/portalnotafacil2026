@@ -201,167 +201,173 @@ class DPSSnXmlBuilder
          * TOMADOR
          * =========================================================
          */
-
-        $toma = $dom->createElement(
-            'toma'
-        );
-
-        $infDps->appendChild($toma);
-
-        /*
-         * CPF ou CNPJ
-         */
-        if (!empty($data->cnpjTomador)) {
-
-            $this->appendText(
-                $dom,
-                $toma,
-                'CNPJ',
-                $data->cnpjTomador
-            );
-
-        } elseif (!empty($data->cpfTomador)) {
-
-            $this->appendText(
-                $dom,
-                $toma,
-                'CPF',
-                $data->cpfTomador
-            );
-        }
-
-        if(is_null($data->nao_nif) || empty($data->nao_nif)){
-            $this->appendOptionalText(
-                $dom,
-                $toma,
-                'NIF',
-                $data->nif
-            );
-        }else{
-             $this->appendOptionalText(
-                $dom,
-                $toma,
-                'cNaoNIF',
-                $data->nao_nif
-            );
-        }
-
-        $this->appendOptionalText(
-            $dom,
-            $toma,
-            'xNome',
-            $data->razaoTomador
-        );
-
-        /*
-         * Endereço
-         */
-        $end = $dom->createElement(
-            'end'
-        );
-
-        $toma->appendChild($end);
         
-        if($data->endNoExterior == 2){
-            $endNac = $dom->createElement(
-                'endNac'
-            );
-
-            $end->appendChild($endNac);
-
-            $this->appendOptionalText(
-                $dom,
-                $endNac,
-                'cMun',
-                $data->codigoMunicipioTomador
-            );
-
-            $this->appendOptionalText(
-                $dom,
-                $endNac,
-                'CEP',
-                $data->cepTomador
-            );
+        if($data->cpfTomador === '99999999999' && is_null($data->cnpjTomador)){
+            //
         }else{
-            $endExt = $dom->createElement(
-                'endExt'
+            $toma = $dom->createElement(
+                'toma'
             );
 
-            $end->appendChild($endExt);
+            $infDps->appendChild($toma);
 
-            //cPais
+            /*
+            * CPF ou CNPJ
+            */
+            if (!empty($data->cnpjTomador)) {
+
+                $this->appendText(
+                    $dom,
+                    $toma,
+                    'CNPJ',
+                    $data->cnpjTomador
+                );
+
+            } elseif (!empty($data->cpfTomador)) {
+
+                $this->appendText(
+                    $dom,
+                    $toma,
+                    'CPF',
+                    $data->cpfTomador
+                );
+            }
+
+            if(is_null($data->nao_nif) || empty($data->nao_nif)){
+                $this->appendOptionalText(
+                    $dom,
+                    $toma,
+                    'NIF',
+                    $data->nif
+                );
+            }else{
+                $this->appendOptionalText(
+                    $dom,
+                    $toma,
+                    'cNaoNIF',
+                    $data->nao_nif
+                );
+            }
+
             $this->appendOptionalText(
                 $dom,
-                $endExt,
-                'cPais',
-                $data->pais
+                $toma,
+                'xNome',
+                $data->razaoTomador
             );
 
-            //cEndPost
-            $this->appendOptionalText(
-                $dom,
-                $endExt,
-                'cEndPost',
-                $data->endPostal
+            /*
+            * Endereço
+            */
+            $end = $dom->createElement(
+                'end'
             );
 
-            //xCidade
+            $toma->appendChild($end);
+            
+            if($data->endNoExterior == 2){
+                $endNac = $dom->createElement(
+                    'endNac'
+                );
+
+                $end->appendChild($endNac);
+
+                $this->appendOptionalText(
+                    $dom,
+                    $endNac,
+                    'cMun',
+                    $data->codigoMunicipioTomador
+                );
+
+                $this->appendOptionalText(
+                    $dom,
+                    $endNac,
+                    'CEP',
+                    $data->cepTomador
+                );
+            }else{
+                $endExt = $dom->createElement(
+                    'endExt'
+                );
+
+                $end->appendChild($endExt);
+
+                //cPais
+                $this->appendOptionalText(
+                    $dom,
+                    $endExt,
+                    'cPais',
+                    $data->pais
+                );
+
+                //cEndPost
+                $this->appendOptionalText(
+                    $dom,
+                    $endExt,
+                    'cEndPost',
+                    $data->endPostal
+                );
+
+                //xCidade
+                $this->appendOptionalText(
+                    $dom,
+                    $endExt,
+                    'xCidade',
+                    $data->cidade
+                );
+                //xEstProvReg
+                $this->appendOptionalText(
+                    $dom,
+                    $endExt,
+                    'xEstProvReg',
+                    $data->provincia
+                );
+            }
+
             $this->appendOptionalText(
                 $dom,
-                $endExt,
-                'xCidade',
-                $data->cidade
+                $end,
+                'xLgr',
+                $data->logradouroTomador
             );
-            //xEstProvReg
+
             $this->appendOptionalText(
                 $dom,
-                $endExt,
-                'xEstProvReg',
-                $data->provincia
+                $end,
+                'nro',
+                $data->numeroTomador
+            );
+
+            if(!empty($data->complementoTomador)){
+                $this->appendOptionalText(
+                    $dom,
+                    $end,
+                    'xCpl',
+                    $data->complementoTomador
+                );
+            }
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'xBairro',
+                $data->bairroTomador
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $toma,
+                'fone',
+                $data->foneTomador
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $toma,
+                'email',
+                $data->emailTomador
             );
         }
-
-        $this->appendOptionalText(
-            $dom,
-            $end,
-            'xLgr',
-            $data->logradouroTomador
-        );
-
-        $this->appendOptionalText(
-            $dom,
-            $end,
-            'nro',
-            $data->numeroTomador
-        );
-
-        $this->appendOptionalText(
-            $dom,
-            $end,
-            'xCpl',
-            $data->complementoTomador
-        );
-
-        $this->appendOptionalText(
-            $dom,
-            $end,
-            'xBairro',
-            $data->bairroTomador
-        );
-
-        $this->appendOptionalText(
-            $dom,
-            $toma,
-            'fone',
-            $data->foneTomador
-        );
-
-        $this->appendOptionalText(
-            $dom,
-            $toma,
-            'email',
-            $data->emailTomador
-        );
 
         /*
          * =========================================================

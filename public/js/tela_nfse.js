@@ -35,6 +35,11 @@ $(document).ready(function () {
     const $ddlClassificacaoTributaria = $('#ddlClassificacaoTributaria');
     const $ddlIndicadorOperacao     =   $('#ddlIndicadorOperacao');
     const $txtBaseCalc              = $('#txtBaseCalc');
+    const $txtDescontoInCondicionado    = $('#txtDescontoInCondicionado');
+    const $txtDescontoCondicionado      = $('#txtDescontoCondicionado');
+
+    const $ddlTipoRetFederal  = $('#ddlTipoRetFederal ');
+
     
 
     //SUSPENSÕES
@@ -122,6 +127,10 @@ $(document).ready(function () {
     $txtInfoComplementares.on('input', function () {
         this.value = this.value.replace(/[\r\n]+/g, '');
     });
+
+    $ddlTipoRetFederal.on('change', function (event) {
+        calculos();
+    })
 
     $tipoRetFederal.on('change', function (event) {
         event.preventDefault();
@@ -1484,51 +1493,115 @@ $(document).ready(function () {
         configurarCSTCredito();
     }*/
 
+
+    function obterTributosRetidos() {
+        const tipo = $('#ddlTipoRetFederal').val();
+
+        const regras = {
+            '0': { pis: false, cofins: false, csll: false },
+            '1': { pis: true,  cofins: true,  csll: false },
+            '2': { pis: false, cofins: false, csll: false },
+            '3': { pis: true,  cofins: true,  csll: true },
+            '4': { pis: true,  cofins: true,  csll: false },
+            '5': { pis: true,  cofins: false, csll: false },
+            '6': { pis: false, cofins: true,  csll: false },
+            '7': { pis: false, cofins: true,  csll: true },
+            '8': { pis: false, cofins: false, csll: true },
+            '9': { pis: true,  cofins: false, csll: true }
+        };
+
+        return regras[tipo] || {
+            pis: false,
+            cofins: false,
+            csll: false
+        };
+    }
+
     function calculos(){
-        if($tipoRetencao.val() != 1){
-            //calcularValorIssqn();
-            calculoReduzindoISSQN = formatoBrasileiro(converterNumero($valorTotalServico.val()) - converterNumero($txtValorRetido.val()));
-            $txtBaseCalc.val(formatarMoeda(calculoReduzindoISSQN));
-        }else{
-            calculoReduzindoISSQN = formatoBrasileiro(converterNumero($valorTotalServico.val()));
-            $txtBaseCalc.val(formatarMoeda(calculoReduzindoISSQN));
+        valorLiquido = converterNumero($valorTotalServico.val());
+
+        if ($txtDescontoInCondicionado.length > 0 && $txtDescontoInCondicionado.is(':visible')) {
+            valorLiquido = valorLiquido - converterNumero($txtDescontoInCondicionado.val())
         }
 
+        if ($txtDescontoCondicionado.length > 0 && $txtDescontoCondicionado.is(':visible')) {
+            valorLiquido = valorLiquido - converterNumero($txtDescontoCondicionado.val())
+        }
+
+        //ISSQN
+        if($tipoRetencao.val() != 1){
+            if(converterNumero($txtDeducaoBaseCalculo.val()) > 0 && converterNumero($txtAliquota.val()) > 0){
+                valorIssqn = formatoBrasileiro(
+                    (converterNumero($valorTotalServico.val()) - converterNumero($txtDeducaoBaseCalculo.val())) * (converterNumero($txtAliquota.val()) / 100)
+                );
+            }else{
+                valorIssqn = formatoBrasileiro(converterNumero($valorTotalServico.val()) * (converterNumero($txtAliquota.val()) / 100));
+            }
+            
+            valorLiquido = valorLiquido - converterNumero(valorIssqn);
+        }
+
+
+        //tributação federal calculos
         valorPis = 0;
         valorCofins = 0;
+        somaTributosFederais = 0;
 
-        if($baseCalcFederal.val() != 0 || $baseCalcFederal.val() != ''){
-            if($aliqPIS.val() != 0){
-                valorPis = formatoBrasileiro(converterNumero($baseCalcFederal.val()) * (converterNumero($aliqPIS.val()) / 100));
+        const retidos = obterTributosRetidos();
+        const baseFederal = converterNumero($baseCalcFederal.val());
+
+        if (converterNumero($aliqPIS.val()) > 0) {
+            valorPis = baseFederal * (converterNumero($aliqPIS.val()) / 100);
+        }
+
+        if (converterNumero($aliqCOFINS.val()) > 0) {
+            valorCofins = baseFederal * (converterNumero($aliqCOFINS.val()) / 100);
+        }
+
+        if(valorPis != undefined || valorPis > 0){
+            if(retidos.pis){
+                somaTributosFederais += valorPis
             }
+        }
 
-            if($aliqCOFINS.val() != 0){
-                valorCofins = formatoBrasileiro(converterNumero($baseCalcFederal.val()) * (converterNumero($aliqCOFINS.val()) / 100));
+         if(valorCofins != undefined || valorCofins){
+            if(retidos.cofins){
+                somaTributosFederais += valorCofins
             }
-
-            $txtBaseCalc.val(
-                formatarMoeda(converterNumero($txtBaseCalc.val()) - converterNumero(valorPis) - converterNumero(valorCofins))
-            );
         }
 
-        if($valorCSLL.val() != 0 || $valorCSLL.val() != ''){
-            $txtBaseCalc.val(
-                formatarMoeda(converterNumero($txtBaseCalc.val()) - converterNumero($valorCSLL.val()))
-            );
+        //CSLL
+        if (retidos.csll) {
+            somaTributosFederais += converterNumero($valorCSLL.val());
         }
 
-        if($valorIRRF.val() != 0 || $valorIRRF.val() != ''){
-            $txtBaseCalc.val(
-                formatarMoeda(converterNumero($txtBaseCalc.val()) - converterNumero($valorIRRF.val()))
-            );
-        }
+        // IRRF
+        somaTributosFederais += converterNumero($valorIRRF.val());
+        
+        // Contribuição previdenciária (CP)
+        somaTributosFederais += converterNumero($valorCP.val());
 
-        if($valorCP.val() != 0 || $valorCP.val() != ''){
-            $txtBaseCalc.val(
-                formatarMoeda(converterNumero($txtBaseCalc.val()) - converterNumero($valorCP.val()))
-            );
-        }
+        valorLiquido = valorLiquido - somaTributosFederais;
+        
+        $txtBaseCalc.val(
+            formatarMoeda(
+                valorLiquido
+            )
+        );
     }
+
+
+    $txtAliquota.on('input', function(){
+        calculos();
+    });
+
+    $txtDeducaoBaseCalculo.on('input', function(){
+        calculos();
+    }); 
+
+    $txtDescontoInCondicionado.on('input', function(){
+        calculos();
+    });
     
     function resetarTributacaoFederal() {
         $baseCalcFederal.closest('label').hide();

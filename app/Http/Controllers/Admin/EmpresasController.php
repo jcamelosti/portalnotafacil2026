@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
+use App\Models\EndPoint;
 use App\Models\License;
 use App\Models\Municipio;
 use App\Models\Nbs;
@@ -15,10 +16,11 @@ use App\Models\Plano;
 use App\Models\Tomador;
 use App\Models\Uf;
 use App\Models\User;
+use App\Services\Nfse\ProvedorNfseService;
 use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Log;
 
 //Final necessário para Emissao
 
@@ -34,6 +36,7 @@ class EmpresasController extends Controller
     private $planoModel;
     private $userModel;
     private $nbsModel;
+    private $provedorNfseService;
 
     public function __construct(
         Empresa $empresaModel, Uf $estadoModel, 
@@ -42,7 +45,8 @@ class EmpresasController extends Controller
         License $licenseModel,
         Plano $planoModel,
         User $userModel,
-        Nbs $nbsModel
+        Nbs $nbsModel,
+        ProvedorNfseService $provedorNfseService
     )
     {
         $this->empresaModel = $empresaModel;
@@ -53,6 +57,7 @@ class EmpresasController extends Controller
         $this->planoModel = $planoModel;
         $this->userModel = $userModel;
         $this->nbsModel = $nbsModel;
+        $this->provedorNfseService = $provedorNfseService;
     }
 
     /**
@@ -262,6 +267,26 @@ class EmpresasController extends Controller
 
         $empresa->update($dados);
 
+        $provedor = EndPoint::where('codigo_municipio', $empresa->cidade_id)->first();
+
+        if(is_null($provedor) || ($provedor->provedor !== 'issnet') && $empresa->sigla_provedor !== 'issnet' ){
+            //$this->saveOrUpdateSpedy($empresa);
+            //$this->saveOrUpdateFocuNfe($empresa);
+            try {
+                $this->provedorNfseService->salvar($empresa, 'focunfe');
+                Utilitarios::sendMessage("Empresa sincronizada na FocuNFe " . $empresa->razao_social);
+            } catch (\Throwable $e) {
+                Log::error('Erro ao sincronizar empresa com provedor NFS-e', [
+                    'empresa_id' => $empresa->id,
+                    'erro' => $e->getMessage(),
+                ]);
+
+                return back()->withErrors([
+                    'provedor' => 'Não foi possível sincronizar a empresa com o provedor de NFS-e.',
+                ]);
+            }
+        }
+        
         session()->flash('message', 'Registro Atualizado com Sucesso.');
         return redirect()->route('admin.empresas.edit', $id);
     }
