@@ -333,10 +333,12 @@ class EmissorNotaService
         
         //validar se houver erro voltar para tela de emissão
         $validacaoRet = $this->nfse->validarXml($empresa->sigla_provedor, $dataSN, $empresa->id);
+        
         if ($validacaoRet === null) {
-            Log::error('Não foi possível interpretar o retorno da validação XML', [
+            Log::error('Não foi possível interpretar o retorno da validação XML.', [
                 'empresa_id' => $empresa->id,
             ]);
+            throw new \DomainException('Não foi possível validar o Xml Gerado! Geralmente ocorre por uma falha de comunicação com o Servidor da Prefeitura(Issnet). Tente novamente.');
         } else {
             $body = $validacaoRet->Body ?? null;
 
@@ -383,7 +385,11 @@ class EmissorNotaService
         
         //Gerar NFSe
         $retorno = $this->nfse->gerarNfse($empresa->sigla_provedor, $dataSN, $empresa->id);
-        
+    
+        if($retorno === null || empty($retorno)){
+            throw new \DomainException('A transmissão da NFS-e com DPS Nº: #<b>'. $dataSN->numDps . '</b> não foi efetivada! Geralmente ocorre por uma falha de comunicação com o Servidor da Prefeitura(Issnet). Tente novamente.');
+        }
+
         if(isset($retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno)){
             $retornoLista = $retorno->sBody->GerarNfseResponse->GerarNfseResposta->ListaMensagemRetorno;
             $mensagens = [];
