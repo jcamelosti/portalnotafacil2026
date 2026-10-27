@@ -275,6 +275,8 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             //Route::get('gerar-boleto/{fatura_id}', ['as' => 'gerar-boleto', 'uses' => 'LicenciamentoController@boleto']);
             //Route::any('cartao-credito/{fatura_id}', ['as' => 'gerar-cartaocredito', 'uses' => 'LicenciamentoController@cartaoCredito']);
             //Route::any('cartao-debito/{fatura_id}', ['as' => 'gerar-cartaodebito', 'uses' => 'LicenciamentoController@cartaoDebito']);
+
+             Route::any('/', [LicencasController::class, 'index'])->name('index');
         });
 
         //Faturas dos Clientes
