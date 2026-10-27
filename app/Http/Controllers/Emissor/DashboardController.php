@@ -114,8 +114,21 @@ class DashboardController extends Controller
     }
 
     public function dashboard(){
+        $userId = Auth::user()->id;
         $credito = $this->creditoUserModel->where('user_id', Auth::user()->id)->first();
-        $empresas = $this->empresaModel->where('user_id', Auth::user()->id)->get();
+        $empresas = $this->empresaModel
+            ->where(function($q) use ($userId) {
+                $q->where('user_id', $userId)
+                ->orWhereExists(function($sub) use ($userId) {
+                    $sub->select(DB::raw(1))
+                        ->from('empresas_compartilhadas')
+                        ->whereColumn('empresas_compartilhadas.empresa_id', 'empresas.id')
+                        ->where('empresas_compartilhadas.solicitante_user_id', $userId)
+                        ->where('empresas_compartilhadas.autorizado', 'S');
+                });
+            })
+            ->get();
+
         $temLicencaValida = true;
         $license = null;
 
