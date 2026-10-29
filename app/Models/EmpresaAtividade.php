@@ -27,7 +27,7 @@ class EmpresaAtividade extends Model
         return [null =>'Selecione a Atividade no Município'] + $this
             ->select(
                 'id',
-                DB::raw("concat(codigo_atividade, ' - ', IFNULL(descricao_atividade, '')) as field1")
+                DB::raw("concat(codigo_atividade, ' - ', LEFT(IFNULL(descricao_atividade, ''), 60)) as field1")
             )
             ->where('empresa_id', $empresaId)
             /*->where(function ($query) {
@@ -43,7 +43,7 @@ class EmpresaAtividade extends Model
         return [null =>'Selecione a Atividade no Município'] + $this
             ->select(
                 'codigo_atividade',
-                DB::raw("concat(codigo_atividade, ' - ', IFNULL(descricao_atividade, '')) as field1")
+                DB::raw("concat(codigo_atividade, ' - ', LEFT(IFNULL(descricao_atividade, ''), 60)) as field1")
             )
             ->where('empresa_id', $empresaId)
             /*->where(function ($query) {

@@ -184,7 +184,7 @@ class NotaController extends Controller
         
         $cod_trib_nac = [null => 'Selecione o Código de Tributação Nacional'] + CorrelacaoTribMunTribNac::select(
                 'cTribNac',
-                DB::raw("concat(cTribNac, ' - ', IFNULL(xTribNac, '')) as field1")
+                DB::raw("concat(cTribNac, ' - ', LEFT(IFNULL(xTribNac, ''), 60)) as field1")
             )
             ->where('cTribMun', $atividade->codigo_atividade)
             ->where('empresa_id', $empresa->id)
@@ -302,7 +302,7 @@ class NotaController extends Controller
     }
 
     public function store(NotaCreateRequest $request){
-        try{
+        /*try{
             $empresaSessao = request()->session()->get('empresa_selecionada');
             $empresaSessao = $this->empresaModel->find($empresaSessao);
             
@@ -334,10 +334,25 @@ class NotaController extends Controller
             );
             return back()
                 ->withInput();
-                /*->with(
-                    'error',
+        }catch(\DomainException $e){
+            Log::info('Erro ao emitir NFS-e', [
+                'empresa_id' => $empresaSessao->id ?? null,
+                'mensagem'   => $e->getMessage(),
+                'arquivo'    => $e->getFile(),
+                'linha'      => $e->getLine(),
+                'trace'      => $e->getTraceAsString(),
+            ]);
+            
+            DB::insert(
+                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                [
+                    $empresaSessao->id,
                     $e->getMessage()
-                );*/
+                ]
+            );
+            session()->flash('danger', $e->getMessage());
+            return back()
+                ->withInput();
         }catch(\Exception $e){
             Log::info('Erro ao emitir NFS-e', [
                 'empresa_id' => $empresaSessao->id ?? null,
@@ -354,7 +369,88 @@ class NotaController extends Controller
                     $e->getMessage()
                 ]
             );
-            session()->flash('danger', 'EI002 - Opss! Houve falha na Emissão da NFS-e');
+            session()->flash('danger', $e->getMessage());
+            return back()
+                ->withInput();
+        }*/
+
+        
+        try {
+            $empresaSessao = request()->session()->get('empresa_selecionada');
+            $empresaSessao = $this->empresaModel->find($empresaSessao);
+
+            $dados = $request->all();
+            $dados = $request->except('_token');
+
+            $dados = $this->notaBO->tratarDados($dados);
+
+            $retorno = $this->emissorService->emitir($dados);
+
+            return redirect()->route('notas.show', $retorno['registro']->id);
+
+        } catch (\DomainException $e) {
+            Log::info('Erro ao emitir NFS-e', [
+                'empresa_id' => $empresaSessao->id ?? null,
+                'mensagem'   => $e->getMessage(),
+                'arquivo'    => $e->getFile(),
+                'linha'      => $e->getLine(),
+                'trace'      => $e->getTraceAsString(),
+            ]);
+
+            DB::insert(
+                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                [
+                    $empresaSessao->id,
+                    $e->getMessage()
+                ]
+            );
+
+            session()->flash('danger', $e->getMessage());
+
+            return back()
+                ->withInput();
+
+        } catch (\Exception $e) {
+            Log::info('Erro ao emitir NFS-e', [
+                'empresa_id' => $empresaSessao->id ?? null,
+                'mensagem'   => $e->getMessage(),
+                'arquivo'    => $e->getFile(),
+                'linha'      => $e->getLine(),
+                'trace'      => $e->getTraceAsString(),
+            ]);
+
+            DB::insert(
+                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                [
+                    $empresaSessao->id,
+                    $e->getMessage()
+                ]
+            );
+
+            session()->flash('danger', $e->getMessage());
+
+            return back()
+                ->withInput();
+
+        } catch (\Throwable $e) {
+            Log::info('Erro ao emitir NFS-e', [
+                'empresa_id' => $empresaSessao->id ?? null,
+                'mensagem'   => $e->getMessage(),
+                'arquivo'    => $e->getFile(),
+                'linha'      => $e->getLine(),
+                'trace'      => $e->getTraceAsString(),
+            ]);
+
+            session()->flash('danger', $e->getMessage());
+
+            DB::insert(
+                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                [
+                    $empresaSessao->id,
+                    $e->getMessage()
+                ]
+            );
+
             return back()
                 ->withInput();
         }
@@ -701,8 +797,15 @@ class NotaController extends Controller
             ->values()
             ->toArray();
 
+        $retIndOps = null;
+
+        if(!empty($retIndOps)){
+            $indOpIbsCbs = $this->indOperModel->whereIn('codigo', $retIndOps)->get();
+        }else{
+            $indOpIbsCbs = $this->indOperModel->get();
+        }
+                
         
-        $indOpIbsCbs = $this->indOperModel->whereIn('codigo', $retIndOps)->get();
         return response()->json($indOpIbsCbs,200,[],JSON_UNESCAPED_UNICODE);
     }
 }

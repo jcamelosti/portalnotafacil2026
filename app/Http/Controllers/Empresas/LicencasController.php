@@ -601,4 +601,38 @@ class LicencasController extends Controller
 
         return redirect()->away($result['url']);
     }*/
+
+    public function index(Request $request){
+        $campos = $request->all();
+        $userId = Auth::id();
+        $empresasList = $this->empresaModel
+            ->empresasList(Auth::user()->id);
+      
+        $licencas = $this->licenseModel
+            ->leftJoin('empresas', 'empresas.id', '=', 'licenses.empresa_id')
+            //->where('empresas.user_id', Auth::id())
+            ->where(function($query) use($campos) {
+                if(isset($campos['empresa_id']) && $campos['empresa_id'] != '0'){
+                    $query->where('empresa_id', $campos['empresa_id']);
+                }
+            })
+            ->where(function($q) use ($userId) {
+                $q->where('user_id', $userId)
+                ->orWhereExists(function($sub) use ($userId) {
+                    $sub->select(DB::raw(1))
+                        ->from('empresas_compartilhadas')
+                        ->whereColumn('empresas_compartilhadas.empresa_id', 'empresas.id')
+                        ->where('empresas_compartilhadas.solicitante_user_id', $userId)
+                        ->where('empresas_compartilhadas.autorizado', 'S');
+                });
+            })
+            //->where('licenses.validate', '<=', now()->endOfDay())
+            ->orderBy('licenses.validate', 'ASC')
+            ->paginate(20);
+
+        return view('licenciamento.index')->with([
+            'vencidas' => $licencas,
+            'empresasList' => $empresasList,
+        ]);
+    }
 }
