@@ -21,6 +21,7 @@ use App\Models\NotaEmitida;
 use App\Models\Pais;
 use App\Models\Tomador;
 use App\Models\Uf;
+use App\Services\EmissorAmbienteNacionalService;
 use App\Services\EmissorNotaService;
 use App\Services\NotaFiscalAuthorization;
 use Carbon\Carbon;
@@ -54,16 +55,25 @@ class NotaController extends Controller
     private EmissorNotaService $emissorService;
     protected NotaFiscalAuthorization $notaAuthorization;
     private $consultaCorrelacaoModel;
+    private EmissorAmbienteNacionalService $emissorAmbienteNacionalService;
     
     public function __construct(
-        Empresa $empresaModel, Tomador $tomadorModel, 
-        Uf $estadoModel, Municipio $municipioModel,
+        Empresa $empresaModel, 
+        Tomador $tomadorModel, 
+        Uf $estadoModel, 
+        Municipio $municipioModel,
         EmpresaAtividade $atividadeModel,
-        Nbs $nbsModel, IndOpIbsCbs $indOperModel, CstIbsCbs $cstIbsCsbModel, 
+        Nbs $nbsModel, 
+        IndOpIbsCbs $indOperModel, 
+        CstIbsCbs $cstIbsCsbModel, 
         ClassificacaoTributaria $classificacaoTributariaModel,
-        EmissorNotaService $emissorService, NotaEmitida $notasEmitidas, Moeda $moedaModel,
-        Pais $paisesModel, NotaFiscalAuthorization $notaAuthorization,
-        CorrelacaoTribNacNbs $consultaCorrelacaoModel
+        EmissorNotaService $emissorService, 
+        NotaEmitida $notasEmitidas, 
+        Moeda $moedaModel,
+        Pais $paisesModel, 
+        NotaFiscalAuthorization $notaAuthorization,
+        CorrelacaoTribNacNbs $consultaCorrelacaoModel,
+        EmissorAmbienteNacionalService $emissorAmbienteNacionalService
     ){
         $this->empresaModel = $empresaModel;
         $this->tomadorModel = $tomadorModel;
@@ -83,6 +93,7 @@ class NotaController extends Controller
 
         $this->notaAuthorization = $notaAuthorization;
         $this->consultaCorrelacaoModel = $consultaCorrelacaoModel;
+        $this->emissorAmbienteNacionalService = $emissorAmbienteNacionalService;
     }
 
     public function index(){
@@ -384,8 +395,12 @@ class NotaController extends Controller
 
             $dados = $this->notaBO->tratarDados($dados);
 
-            $retorno = $this->emissorService->emitir($dados);
-
+            if( $empresaSessao->sigla_provedor == 'issnet' ){
+                $retorno = $this->emissorService->emitir($dados);
+            }elseif( $empresaSessao->sigla_provedor == 'nacional' ){
+                $retorno = $this->emissorAmbienteNacionalService->emitir($dados);
+            }
+            dd('passou');
             return redirect()->route('notas.show', $retorno['registro']->id);
 
         } catch (\DomainException $e) {
