@@ -242,8 +242,7 @@ class RestCurl extends RestBase
 
     public function postDataAdn($operacao, $data, $origem = 1)
     {
-        $this->resolveUrl($origem);
-       
+        $this->resolveUrl($origem);       
         $this->saveTemporarilyKeyFiles();
         try {
             $msgSize = $data ? strlen($data) : 0;

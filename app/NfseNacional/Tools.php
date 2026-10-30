@@ -155,17 +155,36 @@ class Tools extends RestCurl
 
     public function enviaDpsAdn($content, $origem = 1)
     {
-        //$content = $this->canonize($content);
+        // Assina o XML
         $content = $this->sign($content, 'infDPS', '', 'DPS');
+        
+        // Adiciona declaração XML
         $content = '<?xml version="1.0" encoding="UTF-8"?>' . $content;
 
-        $gz = gzencode($content);
-        $data = base64_encode($gz);
+        // Compacta o XML em GZIP
+        $gz = gzencode($content, 9);
+
+        if ($gz === false) {
+            throw new \Exception('Erro ao compactar XML da DPS.');
+        }
+
+        // Converte GZIP para Base64
+        $base64 = base64_encode($gz);
+
+        // Estrutura conforme documentação do ADN
         $dados = [
-            'dpsXmlGZipB64' => $data
+            'LoteXmlGZipB64' => [
+                $base64
+            ]
         ];
-        $retorno = $this->postDataAdn('adn/DFe', json_encode($dados), $origem);
-        return $retorno;
+
+        // Gera JSON
+        $json = json_encode(
+            $dados,
+            JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
+        );
+
+        return $this->postDataAdn('DFe', $json, $origem);
     }
 
     public function cancelaNfse($std)

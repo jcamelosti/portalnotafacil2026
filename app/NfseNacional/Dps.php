@@ -826,8 +826,10 @@ if (isset($this->std->infdps->serv->atvevento)) {
             }
         }
 
-        $tottrib_inner = $this->dom->createElement('totTrib');
-        $trib_inner->appendChild($tottrib_inner);
+        if(isset($this->std->infdps->valores->trib->totTrib)){
+            $tottrib_inner = $this->dom->createElement('totTrib');
+            $trib_inner->appendChild($tottrib_inner);
+        }
 
         if (isset($this->std->infdps->valores->trib->tottrib->vtottrib)) {
             $vtottrib_inner = $this->dom->createElement('vTotTrib');
