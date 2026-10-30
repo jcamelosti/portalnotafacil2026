@@ -216,6 +216,10 @@ class Utilitarios
             $resposta = curl_exec($curl);
             $result = json_decode($resposta);
 
+            if($result->status == 'ERROR'){
+                return [];
+            }
+
             $empresa['cpf_cnpj'] = $cnpj;
             $empresa['razao_social'] = !empty($result->nome) ? $result->nome : '';
             $empresa['nome_fantasia'] = !empty($result->fantasia) ? $result->fantasia : '';
@@ -233,7 +237,6 @@ class Utilitarios
         
             return $empresa;
         }catch(\Exception $e){
-            dd($e->getMessage());
             return [];
         }        
     }

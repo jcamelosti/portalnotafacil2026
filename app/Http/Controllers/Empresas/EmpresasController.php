@@ -15,6 +15,7 @@ use App\Services\FocuNfe\GestaoService;
 use App\Traits\IssnetTrait;
 use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -175,10 +176,14 @@ class EmpresasController extends Controller
     }
 
     public function buscarDadosEmpresa(){
-        if(request()->method() == 'POST'){
-            $dadosEmpresa = Utilitarios::consultarEmpresaCNPJ(request()->get('cpf_cnpj'));
-            Session::put('nova_empresa_prest', $dadosEmpresa);
-            
+        try{
+            if(request()->method() == 'POST'){
+                $dadosEmpresa = Utilitarios::consultarEmpresaCNPJ(request()->get('cpf_cnpj'));
+                Session::put('nova_empresa_prest', $dadosEmpresa);
+                return redirect()->route('empresas.create');
+            }
+        }catch(Exception $e){
+            session()->flash('info', 'Adicione os Dados Manualmente. Não foi possível adicionar via Consulta na Base da Receita Federal.');
             return redirect()->route('empresas.create');
         }
         
