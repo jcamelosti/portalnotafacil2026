@@ -138,7 +138,7 @@ class Tools extends RestCurl
         return null;
     }
 
-    public function enviaDps($content)
+    public function enviaDps($content, $origem = 1)
     {
         //$content = $this->canonize($content);
         $content = $this->sign($content, 'infDPS', '', 'DPS');
@@ -149,7 +149,22 @@ class Tools extends RestCurl
         $dados = [
             'dpsXmlGZipB64' => $data
         ];
-        $retorno = $this->postData('nfse', json_encode($dados));
+        $retorno = $this->postData('nfse', json_encode($dados), $origem);
+        return $retorno;
+    }
+
+    public function enviaDpsAdn($content, $origem = 1)
+    {
+        //$content = $this->canonize($content);
+        $content = $this->sign($content, 'infDPS', '', 'DPS');
+        $content = '<?xml version="1.0" encoding="UTF-8"?>' . $content;
+
+        $gz = gzencode($content);
+        $data = base64_encode($gz);
+        $dados = [
+            'dpsXmlGZipB64' => $data
+        ];
+        $retorno = $this->postDataAdn('adn/DFe', json_encode($dados), $origem);
         return $retorno;
     }
 

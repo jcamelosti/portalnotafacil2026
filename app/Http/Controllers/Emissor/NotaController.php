@@ -399,8 +399,11 @@ class NotaController extends Controller
                 $retorno = $this->emissorService->emitir($dados);
             }elseif( $empresaSessao->sigla_provedor == 'nacional' ){
                 $retorno = $this->emissorAmbienteNacionalService->emitir($dados);
+            }else{
+                dd("Provedor Desconhecido");
             }
-            dd('passou');
+            
+            dd('passou não deixar concluir');
             return redirect()->route('notas.show', $retorno['registro']->id);
 
         } catch (\DomainException $e) {

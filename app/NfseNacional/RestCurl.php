@@ -183,6 +183,67 @@ class RestCurl extends RestBase
     public function postData($operacao, $data, $origem = 1)
     {
         $this->resolveUrl($origem);
+       
+        $this->saveTemporarilyKeyFiles();
+        try {
+            $msgSize = $data ? strlen($data) : 0;
+            $parameters = [
+                //                'Accept: */*; ',
+                'Content-Type: application/json',
+                //                "Content-Type: application/x-www-form-urlencoded;charset=utf-8;",
+                'Content-length: ' . $msgSize,
+            ];
+            //            $this->requestHead = implode("\n", $parameters);
+            $oCurl = curl_init();
+            curl_setopt($oCurl, CURLOPT_URL, $this->url_api . '/' . $operacao);
+            curl_setopt($oCurl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+            curl_setopt($oCurl, CURLOPT_CONNECTTIMEOUT, $this->connection_timeout);
+            curl_setopt($oCurl, CURLOPT_TIMEOUT, $this->timeout);
+            curl_setopt($oCurl, CURLOPT_HEADER, 1);
+            curl_setopt($oCurl, CURLOPT_HTTP_VERSION, $this->httpver);
+            curl_setopt($oCurl, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($oCurl, CURLOPT_SSL_VERIFYPEER, 0);
+            if (!empty($this->security_level)) {
+                curl_setopt($oCurl, CURLOPT_SSL_CIPHER_LIST, "{$this->security_level}");
+            }
+
+            curl_setopt($oCurl, CURLOPT_SSLVERSION, CURL_SSLVERSION_DEFAULT);
+            curl_setopt($oCurl, CURLOPT_SSLCERT, $this->tempdir . $this->certfile);
+            curl_setopt($oCurl, CURLOPT_SSLKEY, $this->tempdir . $this->prifile);
+            if (!empty($this->temppass)) {
+                curl_setopt($oCurl, CURLOPT_KEYPASSWD, $this->temppass);
+            }
+            curl_setopt($oCurl, CURLOPT_RETURNTRANSFER, 1);
+            if (!empty($data)) {
+                curl_setopt($oCurl, CURLOPT_POST, 1);
+                curl_setopt($oCurl, CURLOPT_POSTFIELDS, $data);
+                //curl_setopt($oCurl, CURLOPT_POSTFIELDS, http_build_query($data)); // Dados para enviar no POST
+                curl_setopt($oCurl, CURLOPT_HTTPHEADER, $parameters);
+            }
+            $response = curl_exec($oCurl);
+
+            $this->soaperror = curl_error($oCurl);
+            $this->soaperror_code = curl_errno($oCurl);
+            $ainfo = curl_getinfo($oCurl);
+            if (is_array($ainfo)) {
+                $this->soapinfo = $ainfo;
+            }
+            $headsize = curl_getinfo($oCurl, CURLINFO_HEADER_SIZE);
+            $httpcode = curl_getinfo($oCurl, CURLINFO_HTTP_CODE);
+            curl_close($oCurl);
+            $this->responseHead = trim(substr($response, 0, $headsize));
+            $this->responseBody = trim(substr($response, $headsize));
+            return json_decode($this->responseBody, true);
+        } catch (Exception $e) {
+            throw SoapException::unableToLoadCurl($e->getMessage());
+        }
+    }
+
+
+    public function postDataAdn($operacao, $data, $origem = 1)
+    {
+        $this->resolveUrl($origem);
+       
         $this->saveTemporarilyKeyFiles();
         try {
             $msgSize = $data ? strlen($data) : 0;
