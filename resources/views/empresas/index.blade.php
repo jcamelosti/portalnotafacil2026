@@ -75,62 +75,34 @@
             </div>
 
             {{-- Pesquisa --}}
-            <div class="bg-gray-50 border-t border-gray-200 px-5 py-4">
-
+            <div class="px-4 py-3 mb-8 bg-white ">
                 {!! Form::open(['route' => 'empresas.index', 'method' => 'GET']) !!}
-
-                <div class="flex flex-col sm:flex-row sm:items-end gap-3">
-
-                    <div class="flex-1">
-                        <label for="empresa_id" class="block text-sm font-medium text-gray-700 mb-1">
-                            Pesquisar empresa
-                        </label>
-
-                        {!! Form::select(
-                            'empresa_id',
-                            $empresasList,
-                            isset($pesquisa['empresa_id']) ? $pesquisa['empresa_id'] : null,
-                            [
-                                'id' => 'empresa_id',
-                                'class' => 'select2 block w-full mt-1 text-sm form-select focus:border-blue-500 focus:ring-blue-500 rounded-lg border-gray-300',
-                                'placeholder' => 'Todas as empresas'
-                            ]
-                        ) !!}
-
-                        @if ($errors->has('empresa_id'))
-                            <span class="text-xs text-red-600">
-                                {{ $errors->first('empresa_id') }}
-                            </span>
-                        @endif
-                    </div>
-
-                    <div class="flex gap-2">
-
-                        <button type="submit"
-                                class="mt-2 inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition">
-
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M21 21l-4.35-4.35M11 19a8 8 0 110-16 8 8 0 010 16z"/>
-                            </svg>
-
+                <label class="block text-sm">
+                    <span class="text-gray-700 ">Empresa:</span>
+                    {!! Form::select('empresa_id', $empresasList, isset($pesquisa['empresa_id']) ? $pesquisa['empresa_id'] : null, ['class' => 'select2  block w-full mt-1 text-sm    form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                    @if ($errors->has('empresa_id'))
+                        <span class="text-xs text-red-600 ">
+                            <strong>{{ $errors->first('empresa_id') }}</strong>
+                        </span>
+                    @endif
+                </label>
+                
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                     <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto ml-2">
+                        <a href="{{ route('empresas.index') }}"
+                        class="inline-flex justify-center w-full rounded-md border border-gray-300 px-4 py-2 bg-white text-base leading-6 font-medium text-gray-700 shadow-sm hover:text-gray-500 focus:outline-none focus:border-blue-300 focus:shadow-outline-blue transition ease-in-out duration-150 sm:text-sm sm:leading-5">
+                           Limpar Pesquisa
+                        </a>
+                    </span>
+                    <span class="mt-3 flex w-full rounded-md shadow-sm sm:mt-0 sm:w-auto">
+                        <button type="submit" type="button"
+                            class="inline-flex justify-center w-full rounded-md border border-transparent px-4 py-2 bg-green-600 text-base leading-6 font-medium text-white shadow-sm hover:bg-green-500 focus:outline-none focus:border-green-700 focus:shadow-outline-green transition ease-in-out duration-150 sm:text-sm sm:leading-5">
                             Pesquisar
                         </button>
-
-                        <a href="{{ route('empresas.index') }}"
-                           class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition">
-
-                            Limpar
-                        </a>
-
-                    </div>
-
+                    </span>
                 </div>
-
                 {!! Form::close() !!}
-
             </div>
-
         </div>
 
         {{-- Mensagens --}}
