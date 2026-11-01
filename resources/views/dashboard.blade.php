@@ -294,102 +294,245 @@
 
             @endif
         @else
-            empresas com licença vencendo
-        @endif
+            <div class="relative isolate w-full overflow-hidden bg-orange-600 rounded-2xl bg-gradient-to-r from-slate-950 via-blue-950 to-blue-900 p-6 shadow-xl sm:p-8">
 
-        {{-- CERTIFICADO DIGITAL — PROMOÇÃO POR TEMPO LIMITADO --}}
-        <div class="relative mb-10 overflow-hidden rounded-2xl shadow-lg"
-            style="background: linear-gradient(135deg, #064e3b 0%, #047857 55%, #16a34a 100%);">
+                <!-- Decoração -->
+                <div class="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-blue-500/10"></div>
+                <div class="pointer-events-none absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-yellow-400/5"></div>
 
-            {{-- ELEMENTOS DECORATIVOS --}}
-            <div class="absolute -right-10 -top-10 h-48 w-48 rounded-full"
-                style="background: rgba(255,255,255,0.08);"></div>
+                <div class="relative flex flex-col items-center justify-between gap-6 sm:flex-row">
 
-            <div class="absolute -bottom-16 right-32 h-48 w-48 rounded-full"
-                style="background: rgba(255,255,255,0.08);"></div>
+                    <!-- Ícone e mensagem -->
+                    <div class="flex items-center gap-4 sm:gap-6">
 
-            <div class="relative flex flex-col gap-6 p-6 sm:p-8 lg:flex-row lg:items-center lg:justify-between">
-
-                {{-- TEXTO DA OFERTA --}}
-                <div class="max-w-2xl">
-
-                    <div class="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold"
-                        style="background: #fef3c7; color: #92400e;">
-
-                        <span>🔥</span>
-                        OFERTA ESPECIAL POR TEMPO LIMITADO
-                    </div>
-
-                    <h2 class="text-2xl font-bold sm:text-3xl"
-                        style="color: #ffffff;">
-                        Emita seu Certificado Digital por um preço especial!
-                    </h2>
-
-                    <p class="mt-3 text-sm leading-6 sm:text-base"
-                    style="color: #ecfdf5;">
-                        Aproveite esta oportunidade para emitir seu certificado digital
-                        com praticidade, atendimento seguro e emissão por videoconferência.
-                        Resolva tudo com o suporte da nossa equipe!
-                    </p>
-
-                    {{-- PREÇO PROMOCIONAL --}}
-                    <div class="mt-5 inline-block rounded-2xl px-5 py-4"
-                        style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);">
-
-                        <p class="text-xs font-bold uppercase tracking-wider"
-                        style="color: #d1fae5;">
-                            Preço promocional
-                        </p>
-
-                        <div class="mt-1 flex flex-wrap items-baseline gap-2">
-                            <span class="text-4xl font-extrabold sm:text-5xl"
-                                style="color: #ffffff;">
-                                R$ 180,00
-                            </span>
+                        <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-yellow-400 bg-yellow-400/10 text-yellow-400 sm:h-20 sm:w-20">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-9 w-9 sm:h-11 sm:w-11"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M12 9v3.75m9-1.5a9 9 0 11-18 0 9 9 0 0118 0zm-9 4.5h.008v.008H12v-.008z"/>
+                            </svg>
                         </div>
 
-                        <p class="mt-2 text-sm font-semibold"
-                        style="color: #fef3c7;">
-                            ⏳ Promoção válida até 31/12/2026!
+                        <div>
+                            <span class="mb-2 inline-flex items-center gap-2 rounded-full bg-red-500/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-white">
+                                <span class="h-2 w-2 animate-pulse rounded-full bg-red-500"></span>
+                                Atenção necessária
+                            </span>
+
+                            <h2 class="text-xl font-extrabold leading-tight text-white sm:text-2xl lg:text-3xl">
+                                Há empresas com
+                                <span class="text-yellow-400">licenças vencidas!</span>
+                            </h2>
+
+                            <p class="mt-2 text-sm text-blue-200 sm:text-base">
+                                Verifique as empresas que estão com suas licenças fora da validade.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <!-- Botão -->
+                    <div class="w-full shrink-0 sm:w-auto">
+                        <a href="{{ route('licenca.index') }}"
+                        class="group flex w-full items-center justify-center gap-3 rounded-xl bg-yellow-400 px-6 py-4 text-sm font-extrabold text-slate-950 shadow-lg shadow-yellow-500/20 transition duration-300 hover:-translate-y-1 hover:bg-yellow-300 hover:shadow-yellow-400/30 sm:w-auto sm:text-base">
+
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+
+                            CONFERIR LISTAGEM
+
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                class="h-5 w-5 transition-transform group-hover:translate-x-1"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                            </svg>
+                        </a>
+
+                        <p class="mt-2 text-center text-xs text-blue-200">
+                            Clique para visualizar as empresas
                         </p>
                     </div>
 
-                    <p class="mt-4 text-sm font-medium"
-                    style="color: #ffffff;">
-                        Não deixe para a última hora. Aproveite o valor promocional e entre em contato!
+                </div>
+            </div>     
+        @endif
+
+        <div class="relative isolate w-full overflow-hidden rounded-3xl
+            bg-gradient-to-br from-cool-gray-900 via-teal-900 to-blue-900
+            p-6 shadow-2xl sm:p-8 lg:p-10 mt-4">
+
+            <!-- Efeitos de iluminação -->
+            <div class="pointer-events-none absolute -right-20 -top-24
+                h-80 w-80 rounded-full bg-teal-400/20 blur-3xl"></div>
+
+            <div class="pointer-events-none absolute -bottom-32 -left-20
+                h-80 w-80 rounded-full bg-green-400/15 blur-3xl"></div>
+
+            <div class="pointer-events-none absolute right-1/3 top-1/2
+                h-64 w-64 -translate-y-1/2 rounded-full
+                bg-blue-400/10 blur-3xl"></div>
+
+            <!-- Conteúdo -->
+            <div class="relative flex flex-col items-center justify-between gap-8 lg:flex-row">
+
+                <!-- Conteúdo principal -->
+                <div class="max-w-2xl text-center lg:text-left">
+
+                    <!-- Selo -->
+                    <span class="inline-flex items-center gap-2 rounded-full
+                        border border-teal-400/30 bg-teal-500/15
+                        px-4 py-2 text-xs font-extrabold uppercase
+                        tracking-widest text-teal-300">
+
+                        <span class="h-2 w-2 animate-pulse rounded-full bg-teal-400"></span>
+                        Emissão de Certificado Digital
+                    </span>
+
+                    <!-- Título -->
+                    <h2 class="mt-5 text-3xl font-black leading-tight
+                        text-white sm:text-4xl lg:text-5xl">
+
+                        Seu Certificado Digital
+                        <span class="bg-gradient-to-r from-teal-300 via-green-400 to-emerald-300
+                            bg-clip-text text-transparent">
+                            sem complicação!
+                        </span>
+                    </h2>
+
+                    <p class="mt-4 text-base leading-relaxed text-cool-gray-100 sm:text-lg">
+                        Emita seu certificado digital em poucos minutos, com praticidade,
+                        segurança e atendimento personalizado por videoconferência.
                     </p>
+
+                    <!-- Benefícios -->
+                    <div class="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-4 lg:justify-start">
+
+                        <div class="flex items-center gap-2 text-sm font-semibold text-white">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/20 text-green-400">✓</span>
+                            Atendimento online
+                        </div>
+
+                        <div class="flex items-center gap-2 text-sm font-semibold text-white">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/20 text-green-400">✓</span>
+                            Processo simplificado
+                        </div>
+
+                        <div class="flex items-center gap-2 text-sm font-semibold text-white">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-green-500/20 text-green-400">✓</span>
+                            Suporte especializado
+                        </div>
+
+                    </div>
+
+                    <!-- Chamada de atenção -->
+                    <div class="mt-8 inline-flex items-center gap-3 rounded-xl
+                        border border-teal-400/30 bg-teal-400/10
+                        px-4 py-3 text-left backdrop-blur-sm">
+
+                        <span class="text-2xl">⚡</span>
+
+                        <div>
+                            <p class="text-sm font-extrabold text-teal-300">
+                                Não deixe para depois!
+                            </p>
+                            <p class="text-xs text-teal-100">
+                                Solicite seu certificado e agilize suas operações.
+                            </p>
+                        </div>
+                    </div>
+
                 </div>
 
-                {{-- BOTÃO WHATSAPP --}}
-                <div class="flex shrink-0 flex-col items-stretch gap-3 sm:items-start lg:items-center">
+                <!-- Card de preço -->
+                <div class="w-full max-w-sm shrink-0 overflow-hidden
+                    rounded-3xl border border-white/60 bg-white shadow-2xl">
 
-                    <a href="https://wa.me/5562984018589?text=Ol%C3%A1%21%20Tenho%20interesse%20na%20promo%C3%A7%C3%A3o%20do%20Certificado%20Digital%20por%20R%24%20180%2C00."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-flex items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-extrabold shadow-lg transition hover:opacity-90"
-                    style="background: #ffffff; color: #047857;">
+                    <!-- Faixa superior -->
+                    <div class="bg-gradient-to-r from-teal-700 via-teal-600 to-green-500
+                        px-5 py-3 text-center">
 
-                        <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M20.52 3.48A11.8 11.8 0 0012.12 0C5.58 0 .25 5.33.25 11.87c0 2.09.55 4.13 1.59 5.94L.15 24l6.34-1.66a11.88 11.88 0 005.63 1.43h.01c6.54 0 11.87-5.33 11.87-11.87a11.8 11.8 0 00-3.48-8.42z"/>
-                        </svg>
+                        <p class="text-sm font-black uppercase tracking-wider text-white">
+                            ⚡ Condição especial
+                        </p>
+                    </div>
 
-                        QUERO APROVEITAR!
-                    </a>
+                    <div class="p-6 text-center sm:p-8">
 
-                    <p class="text-center text-xs"
-                    style="color: #d1fae5;">
-                        Fale agora com nossa equipe pelo WhatsApp.
-                    </p>
+                        <p class="text-sm font-bold uppercase tracking-wider text-cool-gray-500">
+                            Certificado Digital a partir de
+                        </p>
+
+                        <!-- Preço -->
+                        <div class="mt-3 flex items-baseline justify-center gap-1">
+                            <span class="text-2xl font-bold text-teal-600">R$</span>
+                            <span class="text-6xl font-black tracking-tighter text-cool-gray-900">149</span>
+                            <span class="text-2xl font-black text-teal-600">,90</span>
+                        </div>
+
+                        <div class="mx-auto mt-3 inline-flex items-center gap-2
+                            rounded-full bg-green-50 px-4 py-2
+                            text-xs font-bold text-green-700">
+
+                            <span>✓</span>
+                            Atendimento por videoconferência
+                        </div>
+
+                        <p class="mt-4 text-sm leading-relaxed text-cool-gray-500">
+                            Escolha a modalidade ideal para você e conte com nossa equipe.
+                        </p>
+
+                        <!-- Botão -->
+                        <a href="https://wa.me/5562984018589?text=Ol%C3%A1%21%20Tenho%20interesse%20em%20emitir%20meu%20Certificado%20Digital%20a%20partir%20de%20R%24%20149%2C90."
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group mt-6 flex w-full items-center justify-center
+                            gap-3 rounded-xl bg-gradient-to-r from-teal-600 to-green-600
+                            px-5 py-4 text-base font-black text-white
+                            shadow-lg shadow-teal-500/30 transition duration-300
+                            hover:-translate-y-1 hover:from-teal-700 hover:to-green-700
+                            hover:shadow-xl">
+
+                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.52 3.48A11.8 11.8 0 0012.12 0C5.58 0 .25 5.33 .25 11.87c0 2.09.55 4.13 1.59 5.94L.15 24l6.34-1.66a11.88 11.88 0 005.63 1.43h.01c6.54 0 11.87-5.33 11.87-11.87a11.8 11.8 0 00-3.48-8.42z"/>
+                            </svg>
+
+                            EMITIR MEU CERTIFICADO
+
+                            <span class="transition-transform group-hover:translate-x-1">→</span>
+                        </a>
+
+                        <p class="mt-4 text-xs font-medium text-cool-gray-500">
+                            Atendimento rápido e seguro pelo WhatsApp.
+                        </p>
+
+                    </div>
                 </div>
 
             </div>
         </div>
 
-        {{-- GESTÃO DE EMPRESAS --}}
-        <div class="mb-10">
 
+
+        
+        {{-- GESTÃO DE EMPRESAS --}}
+        <div class="mb-10 mt-4">
             {{-- CABEÇALHO DA SEÇÃO --}}
-            <div class="mb-5 flex items-center gap-3">
+            <div class="mb-5 flex items-center gap-3 bg-fixed bg-gradient-to-r from-blue-100 to-blue-50 px-6 py-4 rounded-xl shadow-sm">
                 <div class="flex h-11 w-11 items-center justify-center rounded-xl"
                     style="background-color: #4f46e5; color: #ffffff;">
                     <svg class="h-6 w-6" fill="none" stroke="currentColor"
