@@ -28,11 +28,11 @@ class SolicitarCreditoController extends Controller
     public function solicitarCredito(){
         $valores = [];
 
-        if (collect([56,78,79,86])->contains(auth()->id())) {
-            //combinado com blessed - quando precisar ajustar ajustar no valor
-            $planosValores = PlanoVariacao::where('plano_id', 1)->first();
-        }else{
-            $planosValores = PlanoVariacao::where('plano_id', 4)->first();
+        $planosValores = PlanoVariacao::where('plano_id', 4)->first();
+
+        if(Auth::user()->percentual_desconto > 0){
+            $planosValores->valor = $planosValores->valor - ($planosValores->valor * (Auth::user()->percentual_desconto / 100));
+
         }
         
         for($i = 5; $i <= 20; $i++){

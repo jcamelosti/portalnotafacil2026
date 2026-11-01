@@ -203,11 +203,6 @@ class EmpresasController extends Controller
 
         $empresaExiste = $this->empresaModel->where('cpf_cnpj', preg_replace('/[^[:alnum:]_]/', '', $dados['cpf_cnpj']))->first();
 
-        //blessed
-        if (collect([56,78,79,86])->contains(auth()->id())) {
-            $dados['plano_id'] = 1;
-        }
-
         if(!is_null($empresaExiste)){
             session()->flash('info', 'Não foi possível adicionar a Empresa. A empresa já encontra-se cadastrada no sistema.');
             return redirect()->back();
@@ -343,11 +338,6 @@ class EmpresasController extends Controller
             return redirect()->route('empresas.edit', $id);
         }
 
-        //blessed
-        if (collect([56,78,79,86])->contains(auth()->id())) {
-            $dados['plano_id'] = 1;
-        }
-       
         $empresa->update($dados);
 
         //$this->saveOrUpdateSpedy($empresa);
