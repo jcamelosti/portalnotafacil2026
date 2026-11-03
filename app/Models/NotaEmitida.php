@@ -16,6 +16,7 @@ class NotaEmitida extends Model
         'num_nfse',
         'valor',
         'dados_emissao',
+        'chave'
     ];
 
     protected $casts = [

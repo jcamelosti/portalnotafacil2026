@@ -403,7 +403,6 @@ class NotaController extends Controller
                 dd("Provedor Desconhecido");
             }
             
-            dd('passou não deixar concluir');
             return redirect()->route('notas.show', $retorno['registro']->id);
 
         } catch (\DomainException $e) {
