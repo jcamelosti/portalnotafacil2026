@@ -371,6 +371,8 @@ class EmissorAmbienteNacionalService
             // 6. Exibe o XML formatado
             //var_dump($dom->saveXML());
             //exit;
+            Log::info("NFSE ADN");
+            Log::info($dom->saveXML());
             
             $response = $tools->enviaDpsAdn($dps->render(), 1);//2 para adn, 1 sefin -> 1 é padrão
             Log::info($response);
@@ -404,7 +406,7 @@ class EmissorAmbienteNacionalService
                 
                 return [
                     'error' => false,
-                    'Mensagem' => 'Nota Emitida com Sucesso',
+                    'mensagem' => 'Nota Emitida com Sucesso',
                     'registro' => $ne
                 ];
             } else {
@@ -426,7 +428,12 @@ class EmissorAmbienteNacionalService
                             ]
                         );
                     }
-                    return redirect()->back()->with('danger', 'Erros ao emitir NFSe: ' . $mensagemErro);
+                    //return redirect()->back()->with('danger', 'Erros ao emitir NFSe: ' . $mensagemErro);
+                    return [
+                        'error' => true,
+                        'mensagem' => 'Erros ao emitir NFSe: ' . $mensagemErro,
+                        'registro' => null
+                    ];
                 }
             }
         } catch (\Exception $e) {
@@ -438,7 +445,11 @@ class EmissorAmbienteNacionalService
                     $e->getMessage(),
                 ]
             );
-            return redirect()->back()->with('danger', 'Erro ao emitir NFSe: ' . $e->getMessage());
+            return [
+                'error' => true,
+                'mensagem' => 'Erro ao emitir NFSe: ' . $e->getMessage(),
+                'registro' => null
+            ];
         }
     }
 

@@ -399,6 +399,15 @@ class NotaController extends Controller
                 $retorno = $this->emissorService->emitir($dados);
             }elseif( $empresaSessao->sigla_provedor == 'nacional' ){
                 $retorno = $this->emissorAmbienteNacionalService->emitir($dados);
+                
+                if(isset($retorno['error']) && $retorno['error'] === true){
+                    session()->flash('danger', $retorno['mensagem']);
+                    return back()
+                        ->withInput();
+                }else{
+                    session()->flash('success', $retorno['mensagem']);
+                    return redirect()->route('nota.index');
+                }
             }else{
                 dd("Provedor Desconhecido");
             }

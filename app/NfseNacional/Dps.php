@@ -173,15 +173,14 @@ class Dps implements DpsInterface
             true
         );
 
-        if(isset($this->std->infdps->finnfse) && $this->std->infdps->finnfse !== '') {
+        /*if(isset($this->std->infdps->finnfse) && $this->std->infdps->finnfse !== '') {
             $this->dom->addChild(
                 $infdps_inner,
                 'finNFSe',
                 $this->std->infdps->finnfse,
                 true
             );
-
-        }
+        }*/
 
         if (isset($this->std->infdps->cmotivoemisti)) {
             $this->dom->addChild(
