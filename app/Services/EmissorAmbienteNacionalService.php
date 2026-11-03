@@ -437,7 +437,6 @@ class EmissorAmbienteNacionalService
                 }
             }
         } catch (\Exception $e) {
-            dd($e->getMessage(), $e->getFile(), $e->getLine());
             DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
@@ -466,7 +465,8 @@ class EmissorAmbienteNacionalService
         $std->infDPS->nDPS = $empresa->num_ultimo_dps + 1;//ver qual é o último número
         $std->infDPS->dCompet = now()->format('Y-m-d'); //"Data de competência da prestação do serviço. Ano, Mês e Dia (AAAA-MM-DD)"
         $std->infDPS->tpEmit = 1; //Emitente da DPS: 1 - Prestador; 2 - Tomador; 3 - Intermediário;
-        $std->infDPS->finnfse = 0; //Indicador da finalidade da emissão de NFS-e - 0 - NFS-e regular 1 - NFS-e de crédito 2 - NFS-e de débito
+        //não informar para produção $std->infDPS->finnfse
+        //$std->infDPS->finnfse = 0; //Indicador da finalidade da emissão de NFS-e - 0 - NFS-e regular 1 - NFS-e de crédito 2 - NFS-e de débito
 
         $std->infDPS->cLocEmi = $empresa->cidade_id; //Código IBGE 7 dígitos da cidade emissora da NFS-e.
         
@@ -548,7 +548,7 @@ class EmissorAmbienteNacionalService
         $std->infDPS->serv->cServ->cTribNac = $dados->codigoTributacaoNacional;//Código de tributação Nacional
         //$std->infDPS->serv->cServ->cTribMun = ''; //Código de tributação municipal do ISSQN.
         $std->infDPS->serv->cServ->xDescServ = $dados->descricaoServico;
-        //$std->infDPS->serv->cServ->cNBS = $dados->codigoNbs;//'122051900';// Código NBS correspondente ao serviço prestado
+        $std->infDPS->serv->cServ->cNBS = $dados->codigoNbs;//'122051900';// Código NBS correspondente ao serviço prestado
         //$std->infDPS->serv->cServ->cIntContrib = str_pad($servico->id, 5, '0', STR_PAD_LEFT);;// Código interno do contribuinte - Utilizado para identificação da DPS no Sistema interno do Contribuinte
 
         /*
