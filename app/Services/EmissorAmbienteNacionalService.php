@@ -343,7 +343,7 @@ class EmissorAmbienteNacionalService
         try {
             $config = new \stdClass();
             $config->tpamb = $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1; //1 - Produção, 2 - Homologação
-
+            
             $configJson = json_encode($config);
             
             $content = file_get_contents($certificado);
@@ -355,8 +355,22 @@ class EmissorAmbienteNacionalService
             //gerar dps
             $std = $this->gerarDps($dados, $empresa);
             $dps = new \Hadder\NfseNacional\Dps($std);
+
+            $xml = $dps->render();
+
+            // 2. Cria o objeto DOMDocument
+            $dom = new \DOMDocument('1.0', 'UTF-8');
+            // 3. Ativa a formatação automática (identação)
+            $dom->preserveWhiteSpace = false;
+            $dom->formatOutput = true;
+            // 4. Carrega a string XML
+            $dom->loadXML($xml);
+
+            // 6. Exibe o XML formatado
+            //var_dump($dom->saveXML());
+            //exit;
             
-            $response = $tools->enviaDpsAdn($dps->render(), 2);//2 para adn, 1 sefin -> 1 é padrão
+            $response = $tools->enviaDpsAdn($dps->render(), 1);//2 para adn, 1 sefin -> 1 é padrão
             dd($response);            
             Log::info($response);
             //    $response = [
@@ -428,6 +442,8 @@ class EmissorAmbienteNacionalService
         $std->infDPS->nDPS = $empresa->num_ultimo_dps + 1;//ver qual é o último número
         $std->infDPS->dCompet = now()->format('Y-m-d'); //"Data de competência da prestação do serviço. Ano, Mês e Dia (AAAA-MM-DD)"
         $std->infDPS->tpEmit = 1; //Emitente da DPS: 1 - Prestador; 2 - Tomador; 3 - Intermediário;
+        $std->infDPS->finnfse = 0; //Indicador da finalidade da emissão de NFS-e - 0 - NFS-e regular 1 - NFS-e de crédito 2 - NFS-e de débito
+
         $std->infDPS->cLocEmi = $empresa->cidade_id; //Código IBGE 7 dígitos da cidade emissora da NFS-e.
         
         //Substituição
@@ -508,7 +524,7 @@ class EmissorAmbienteNacionalService
         $std->infDPS->serv->cServ->cTribNac = $dados->codigoTributacaoNacional;//Código de tributação Nacional
         //$std->infDPS->serv->cServ->cTribMun = ''; //Código de tributação municipal do ISSQN.
         $std->infDPS->serv->cServ->xDescServ = $dados->descricaoServico;
-        $std->infDPS->serv->cServ->cNBS = $dados->codigoNbs;//'122051900';// Código NBS correspondente ao serviço prestado
+        //$std->infDPS->serv->cServ->cNBS = $dados->codigoNbs;//'122051900';// Código NBS correspondente ao serviço prestado
         //$std->infDPS->serv->cServ->cIntContrib = str_pad($servico->id, 5, '0', STR_PAD_LEFT);;// Código interno do contribuinte - Utilizado para identificação da DPS no Sistema interno do Contribuinte
 
         /*
@@ -524,8 +540,10 @@ class EmissorAmbienteNacionalService
         $std->infDPS->valores->trib->tribMun->tribISSQN = $dados->tributaIss; // Tributação do ISSQN sobre o serviço prestado: 1 - Operação tributável; 2 - Imunidade 3 - Exportação de serviço; 4 - Não Incidência;
         $std->infDPS->valores->trib->tribMun->tpRetISSQN = $dados->tipoRetencaoIss; //Tipo de retencao do ISSQN: 1 - Não Retido; 2 - Retido pelo Tomador; 3 - Retido pelo Intermediario;
 
-        //$std->infDPS->valores->trib->totTrib = new \stdClass();
+        //Para ME/EPP o indicador de informação de valor total de tributos não pode ser informado.
+        $std->infDPS->valores->trib->totTrib = new \stdClass();
         //$std->infDPS->valores->trib->totTrib->indTotTrib = 0;
+        $std->infDPS->valores->trib->totTrib->ptottribsn = "5.00";
 
         return $std;
     }

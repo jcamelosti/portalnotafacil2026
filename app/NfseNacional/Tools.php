@@ -161,30 +161,19 @@ class Tools extends RestCurl
         // Adiciona declaração XML
         $content = '<?xml version="1.0" encoding="UTF-8"?>' . $content;
 
-        // Compacta o XML em GZIP
-        $gz = gzencode($content, 9);
+        // 2. Compactar obrigatoriamente usando gzencode() com nível de compressão 9
+        // IMPORTANTE: Use gzencode() e não gzcompress(). O SEFIN exige os headers do GZIP.
+        $xmlGzip = gzencode($content, 9);
 
-        if ($gz === false) {
-            throw new \Exception('Erro ao compactar XML da DPS.');
-        }
+        // 3. Converter o binário resultante para Base64 (sem quebras de linha)
+        $xmlBase64 = base64_encode($xmlGzip);
 
-        // Converte GZIP para Base64
-        $base64 = base64_encode($gz);
+        // 4. Montar o JSON exatamente com a propriedade exigida pelo manual
+        $payloadJson = json_encode([
+            'dpsXmlGZipB64' => $xmlBase64
+        ], JSON_UNESCAPED_SLASHES);
 
-        // Estrutura conforme documentação do ADN
-        $dados = [
-            'LoteXmlGZipB64' => [
-                $base64
-            ]
-        ];
-
-        // Gera JSON
-        $json = json_encode(
-            $dados,
-            JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR
-        );
-
-        return $this->postDataAdn('DFe', $json, $origem);
+        return $this->postDataAdn('nfse', $payloadJson, $origem);
     }
 
     public function cancelaNfse($std)

@@ -172,6 +172,17 @@ class Dps implements DpsInterface
             $this->std->infdps->tpemit,
             true
         );
+
+        if(isset($this->std->infdps->finnfse) && $this->std->infdps->finnfse !== '') {
+            $this->dom->addChild(
+                $infdps_inner,
+                'finNFSe',
+                $this->std->infdps->finnfse,
+                true
+            );
+
+        }
+
         if (isset($this->std->infdps->cmotivoemisti)) {
             $this->dom->addChild(
                 $infdps_inner,
@@ -826,63 +837,64 @@ if (isset($this->std->infdps->serv->atvevento)) {
             }
         }
 
-        if(isset($this->std->infdps->valores->trib->totTrib)){
+
+        if(isset($this->std->infdps->valores->trib->tottrib)){
             $tottrib_inner = $this->dom->createElement('totTrib');
             $trib_inner->appendChild($tottrib_inner);
         }
 
-        if (isset($this->std->infdps->valores->trib->tottrib->vtottrib)) {
+        if (isset($this->std->infdps->valores->trib->totTrib->vtottrib)) {
             $vtottrib_inner = $this->dom->createElement('vTotTrib');
             $tottrib_inner->appendChild($vtottrib_inner);
-            if (isset($this->std->infdps->valores->trib->tottrib->vtottrib->vtottribfed)) {
+            if (isset($this->std->infdps->valores->trib->totTrib->vtottrib->vtottribfed)) {
                 $this->dom->addChild(
                     $vtottrib_inner,
                     'vTotTribFed',
-                    $this->std->infdps->valores->trib->tottrib->vtottrib->vtottribfed
+                    $this->std->infdps->valores->trib->totTrib->vtottrib->vtottribfed
                 );
             }
-            if (isset($this->std->infdps->valores->trib->tottrib->vtottrib->vtottribest)) {
+            if (isset($this->std->infdps->valores->trib->totTrib->vtottrib->vtottribest)) {
                 $this->dom->addChild(
                     $vtottrib_inner,
                     'vTotTribEst',
-                    $this->std->infdps->valores->trib->tottrib->vtottrib->vtottribest
+                    $this->std->infdps->valores->trib->totTrib->vtottrib->vtottribest
                 );
             }
-            if (isset($this->std->infdps->valores->trib->tottrib->vtottrib->vtottribmun)) {
+            if (isset($this->std->infdps->valores->trib->totTrib->vtottrib->vtottribmun)) {
                 $this->dom->addChild(
                     $vtottrib_inner,
                     'vTotTribMun',
-                    $this->std->infdps->valores->trib->tottrib->vtottrib->vtottribmun
+                    $this->std->infdps->valores->trib->totTrib->vtottrib->vtottribmun
                 );
             }
         }
-        if (isset($this->std->infdps->valores->trib->tottrib->ptottrib)) {
+        if (isset($this->std->infdps->valores->trib->totTrib->ptottrib)) {
             $ptottrib_inner = $this->dom->createElement('pTotTrib');
             $tottrib_inner->appendChild($ptottrib_inner);
 
-            if (isset($this->std->infdps->valores->trib->tottrib->ptottrib->ptottribfed)) {
+            if (isset($this->std->infdps->valores->trib->totTrib->ptottrib->ptottribfed)) {
                 $this->dom->addChild(
                     $ptottrib_inner,
                     'pTotTribFed',
-                    $this->std->infdps->valores->trib->tottrib->ptottrib->ptottribfed
+                    $this->std->infdps->valores->trib->totTrib->ptottrib->ptottribfed
                 );
             }
-            if (isset($this->std->infdps->valores->trib->tottrib->ptottrib->ptottribest)) {
+            if (isset($this->std->infdps->valores->trib->totTrib->ptottrib->ptottribest)) {
                 $this->dom->addChild(
                     $ptottrib_inner,
                     'pTotTribEst',
-                    $this->std->infdps->valores->trib->tottrib->ptottrib->ptottribest
+                    $this->std->infdps->valores->trib->totTrib->ptottrib->ptottribest
                 );
             }
-            if (isset($this->std->infdps->valores->trib->tottrib->ptottrib->ptottribmun)) {
+            if (isset($this->std->infdps->valores->trib->totTrib->ptottrib->ptottribmun)) {
                 $this->dom->addChild(
                     $ptottrib_inner,
                     'pTotTribMun',
-                    $this->std->infdps->valores->trib->tottrib->ptottrib->ptottribmun
+                    $this->std->infdps->valores->trib->totTrib->ptottrib->ptottribmun
                 );
             }
         }
-
+        
         if (isset($this->std->infdps->valores->trib->tottrib->indtottrib)) {
             $this->dom->addChild(
                 $tottrib_inner,
@@ -890,6 +902,7 @@ if (isset($this->std->infdps->serv->atvevento)) {
                 $this->std->infdps->valores->trib->tottrib->indtottrib
             );
         }
+
         if (isset($this->std->infdps->valores->trib->tottrib->ptottribsn)) {
             $this->dom->addChild(
                 $tottrib_inner,

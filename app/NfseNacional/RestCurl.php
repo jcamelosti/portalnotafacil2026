@@ -244,6 +244,7 @@ class RestCurl extends RestBase
     {
         $this->resolveUrl($origem);       
         $this->saveTemporarilyKeyFiles();
+        
         try {
             $msgSize = $data ? strlen($data) : 0;
             $parameters = [
