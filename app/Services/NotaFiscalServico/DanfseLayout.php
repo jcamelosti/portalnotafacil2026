@@ -212,12 +212,13 @@ final class DanfseLayout
         ];
         $y += 1.37;
 
-        $rules[] = $y + 10;
-        $complementaryTop = $y + 0.41;
+        //$rules[] = $y; //removendo a linha
+        $complementaryTop = $y + 0.90;
         $cells = [
             ...$cells,
-            self::sectionCell('Informações Complementares', 0.30, $y, 20.40, 0.39),
+            self::sectionCell('Informações Complementares', 0.30, $y + 0.20, 20.40),
             self::cell('', (string) $data['complementary_info'], 0.30, $complementaryTop, 20.40, max(0.39, 28.08 - $complementaryTop), 'large-text no-label'),
+            
             self::blankCell('Data Cientificação', 0.30, 28.10, 4.94, 0.67),
             self::blankCell('Identificação E Assinatura', 5.41, 28.10, 4.94, 0.67),
             self::cell('Nº NFS-e / Chave NFS-e', (string) $data['canhoto_nfse_key'], 10.51, 28.10, 10.19, 0.67, 'boxed'),
