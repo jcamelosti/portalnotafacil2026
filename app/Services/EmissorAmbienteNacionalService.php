@@ -451,7 +451,7 @@ class EmissorAmbienteNacionalService
         $std->infDPS->tpAmb = $ambienteEmissao; // 1 - Produção, 2 - Homologação
         $std->infDPS->dhEmi = now()->format('Y-m-d\TH:i:sP'); // "Data e hora da emissão da DPS. AAAA-MM-DDThh:mm:ssTZD"
         $std->infDPS->verAplic = 'PortalNotaFacil_V1.0';
-        $std->infDPS->serie = 900;
+        $std->infDPS->serie = $dados->serie;
         $std->infDPS->nDPS = $empresa->num_ultimo_dps + 1;//ver qual é o último número
         $std->infDPS->dCompet = now()->format('Y-m-d'); //"Data de competência da prestação do serviço. Ano, Mês e Dia (AAAA-MM-DD)"
         $std->infDPS->tpEmit = 1; //Emitente da DPS: 1 - Prestador; 2 - Tomador; 3 - Intermediário;
