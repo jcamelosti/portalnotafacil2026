@@ -108,9 +108,8 @@ final class DanfseLayout
             'TOMADOR/ADQUIRENTE DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e',
         );
 
-        $rules[] = $y + 0.2; //8.86
-        
-        $y = 9.0;
+        $rules[] = $y;
+
         $y = self::appendRecipientBlock($cells, $messages, $recipient, $y, (bool) ($data['recipient_is_taker'] ?? false));
         
         $rules[] = $y;
