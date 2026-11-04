@@ -682,6 +682,145 @@ class DPSSnXmlBuilder
             );
         }
 
+        //Grupo de Informações da Atividade Evento
+        if(!is_null($data->atvEvento)){
+            $atvEvento = $dom->createElement(
+                'atvEvento'
+            );
+
+            $serv->appendChild($atvEvento);
+
+            //Nome do Evento
+             $this->appendOptionalText(
+                $dom,
+                $atvEvento,
+                'xNome',
+                $data->atvEvento->xNome
+            );
+
+            //Data Inicio
+            $this->appendOptionalText(
+                $dom,
+                $atvEvento,
+                'dtIni',
+                $data->atvEvento->dataInicio
+            );
+
+            //Data Fim
+            $this->appendOptionalText(
+                $dom,
+                $atvEvento,
+                'dtFim',
+                $data->atvEvento->dataFim
+            );
+
+            //end
+            $end = $dom->createElement(
+                'end'
+            );
+            $atvEvento->appendChild($end);
+
+            /*<endNac>
+            <!--  Informação obrigatória. Código do município do endereço da obra. (Tabela do IBGE)  -->
+            <cMun> ? </cMun>
+            <!--  Código de Endereçamento Postal numérico do endereço nacional da obra.  -->
+            <CEP> ? </CEP>
+            </endNac>*/
+            
+            if(!is_null($data->atvEvento->end->cMun)){
+                $endNac = $dom->createElement(
+                    'endNac'
+                );
+                $end->appendChild($endNac);
+
+                $this->appendText(
+                    $dom,
+                    $endNac,
+                    'cMun',
+                    $data->atvEvento->end->cMun
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endNac,
+                    'CEP',
+                    $data->atvEvento->end->CEP
+                );
+            }else{
+                /*<endExt>
+                <!--  Código do país do endereço da obra. (Tabela de Países ISO)  -->
+                <cPais> ? </cPais>
+                <!--  Código de Endereçamento Postal alfanumérico do endereço no exterior da obra.  -->
+                <cEndPost> ? </cEndPost>
+                <!--  Nome da cidade no exterior, local da obra.  -->
+                <xCidade> ? </xCidade>
+                <!--  Estado, província ou região da cidade no exterior, local da obra.  -->
+                <xEstProvReg> ? </xEstProvReg>
+                </endExt>
+                */
+                $endExt = $dom->createElement(
+                    'endExt'
+                );
+                $end->appendChild($endExt);
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'cPais',
+                    $data->atvEvento->end->cPais
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'cEndPost',
+                    $data->atvEvento->end->cEndPost
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'xCidade',
+                    $data->atvEvento->end->xCidade
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'xEstProvReg',
+                    $data->atvEvento->end->xEstProvReg
+                );
+            }
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'xLgr',
+                $data->atvEvento->end->xLgr
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'nro',
+                $data->atvEvento->end->nro
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'xCpl',
+                $data->atvEvento->end->xCpl
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'xBairro',
+                $data->atvEvento->end->xBairro
+            );
+        }
+
         /*
          * infoCompl
          */

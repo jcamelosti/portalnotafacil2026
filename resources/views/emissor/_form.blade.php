@@ -243,6 +243,146 @@
                             </div>                            
                         </div>
 
+                        <!--Evento-->
+                        <div id="grupoEvento" style="display: none;">
+                            <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
+                                Dados Relacionados ao Evento
+                            </h4>
+                            
+                            <div class="grid grid-cols-2 gap-1">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Nome Evento Artístico, Cultural, Esportivo:</span>
+                                    {!! Form::text('nome_evento', old('nome_evento', $nota['nome_evento'] ?? null), ['maxlength' => '255', 'required', 'class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'Nome Evento', 'id' => 'nome_evento']) !!}
+                                    @if ($errors->has('nome_evento'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('nome_evento') }}</strong>
+                                        </span>
+                                    @endif
+                                </label>
+                            </div>          
+                            
+                            
+                            <div class="grid grid-cols-2 gap-1">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Data Início Evento:</span>
+                                    {!! Form::date('dtini_evento', old('dtini_evento', $nota['dtini_evento'] ?? null), ['maxlength' => '255', 'required', 'class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'Data Início Evento', 'id'=>'dtini_evento']) !!}
+                                    @if ($errors->has('dtini_evento'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('dtini_evento') }}</strong>
+                                        </span>
+                                    @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Data Fim Evento:</span>
+                                    {!! Form::date('dtfim_evento', old('dtfim_evento', $nota['dtfim_evento'] ?? null), ['maxlength' => '255', 'required', 'class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'Data Fim Evento', 'id'=>'dtfim_evento']) !!}
+                                    @if ($errors->has('dtfim_evento'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('dtfim_evento') }}</strong>
+                                        </span>
+                                    @endif
+                                </label>
+                            </div>          
+
+                            <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                                 <label class="block text-sm">
+                                    <span class="text-gray-700 ">CEP:</span>
+                                    {!! Form::text('txtCepEvento', old('txtCepEvento', $nota['txtCepEvento'] ?? null), ['required', 'maxlength'=>'9' ,'class'=>'cep block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtCepEvento']) !!}
+                                    @if ($errors->has('txtCepEvento'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtCepEvento') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Logradouro:</span>
+                                    {!! Form::text('txtEnderecoEvento', old('txtEnderecoEvento', $nota['txtEnderecoEvento'] ?? null), ['required','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtEnderecoEvento']) !!}
+                                    @if ($errors->has('logradouro'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtEnderecoEvento') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Número:</span>
+                                    {!! Form::text('txtNumeroEvento', old('txtNumeroEvento', $nota['txtNumeroEvento'] ?? null), ['required','maxlength' => '6','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe informe 0(Zero)','id'=>'txtNumeroEvento']) !!}
+                                    @if ($errors->has('txtNumeroEvento'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtNumeroEvento') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+                            </div>
+                             
+                            <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Complemento</span>
+                                    {!! Form::text('txtComplementoEvento', old('txtComplementoEvento', $nota['txtComplementoEvento'] ?? null), ['required','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtComplementoEvento']) !!}
+                                    @if ($errors->has('txtComplementoEvento'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtComplementoEvento') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Bairro:</span>
+                                    {!! Form::text('txtBairroEvento', old('txtBairroEvento', $nota['txtBairroEvento'] ?? null), ['maxlength' => '255','required','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'Bairro', 'id'=>'txtBairroEvento']) !!}
+                                    @if ($errors->has('txtBairroEvento'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtBairroEvento') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+                               
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">UF:</span>
+                                    {!! Form::select(' txtUFEvento',
+                                    $estados
+                                    ,old('txtUFEvento', $nota['txtUFEvento'] ?? null), ['id'=>'txtUFEvento', 'required','class'=>'block w-full mt-1 text-sm  
+                                    form-select
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                    @if ($errors->has('txtUFEvento'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtUFEvento') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <div id="containerCidade">
+                                    <label class="block text-sm w-10/12" id="cidade_id">
+                                        <span class="text-gray-700 ">Cidade:</span>
+                                        {!! Form::select('txtCidadeEvento', $cidades, old('txtCidadeEvento', $nota['txtCidadeEvento'] ?? null), ['maxlength' => '255','required','class'=>'block w-full mt-1 text-sm  
+                                        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                        :shadow-outline-gray form-input', 'placeholder'=>'', 'id' => 'txtCidadeEvento']) !!}
+                                        @if ($errors->has('txtCidadeEvento'))
+                                            <span class="text-xs text-red-600 ">
+                                            <strong>{{ $errors->first('txtCidadeEvento') }}</strong>
+                                        </span>
+                                        @endif
+                                    </label>
+                                </div>
+                            </div>                            
+                        </div>
+
                         <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
                             Local da Prestação do Serviço
                         </h4>

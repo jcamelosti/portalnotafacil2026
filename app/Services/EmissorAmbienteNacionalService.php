@@ -14,7 +14,9 @@ use JCamelo\NfseNacionalLib\Services\NFSeService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use JCamelo\NfseNacionalLib\DTO\EnderecoDTO;
 use JCamelo\NfseNacionalLib\DTO\EnderecoObraDTO;
+use JCamelo\NfseNacionalLib\DTO\EventoDTO;
 use JCamelo\NfseNacionalLib\DTO\ObraDataDTO;
 
 class EmissorAmbienteNacionalService
@@ -196,7 +198,34 @@ class EmissorAmbienteNacionalService
             );
         }
 
-        $dados['txtNumeroObras'] = '150';
+         $evento = null;
+        if(
+            isset($dados['nome_evento']) && trim($dados['nome_evento']) !== '' &&
+            isset($dados['dtini_evento']) && trim($dados['dtini_evento']) !== '' &&
+            isset($dados['dtfim_evento']) && trim($dados['dtfim_evento']) !== '' &&
+            isset($dados['txtCepEvento']) && trim($dados['txtCepEvento']) !== '' &&
+            isset($dados['txtEnderecoEvento']) && trim($dados['txtEnderecoEvento']) !== '' &&
+            isset($dados['txtNumeroEvento']) && trim($dados['txtNumeroEvento']) !== '' &&
+            isset($dados['txtComplementoEvento']) && trim($dados['txtComplementoEvento']) !== '' &&
+            isset($dados['txtBairroEvento']) && trim($dados['txtBairroEvento']) !== '' &&
+            isset($dados['txtUFEvento']) && trim($dados['txtUFEvento']) !== '' &&
+            isset($dados['txtCidadeEvento']) && trim($dados['txtCidadeEvento']) !== ''
+        ){
+            $evento = new EventoDTO(
+                xNome: $dados['nome_evento'],
+                dataInicio: $dados['dtini_evento'],
+                dataFim: $dados['dtfim_evento'],
+                end: new EnderecoDTO(
+                    cMun: $dados['txtCidadeEvento'],
+                    CEP: preg_replace('/[^0-9]/', '', $dados['txtCepEvento']),
+                    xLgr: $dados['txtEnderecoEvento'],
+                    nro: $dados['txtNumeroEvento'],
+                    xCpl: $dados['txtComplementoEvento'],
+                    xBairro: $dados['txtBairroEvento'],
+                )
+            );
+        }
+
         $obra = null;
         if(
             isset($dados['txtEnderecoObras']) && !empty($dados['txtEnderecoObras']) &&
@@ -329,6 +358,7 @@ class EmissorAmbienteNacionalService
 
             //dados da obra
             obra: $obra,
+            atvEvento: null,
         );
 
         $certificadoCliente = Certificado::where('empresa_id', Session::get('empresa_selecionada'))
@@ -373,6 +403,7 @@ class EmissorAmbienteNacionalService
             //exit;
             Log::info("NFSE ADN");
             Log::info($dom->saveXML());
+            //exit;
             
             $response = $tools->enviaDpsAdn($dps->render(), 1);//2 para adn, 1 sefin -> 1 é padrão
             Log::info($response);
@@ -456,6 +487,9 @@ class EmissorAmbienteNacionalService
         $std = new \stdClass();
 
         $ambienteEmissao =  $empresa->ambiente_emissao == "HOMOLOGACAO" ? 2 : 1;
+
+        $calculoService = new CalculoTributosDpsService();
+        $impostosFederais = $calculoService->calcular($dados);
         
         $std->infDPS = new \stdClass();
         $std->infDPS->tpAmb = $ambienteEmissao; // 1 - Produção, 2 - Homologação
@@ -563,13 +597,44 @@ class EmissorAmbienteNacionalService
         $std->infDPS->valores->trib->tribMun = new \stdClass();
         $std->infDPS->valores->trib->tribMun->tribISSQN = $dados->tributaIss; // Tributação do ISSQN sobre o serviço prestado: 1 - Operação tributável; 2 - Imunidade 3 - Exportação de serviço; 4 - Não Incidência;
         $std->infDPS->valores->trib->tribMun->tpRetISSQN = $dados->tipoRetencaoIss; //Tipo de retencao do ISSQN: 1 - Não Retido; 2 - Retido pelo Tomador; 3 - Retido pelo Intermediario;
+        //std->infdps->valores->trib->tribmun->paliq
+        $std->infDPS->valores->trib->tribMun->pAliq = $dados->aliquotaIss;
 
+        //tributos federais
+        //$std->infdps->valores->trib->tribfed
+
+        //calculos 
+        $std->infDPS->valores->trib->tribFed = new \stdClass();
+        $std->infDPS->valores->trib->tribFed->piscofins = new \stdClass();
+        $std->infDPS->valores->trib->tribFed->piscofins->cst = $dados->cstPisCofins;
+        $std->infDPS->valores->trib->tribFed->piscofins->vcofins = $dados->valorCofins ?? null;
+        $std->infDPS->valores->trib->tribFed->piscofins->vpis = $dados->valorPis ?? null;
+        $std->infDPS->valores->trib->tribFed->piscofins->paliqpis = $dados->aliquotaPis ?? null;
+        $std->infDPS->valores->trib->tribFed->piscofins->paliqcofins = $dados->aliquotaCofins ?? null;
+        $std->infDPS->valores->trib->tribFed->piscofins->tpretpiscofins = $dados->tipoRetencaoPisCofins;
+
+        
+        $std->infDPS->valores->trib->tribFed->vretcp = $dados->valorRetencaoCp;
+        $std->infDPS->valores->trib->tribFed->vretirrf = $dados->valorRetencaoIrrf;
+        $std->infDPS->valores->trib->tribFed->vretcsll = $dados->valorRetencaoCsll;
+        
+        if($dados->tipoInfoTributos != 1){
+
+        }else{
+
+        }
+
+        //campos ibs/cbs
+        
+        //final ibs/cbs
+
+        
         //Para ME/EPP o indicador de informação de valor total de tributos não pode ser informado.
         $std->infDPS->valores->trib->totTrib = new \stdClass();
         //$std->infDPS->valores->trib->totTrib->indTotTrib = 0;
 
         $std->infDPS->valores->trib->totTrib->ptottribsn = $dados->percentualTotalTributos;
-
+        
         return $std;
     }
 }

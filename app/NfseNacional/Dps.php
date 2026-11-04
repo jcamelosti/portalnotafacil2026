@@ -747,7 +747,7 @@ if (isset($this->std->infdps->serv->atvevento)) {
             );
         }
 
-        if (isset($this->std->infdps->valores->trib->tribmun->paliq)) {
+        if ($this->std->infdps->valores->trib->tribmun->tpretissqn !== '1' && isset($this->std->infdps->valores->trib->tribmun->paliq)) {
             $this->dom->addChild(
                 $tribmun_inner,
                 'pAliq',
@@ -911,9 +911,9 @@ if (isset($this->std->infdps->serv->atvevento)) {
         }
 
         //Grupos de IBS/CBS
-//        if (isset($this->std->infdps->ibscbs)) {
-//            $ibscbs_inner = $this->dom->createElement('IBSCBS');
-//            $infdps_inner->appendChild($ibscbs_inner);
+        if (isset($this->std->infdps->ibscbs)) {
+            $ibscbs_inner = $this->dom->createElement('IBSCBS');
+            $infdps_inner->appendChild($ibscbs_inner);
 //
 //            $this->dom->addChild(
 //                $ibscbs_inner,
@@ -1095,7 +1095,7 @@ if (isset($this->std->infdps->serv->atvevento)) {
 //                        $this->std->ibscbs->dest->email
 //                    );
 //                }
-//            }
+            }
 //
 //            //TODO Fazer grupo imovel
 //
