@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Emissor;
 
 use App\Business\NotasBO;
 use App\Http\Controllers\Controller;
+use App\Models\Certificado;
 use App\Models\CreditoUser;
 use App\Models\Empresa;
 use App\Models\EmpresaCompartilhada;
@@ -12,6 +13,7 @@ use App\Models\NotaEmitida;
 //use App\Models\NotaEmitida;
 use App\Models\PlanoVariacao;
 use App\Utilitarios\Utilitarios;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -101,7 +103,22 @@ class DashboardController extends Controller
             ->orderBy('id', 'desc')
             ->paginate(10);
         
-        
+        $certificadoCliente = Certificado::where('empresa_id', Session::get('empresa_selecionada'))
+            ->first();
+
+        if(is_null($certificadoCliente)){
+            session()->flash('danger', 'Opss! A empresa não possui um Certificado Digital válido cadastrado. Não é possível consultar ou emitir notas.');
+            return redirect()->route('empresas-certificados.index', [
+                'empresa_id' => Session::get('empresa_selecionada')
+            ]);
+        }else{
+            if ($certificadoCliente && Carbon::parse($certificadoCliente->data_validade)->lte(Carbon::today())) {
+                session()->flash('danger', 'Opss! Certificado Digital Vencido. Edite e adicione o novo certificado.');
+                return redirect()->route('empresas-certificados.index', [
+                    'empresa_id' => Session::get('empresa_selecionada')
+                ]);
+            }
+        }
 
         return view('dashboard_cliente')->with([
             'empresa' => $this->empresa,

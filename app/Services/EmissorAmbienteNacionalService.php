@@ -407,7 +407,7 @@ class EmissorAmbienteNacionalService
             
             $response = $tools->enviaDpsAdn($dps->render(), 1);//2 para adn, 1 sefin -> 1 é padrão
             Log::info($response);
-
+            
             if (isset($response['nfseXmlGZipB64'])) {
                 $xmlNfse = gzdecode(base64_decode($response['nfseXmlGZipB64']));
 
@@ -499,8 +499,11 @@ class EmissorAmbienteNacionalService
         $std->infDPS->nDPS = $empresa->num_ultimo_dps + 1;//ver qual é o último número
         $std->infDPS->dCompet = now()->format('Y-m-d'); //"Data de competência da prestação do serviço. Ano, Mês e Dia (AAAA-MM-DD)"
         $std->infDPS->tpEmit = 1; //Emitente da DPS: 1 - Prestador; 2 - Tomador; 3 - Intermediário;
+        
         //não informar para produção $std->infDPS->finnfse
-        //$std->infDPS->finnfse = 0; //Indicador da finalidade da emissão de NFS-e - 0 - NFS-e regular 1 - NFS-e de crédito 2 - NFS-e de débito
+        if ((int) (getenv('LOCAL_ENV') ?: 0) === 1) {
+            $std->infDPS->finnfse = 0; //Indicador da finalidade da emissão de NFS-e - 0 - NFS-e regular 1 - NFS-e de crédito 2 - NFS-e de débito
+        }
 
         $std->infDPS->cLocEmi = $empresa->cidade_id; //Código IBGE 7 dígitos da cidade emissora da NFS-e.
         
@@ -582,7 +585,10 @@ class EmissorAmbienteNacionalService
         $std->infDPS->serv->cServ->cTribNac = $dados->codigoTributacaoNacional;//Código de tributação Nacional
         //$std->infDPS->serv->cServ->cTribMun = ''; //Código de tributação municipal do ISSQN.
         $std->infDPS->serv->cServ->xDescServ = $dados->descricaoServico;
-        $std->infDPS->serv->cServ->cNBS = $dados->codigoNbs;//'122051900';// Código NBS correspondente ao serviço prestado
+
+        //if ((int) (getenv('LOCAL_ENV') ?: 0) === 0) { //não enviar em homologacao
+            $std->infDPS->serv->cServ->cNBS = $dados->codigoNbs;//'122051900';// Código NBS correspondente ao serviço prestado
+        //}
         //$std->infDPS->serv->cServ->cIntContrib = str_pad($servico->id, 5, '0', STR_PAD_LEFT);;// Código interno do contribuinte - Utilizado para identificação da DPS no Sistema interno do Contribuinte
 
         /*
@@ -625,10 +631,38 @@ class EmissorAmbienteNacionalService
         }
 
         //campos ibs/cbs
+        //dd($dados);
+        $std->infDPS->ibscbs = new \stdClass();
+        if ((int) (getenv('LOCAL_ENV') ?: 0) === 0) {
+            $std->infDPS->ibscbs->finNFSe = 0;
+        }
+        //$std->infDPS->ibscbs->indfinal = 0;
+        $std->infDPS->ibscbs->cIndOp = $dados->cIndOp;
+        $std->infDPS->ibscbs->indDest = 0;//0 – o destinatário é o próprio tomador/adquirente identificado na NFS-e (tomador = adquirente = destinatário);
+
+        //valores 
+        $std->infDPS->ibscbs->valores = new \stdClass();
+        $std->infDPS->ibscbs->valores->trib = new \stdClass();
+
+        $std->infDPS->ibscbs->valores->trib->cClassTrib = $dados->cClassTrib;
+        $std->infDPS->ibscbs->valores->trib->cst = $dados->cstIbsCbs;
+               
+        /*$std->infDPS->ibscbs->valores->trib->gibscbs = new \stdClass();
+        $std->infDPS->ibscbs->valores->trib->gibscbs->cClassTrib = $dados->cClassTrib;
+        $std->infDPS->ibscbs->valores->trib->gibscbs->cst = $dados->cstIbsCbs;*/
         
+        //<!-- Demais campos dependem do gTribRegular ou outros regimes -->
+        /*
+        <!-- Demais campos dependem do gTribRegular ou outros regimes -->
+        <gTribRegular>
+            <!-- CST Geral do IBS e CBS (Ex: 000 = Regular Integral) -->
+            <CSTReg>000</CSTReg>
+        </gTribRegular>
+        */
+
         //final ibs/cbs
 
-        
+        //dd($std->infDPS->ibscbs->valores);
         //Para ME/EPP o indicador de informação de valor total de tributos não pode ser informado.
         $std->infDPS->valores->trib->totTrib = new \stdClass();
         //$std->infDPS->valores->trib->totTrib->indTotTrib = 0;

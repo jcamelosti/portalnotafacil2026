@@ -179,6 +179,13 @@ class NotaController extends Controller
         if(is_null($certificadoCliente)){
             session()->flash('danger', 'Opss! A empresa não possui um Certificado Digital válido cadastrado.');
             return redirect()->route('empresas.edit', $empresa->id);
+        }else{
+            if ($certificadoCliente && Carbon::parse($certificadoCliente->data_validade)->lte(Carbon::today())) {
+                session()->flash('danger', 'Opss! Certificado Digital Vencido. Edite e adicione o novo certificado.');
+                return redirect()->route('empresas-certificados.index', [
+                    'empresa_id' => $empresa->id
+                ]);
+            }
         }
     
         $atividades = $this->atividadeModel->atividadesByCTribMunList($empresa->id);

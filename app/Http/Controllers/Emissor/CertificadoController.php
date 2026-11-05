@@ -8,6 +8,7 @@ use App\Models\Empresa;
 use App\Utilitarios\CertificadoDigital;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use NFePHP\Common\Certificado as CommonCertificado;
 
@@ -30,13 +31,48 @@ class CertificadoController extends Controller
      
         $campos = $request->all();
 
-        $certificados = $this->certificadoModel
+        $userId = Auth::id();
+
+        /*$certificados = $this->certificadoModel
             ->where(function($query) use($campos) {
                 if(isset($campos['empresa_id']) && $campos['empresa_id'] != '0'){
                     $query->where('id', $campos['empresa_id']);
                 }
             })
             ->where('user_id', Auth::user()->id)
+            ->orderBy('razao_social', 'ASC')
+            ->paginate();*/
+
+        $certificados = $this->certificadoModel
+            ->where(function ($query) use ($campos) {
+                if (isset($campos['empresa_id']) && $campos['empresa_id'] != '0') {
+                    $query->where('empresa_id', $campos['empresa_id']);
+                }
+            })
+            ->whereExists(function ($q) use ($userId) {
+                $q->select(DB::raw(1))
+                    ->from('empresas')
+                    ->whereColumn('empresas.id', 'certificados.empresa_id')
+                    ->where(function ($empresa) use ($userId) {
+                        // Empresa pertence ao usuário
+                        $empresa->where('empresas.user_id', $userId)
+
+                            // Ou empresa compartilhada com o usuário
+                            ->orWhereExists(function ($sub) use ($userId) {
+                                $sub->select(DB::raw(1))
+                                    ->from('empresas_compartilhadas')
+                                    ->whereColumn(
+                                        'empresas_compartilhadas.empresa_id',
+                                        'empresas.id'
+                                    )
+                                    ->where(
+                                        'empresas_compartilhadas.solicitante_user_id',
+                                        $userId
+                                    )
+                                    ->where('empresas_compartilhadas.autorizado', 'S');
+                            });
+                    });
+            })
             ->orderBy('razao_social', 'ASC')
             ->paginate();
     
@@ -126,10 +162,33 @@ class CertificadoController extends Controller
      */
     public function edit($id)
     {
-        $certificado = $this->certificadoModel
-            ->where('user_id', Auth::user()->id)
-            ->find($id);
+        $userId = Auth::id();
+        
+        /*$certificado = $this->certificadoModel
+            //->where('user_id', Auth::user()->id)
+            ->find($id);*/
 
+        $certificado = $this->certificadoModel
+        ->whereExists(function ($q) use ($userId) {
+            $q->select(DB::raw(1))
+                ->from('empresas')
+                ->whereColumn('empresas.id', 'certificados.empresa_id')
+                ->where(function ($empresa) use ($userId) {
+                    $empresa->where('empresas.user_id', $userId)
+                        ->orWhereExists(function ($sub) use ($userId) {
+                            $sub->select(DB::raw(1))
+                                ->from('empresas_compartilhadas')
+                                ->whereColumn(
+                                    'empresas_compartilhadas.empresa_id',
+                                    'empresas.id'
+                                )
+                                ->where('empresas_compartilhadas.solicitante_user_id', $userId)
+                                ->where('empresas_compartilhadas.autorizado', 'S');
+                        });
+                });
+        })
+        ->find($id);
+        
         $empresas = ['' => 'Selecione a Empresa'] + $this->empresaModel
             ->where('user_id', Auth::user()->id)
             ->orderBy('razao_social', 'asc')
@@ -149,9 +208,30 @@ class CertificadoController extends Controller
     public function update(Request $request, $id)
     {
         $data = $request->all();
-        $certificadoUpd = $this->certificadoModel->find($id);
+        $userId = Auth::id();
 
-        if($certificadoUpd->user_id != Auth::user()->id){
+        //$certificadoUpd = $this->certificadoModel->find($id);
+        $certificadoUpd = $this->certificadoModel->whereExists(function ($q) use ($userId) {
+            $q->select(DB::raw(1))
+                ->from('empresas')
+                ->whereColumn('empresas.id', 'certificados.empresa_id')
+                ->where(function ($empresa) use ($userId) {
+                    $empresa->where('empresas.user_id', $userId)
+                        ->orWhereExists(function ($sub) use ($userId) {
+                            $sub->select(DB::raw(1))
+                                ->from('empresas_compartilhadas')
+                                ->whereColumn(
+                                    'empresas_compartilhadas.empresa_id',
+                                    'empresas.id'
+                                )
+                                ->where('empresas_compartilhadas.solicitante_user_id', $userId)
+                                ->where('empresas_compartilhadas.autorizado', 'S');
+                        });
+                });
+        })
+        ->find($id);
+
+        if(!$certificadoUpd){
             session()->flash('danger', 'Não foi possível atualizar o certificado.');
             return redirect()->route('empresas-certificados.edit', $certificadoUpd->id);
         }
