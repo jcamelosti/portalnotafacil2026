@@ -81,6 +81,16 @@ class LicencasController extends Controller
             ->orderBy('fator_vigencia', 'ASC')
             ->get();
 
+        //calculo do desconto
+        $desconto = Auth::user()->percentual_desconto ?? 0;
+
+        $variacaoPlanos->each(function ($variacao) use ($desconto) {
+            $variacao->valor = round(
+                $variacao->valor * (1 - ($desconto / 100)),
+                2
+            );
+        });
+
         $cores = [
             0 => 'indigo',
             1 => 'green',
@@ -109,6 +119,14 @@ class LicencasController extends Controller
 
         if(!is_null($credito) && ($credito->credito > 0.0) ){
             $valorPlano = $this->variacaoPlanoModel->find($planoId);
+
+            //calculo desconto
+            $desconto = Auth::user()->percentual_desconto ?? 0;
+            $valorPlano->valor = round(
+                $valorPlano->valor * (1 - ($desconto / 100)),
+                2
+            );
+
             $empresa = $this->empresaModel->find($empresaId);
             $l = $this->licenseModel
                 ->where('empresa_id', $empresaId)
@@ -155,6 +173,14 @@ class LicencasController extends Controller
             }
         }else{    
             $valorPlano = $this->variacaoPlanoModel->find($planoId);
+            
+            //calculo desconto
+            $desconto = Auth::user()->percentual_desconto ?? 0;
+            $valorPlano->valor = round(
+                $valorPlano->valor * (1 - ($desconto / 100)),
+                2
+            );
+
             $empresa = $this->empresaModel->find($empresaId);
             $qtdEmpresasUser = $this->empresaModel->where('user_id', Auth::user()->id)->count();
 
@@ -364,6 +390,13 @@ class LicencasController extends Controller
                 ->first()
                 ->variacaoPlano()
                 ->first();
+
+            //calculo desconto
+            $desconto = Auth::user()->percentual_desconto ?? 0;
+            $varPlano->valor = round(
+                $varPlano->valor * (1 - ($desconto / 100)),
+                2
+            );
 
             $empresa = $fatura->empresa()->first();
             

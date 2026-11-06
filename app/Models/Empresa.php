@@ -66,11 +66,11 @@ class Empresa extends Model
     }*/
 
     public function getCidadeIdAttribute(){
-        $cidade_id = $this->attributes['cidade_id'];
+        $cidade_id = $this->attributes['cidade_id'] ?? null;
         
-        if($this->attributes['ambiente_emissao'] === 'HOMOLOGACAO' && $this->attributes['sigla_provedor'] === 'issnet'){
+        /*if($this->attributes['ambiente_emissao'] === 'HOMOLOGACAO' && $this->attributes['sigla_provedor'] === 'issnet'){
             $cidade_id = '5002704'; // Se estive setado $this->attributes['ambiente_emissao'] === 'HOMOLOGACAO', em hmg só funciona com campo grande
-        }
+        }*/
 
         return $cidade_id;
     }

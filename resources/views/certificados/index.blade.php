@@ -48,93 +48,119 @@
 
         @include('components.mensagens')
 
-        <div class="container-list">
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-6">
+
             @forelse ($certificados as $item)
-                <div
-                    class="
-                                flex flex-col
-                                items-center
-                                p-2
-                                shadow-md
-                                m-1
-                                w-full
-                            ">
-                    <div class="flex flex-row items-center justify-between w-full">
-                        <div
-                            class="
-                                        flex
-                                        items-center
-                                        flex-grow
-                                        font-bold
-                                        text-base
-                                        md:text-2xl
-                                    ">
-                            {{ $item->razao_social }}
-                            @if($item->vencimento_valido)
-                                <span
-                                class="
-                                rounded rounded-lg
-                                bg-green-400
-                                text-green-50 text-xs
-                                px-2
-                                ml-1
-                                uppercase
-                                ">Certificado Valido até {{$item->data_validade->format('d/m/Y')}}</span>
-                            @else 
-                                <span 
-                                class=" 
-                                rounded rounded-lg 
-                                bg-red-400
-                                text-red-50 text-xs
-                                px-2
-                                ml-1
-                                uppercase
-                                ">Certificado Expirado em {{$item->data_validade->format('d/m/Y')}}</span>
+
+                <div class="bg-white rounded-xl shadow-md border border-gray-200
+                            hover:shadow-lg transition-shadow duration-200
+                            flex flex-col overflow-hidden">
+
+                    {{-- Cabeçalho --}}
+                    <div class="p-4 flex-1">
+
+                        <div class="flex items-start justify-between gap-2 mb-3">
+
+                            <div class="flex items-center justify-center
+                                        w-10 h-10 rounded-lg bg-blue-100
+                                        text-blue-600 flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="h-6 w-6" fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M9 12h6m-6 4h6M7 3h7l5 5v13H5V3h2z"/>
+                                </svg>
+                            </div>
+
+                            @if ($item->vencimento_valido)
+                                <span class="inline-flex items-center px-2 py-1
+                                            rounded-full bg-green-100
+                                            text-green-700 text-xs font-semibold">
+                                    Válido
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2 py-1
+                                            rounded-full bg-red-100
+                                            text-red-700 text-xs font-semibold">
+                                    Expirado
+                                </span>
                             @endif
+
                         </div>
-                        <div class="px-6 py-4 text-sm font-medium leading-5 text-right whitespace-nowrap">
-                            <a class="btn-crud-show" href="{{ route('empresas-certificados.edit', $item->id) }}">
-                                Editar
-                            </a>
+
+                        {{-- Razão Social --}}
+                        <h3 class="text-base font-bold text-gray-800
+                                leading-snug mb-3 break-words">
+                            {{ $item->razao_social }}
+                        </h3>
+
+                        {{-- CPF/CNPJ --}}
+                        <div class="mb-3">
+                            <p class="text-xs text-gray-500 mb-1">
+                                CPF / CNPJ
+                            </p>
+                            <p class="text-sm font-semibold text-gray-700">
+                                {{ $item->cpf_cnpj }}
+                            </p>
                         </div>
+
+                        {{-- Validade --}}
+                        <div>
+                            <p class="text-xs text-gray-500 mb-1">
+                                Data de validade
+                            </p>
+
+                            <p class="text-sm font-semibold
+                                {{ $item->vencimento_valido
+                                    ? 'text-green-700'
+                                    : 'text-red-600' }}">
+                                {{ $item->data_validade->format('d/m/Y') }}
+                            </p>
+                        </div>
+
                     </div>
-                    <div class="flex flex-row items-start justify-between w-full">
-                        <div class="flex inline-block">
-                            <span
-                                class="
-                                            rounded rounded-lg
-                                            bg-yellow-400
-                                            text-yellow-50 text-xs
-                                            px-2
-                                            ml-1
-                                            uppercase
-                                            font-bold
-                                        ">{{ $item->cpf_cnpj }}</span>
-                        </div>
+
+                    {{-- Rodapé --}}
+                    <div class="border-t border-gray-100 bg-gray-50
+                                px-4 py-3">
+
+                        <a href="{{ route('empresas-certificados.edit', $item->id) }}"
+                        class="inline-flex items-center justify-center
+                                w-full px-4 py-2 rounded-lg
+                                bg-blue-600 hover:bg-blue-700
+                                text-white text-sm font-medium
+                                transition-colors duration-200">
+
+                            Editar certificado
+                        </a>
+
                     </div>
+
                 </div>
+
             @empty
-                Não há informações para Exibir
+
+                <div class="col-span-full bg-white rounded-xl
+                            shadow-sm border border-gray-200
+                            text-center py-12 px-4">
+
+                    <p class="text-gray-500 text-sm">
+                        Não há certificados digitais para exibir.
+                    </p>
+
+                </div>
+
             @endforelse
+
         </div>
+
     </div>
 
     <div class="py-10 mx-auto max-w-7xl sm:px-6 lg:px-8">
         {!! $certificados->links('pagination') !!}
     </div>
-    <style>
-        .top-100 {
-            top: 100%
-        }
-
-        .bottom-100 {
-            bottom: 100%
-        }
-
-        .max-h-select {
-            max-height: 300px;
-        }
-    </style>
-    @section('jquery')
-    @endsection
 </x-area-cliente-layout>

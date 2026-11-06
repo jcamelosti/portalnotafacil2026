@@ -15,6 +15,7 @@ use App\Services\FocuNfe\GestaoService;
 use App\Traits\IssnetTrait;
 use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -175,10 +176,14 @@ class EmpresasController extends Controller
     }
 
     public function buscarDadosEmpresa(){
-        if(request()->method() == 'POST'){
-            $dadosEmpresa = Utilitarios::consultarEmpresaCNPJ(request()->get('cpf_cnpj'));
-            Session::put('nova_empresa_prest', $dadosEmpresa);
-            
+        try{
+            if(request()->method() == 'POST'){
+                $dadosEmpresa = Utilitarios::consultarEmpresaCNPJ(request()->get('cpf_cnpj'));
+                Session::put('nova_empresa_prest', $dadosEmpresa);
+                return redirect()->route('empresas.create');
+            }
+        }catch(Exception $e){
+            session()->flash('info', 'Adicione os Dados Manualmente. Não foi possível adicionar via Consulta na Base da Receita Federal.');
             return redirect()->route('empresas.create');
         }
         
@@ -197,11 +202,6 @@ class EmpresasController extends Controller
         $dados['user_id'] = Auth::user()->id;
 
         $empresaExiste = $this->empresaModel->where('cpf_cnpj', preg_replace('/[^[:alnum:]_]/', '', $dados['cpf_cnpj']))->first();
-
-        //blessed
-        if (collect([56,78,79,86])->contains(auth()->id())) {
-            $dados['plano_id'] = 1;
-        }
 
         if(!is_null($empresaExiste)){
             session()->flash('info', 'Não foi possível adicionar a Empresa. A empresa já encontra-se cadastrada no sistema.');
@@ -338,11 +338,6 @@ class EmpresasController extends Controller
             return redirect()->route('empresas.edit', $id);
         }
 
-        //blessed
-        if (collect([56,78,79,86])->contains(auth()->id())) {
-            $dados['plano_id'] = 1;
-        }
-       
         $empresa->update($dados);
 
         //$this->saveOrUpdateSpedy($empresa);

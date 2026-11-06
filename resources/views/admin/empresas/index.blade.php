@@ -66,90 +66,118 @@
 
         @include('components.mensagens')
 
-        <div class="container-list">
-            @forelse ($empresas as $item)
-                <div
-                    class="
-                                flex flex-col
-                                items-center
-                                p-2
-                                bg-gray-50
-                                shadow-md
-                                m-1
-                                w-full
-                            ">
-                    <div class="flex flex-row items-center justify-between w-full">
-                        <div
-                            class="
-                                        flex
-                                        items-center
-                                        flex-grow
-                                        font-bold
-                                        text-base
-                                        md:text-2xl
-                                    ">
-                            {{ $item->razao_social }}
-                            @if($item->validate_licenca != '')
-                                <span
-                                class="
-                                rounded rounded-lg
-                                bg-green-400
-                                text-green-50 text-xs
-                                px-2
-                                ml-1
-                                uppercase
-                                ">Licença Valida até {{$item->validate_licenca}}</span>
-                            @else 
-                                <span 
-                                class=" 
-                                rounded rounded-lg 
-                                bg-red-400
-                                text-red-50 text-xs
-                                px-2
-                                ml-1
-                                uppercase
-                                ">Licença Vencida</span>
-                            @endif
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 mt-5">
 
-                            <span
-                                class="
-                                rounded rounded-lg
-                                bg-blue-400
-                                text-blue-50 text-xs
-                                px-2
-                                ml-1
-                                uppercase
-                                ">Responsável: {{$item->responsavel->name}}</span>
+            @forelse ($empresas as $item)
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg transition duration-200 overflow-hidden">
+
+                    {{-- Cabeçalho do card --}}
+                    <div class="p-5">
+
+                        <div class="flex items-start justify-between gap-3">
+
+                            <div class="min-w-0">
+                                <h3 class="text-base font-bold text-gray-800 leading-tight">
+                                    {{ $item->razao_social }}
+                                </h3>
+
+                                <p class="text-sm text-gray-500 mt-2">
+                                    CNPJ / CPF
+                                </p>
+
+                                <p class="text-sm font-semibold text-gray-700">
+                                    {{ $item->cpf_cnpj }}
+                                </p>
+                            </div>
+
+                            {{-- Situação da licença --}}
+                            <div class="shrink-0">
+                                @if($item->validate_licenca != '')
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                        <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>
+                                        Ativa
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                        <span class="w-2 h-2 rounded-full bg-red-500 mr-1.5"></span>
+                                        Vencida
+                                    </span>
+                                @endif
+                            </div>
+
                         </div>
-                        <div class="px-6 py-4 text-sm font-medium leading-5 text-right whitespace-nowrap">
-                            <a class="btn-crud-show" href="{{ route('admin.empresas.edit', $item->id) }}">
+
+                        {{-- Responsável --}}
+                        <div class="mt-5 pt-4 border-t border-gray-100">
+
+                            <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">
+                                Responsável
+                            </p>
+
+                            <p class="text-sm text-gray-700 font-medium mt-1">
+                                {{ $item->responsavel->name ?? 'Não informado' }}
+                            </p>
+
+                        </div>
+
+                        {{-- Validade --}}
+                        <div class="mt-4">
+
+                            <p class="text-xs text-gray-500 uppercase font-semibold tracking-wide">
+                                Validade da licença
+                            </p>
+
+                            <p class="text-sm font-medium mt-1
+                                {{ $item->validate_licenca != '' ? 'text-green-700' : 'text-red-600' }}">
+                                {{ $item->validate_licenca ?: 'Licença vencida ou não cadastrada' }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    {{-- Rodapé / ações --}}
+                    <div class="bg-gray-50 border-t border-gray-200 px-5 py-3">
+
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+
+                            <a href="{{ route('admin.empresas.edit', $item->id) }}"
+                            class="inline-flex items-center px-3 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition">
+
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                                </svg>
+
                                 Editar
                             </a>
-                            |
-                            <a class="btn-crud-show" href="{{ route('admin.licencas.licenca', $item->id) }}">
+
+                            <a href="{{ route('admin.licencas.licenca', $item->id) }}"
+                            class="inline-flex items-center px-3 py-2 rounded-lg bg-green-600 text-white text-xs font-semibold hover:bg-green-700 transition">
+
                                 Liberar Licença
                             </a>
-                            <span class="flex w-full rounded-md shadow-sm sm:ml-3 sm:w-auto">
+
                         </div>
+
                     </div>
-                    <div class="flex flex-row items-start justify-between w-full">
-                        <div class="flex inline-block">
-                            <span
-                                class="
-                                            rounded rounded-lg
-                                            bg-yellow-400
-                                            text-yellow-50 text-xs
-                                            px-2
-                                            ml-1
-                                            uppercase
-                                            font-bold
-                                        ">{{ $item->cpf_cnpj }}</span>
-                        </div>
-                    </div>
+
                 </div>
+
             @empty
-                Não há informações para Exibir
+
+                <div class="col-span-full bg-white rounded-xl border border-gray-200 p-10 text-center">
+
+                    <p class="text-gray-500 text-sm">
+                        Nenhuma empresa encontrada.
+                    </p>
+
+                </div>
+
             @endforelse
+
         </div>
     </div>
 
