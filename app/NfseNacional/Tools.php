@@ -138,7 +138,7 @@ class Tools extends RestCurl
         return null;
     }
 
-    public function enviaDps($content)
+    public function enviaDps($content, $origem = 1)
     {
         //$content = $this->canonize($content);
         $content = $this->sign($content, 'infDPS', '', 'DPS');
@@ -149,8 +149,31 @@ class Tools extends RestCurl
         $dados = [
             'dpsXmlGZipB64' => $data
         ];
-        $retorno = $this->postData('nfse', json_encode($dados));
+        $retorno = $this->postData('nfse', json_encode($dados), $origem);
         return $retorno;
+    }
+
+    public function enviaDpsAdn($content, $origem = 1)
+    {
+        // Assina o XML
+        $content = $this->sign($content, 'infDPS', '', 'DPS');
+        
+        // Adiciona declaração XML
+        $content = '<?xml version="1.0" encoding="UTF-8"?>' . $content;
+
+        // 2. Compactar obrigatoriamente usando gzencode() com nível de compressão 9
+        // IMPORTANTE: Use gzencode() e não gzcompress(). O SEFIN exige os headers do GZIP.
+        $xmlGzip = gzencode($content, 9);
+
+        // 3. Converter o binário resultante para Base64 (sem quebras de linha)
+        $xmlBase64 = base64_encode($xmlGzip);
+
+        // 4. Montar o JSON exatamente com a propriedade exigida pelo manual
+        $payloadJson = json_encode([
+            'dpsXmlGZipB64' => $xmlBase64
+        ], JSON_UNESCAPED_SLASHES);
+
+        return $this->postDataAdn('nfse', $payloadJson, $origem);
     }
 
     public function cancelaNfse($std)

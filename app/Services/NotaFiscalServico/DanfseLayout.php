@@ -95,7 +95,8 @@ final class DanfseLayout
         ];
 
         $messages = [];
-        $rules = [1.48, 20.34, 6.92];
+        $takerIsEmpty = self::isEmptyPerson($taker);
+        $rules = $takerIsEmpty ? [1.48, 6.92] : [1.48, 20.34, 6.92];
         $y = 6.92;
 
         $y = self::appendPersonBlock(
@@ -107,7 +108,7 @@ final class DanfseLayout
             true,
             'TOMADOR/ADQUIRENTE DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e',
         );
-
+        $takerEnd = $y;
         $rules[] = $y;
 
         $y = self::appendRecipientBlock($cells, $messages, $recipient, $y, (bool) ($data['recipient_is_taker'] ?? false));
@@ -122,6 +123,10 @@ final class DanfseLayout
             true,
             'INTERMEDIÁRIO DA OPERAÇÃO NÃO IDENTIFICADO NA NFS-e',
         );
+
+        if ($takerIsEmpty && !self::isEmptyPerson($intermed)) {
+            $y += 9.0 - $takerEnd;
+        }
 
         $rules[] = $y;
         $cells = [
@@ -211,15 +216,23 @@ final class DanfseLayout
         ];
         $y += 1.37;
 
-        $rules[] = $y + 10;
-        $complementaryTop = $y + 0.41;
+        //$rules[] = $y; //removendo a linha
+        $complementaryTop = $y + 0.90;
+        $footerClass = $takerIsEmpty ? '' : '';
+        $footerTop = 28.10;
+
+        if ($takerIsEmpty) {
+            $rules[] = $y + 0.20;
+        }
+
         $cells = [
             ...$cells,
-            self::sectionCell('Informações Complementares', 0.30, $y, 20.40, 0.39),
-            self::cell('', (string) $data['complementary_info'], 0.30, $complementaryTop, 20.40, max(0.39, 28.08 - $complementaryTop), 'large-text no-label'),
-            self::blankCell('Data Cientificação', 0.30, 28.10, 4.94, 0.67),
-            self::blankCell('Identificação E Assinatura', 5.41, 28.10, 4.94, 0.67),
-            self::cell('Nº NFS-e / Chave NFS-e', (string) $data['canhoto_nfse_key'], 10.51, 28.10, 10.19, 0.67, 'boxed'),
+            self::sectionCell('Informações Complementares', 0.30, $y + 0.20, 20.40),
+            self::cell('', (string) $data['complementary_info'], 0.30, $complementaryTop, 20.40, max(0.39, $footerTop - 0.02 - $complementaryTop), 'large-text no-label'),
+            
+            self::blankCell('Data Cientificação', 0.30, $footerTop, 4.94, 0.67, $footerClass),
+            self::blankCell('Identificação E Assinatura', 5.41, $footerTop, 4.94, 0.67, $footerClass),
+            self::cell('Nº NFS-e / Chave NFS-e', (string) $data['canhoto_nfse_key'], 10.51, $footerTop, 10.19, 0.67, trim('boxed ' . $footerClass)),
         ];
 
         return [
@@ -356,9 +369,9 @@ final class DanfseLayout
     }
 
     /** @return array<string, mixed> */
-    private static function blankCell(string $label, float $x, float $y, float $w, float $h): array
+    private static function blankCell(string $label, float $x, float $y, float $w, float $h, string $class = ''): array
     {
-        $cell = self::cell($label, '-', $x, $y, $w, $h, 'boxed');
+        $cell = self::cell($label, '-', $x, $y, $w, $h, trim('boxed ' . $class));
         $cell['value'] = '';
 
         return $cell;

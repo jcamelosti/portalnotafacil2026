@@ -166,6 +166,10 @@
             border: 0.5pt solid #000;
         }
 
+        .no-top-border {
+            border-top: 0;
+        }
+
         .block-rule {
             border-top: 0.5pt solid #000;
             height: 0;

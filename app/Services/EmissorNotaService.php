@@ -14,7 +14,9 @@ use JCamelo\NfseNacionalLib\Services\NFSeService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
+use JCamelo\NfseNacionalLib\DTO\EnderecoDTO;
 use JCamelo\NfseNacionalLib\DTO\EnderecoObraDTO;
+use JCamelo\NfseNacionalLib\DTO\EventoDTO;
 use JCamelo\NfseNacionalLib\DTO\ObraDataDTO;
 
 class EmissorNotaService
@@ -196,7 +198,34 @@ class EmissorNotaService
             );
         }
 
-        $dados['txtNumeroObras'] = '150';
+        $evento = null;
+        if(
+            isset($dados['nome_evento']) && trim($dados['nome_evento']) !== '' &&
+            isset($dados['dtini_evento']) && trim($dados['dtini_evento']) !== '' &&
+            isset($dados['dtfim_evento']) && trim($dados['dtfim_evento']) !== '' &&
+            isset($dados['txtCepEvento']) && trim($dados['txtCepEvento']) !== '' &&
+            isset($dados['txtEnderecoEvento']) && trim($dados['txtEnderecoEvento']) !== '' &&
+            isset($dados['txtNumeroEvento']) && trim($dados['txtNumeroEvento']) !== '' &&
+            isset($dados['txtComplementoEvento']) && trim($dados['txtComplementoEvento']) !== '' &&
+            isset($dados['txtBairroEvento']) && trim($dados['txtBairroEvento']) !== '' &&
+            isset($dados['txtUFEvento']) && trim($dados['txtUFEvento']) !== '' &&
+            isset($dados['txtCidadeEvento']) && trim($dados['txtCidadeEvento']) !== ''
+        ){
+            $evento = new EventoDTO(
+                xNome: $dados['nome_evento'],
+                dataInicio: $dados['dtini_evento'],
+                dataFim: $dados['dtfim_evento'],
+                end: new EnderecoDTO(
+                    cMun: $dados['txtCidadeEvento'],
+                    CEP: preg_replace('/[^0-9]/', '', $dados['txtCepEvento']),
+                    xLgr: $dados['txtEnderecoEvento'],
+                    nro: $dados['txtNumeroEvento'],
+                    xCpl: $dados['txtComplementoEvento'],
+                    xBairro: $dados['txtBairroEvento'],
+                )
+            );
+        }
+
         $obra = null;
         if(
             isset($dados['txtEnderecoObras']) && !empty($dados['txtEnderecoObras']) &&
@@ -272,8 +301,8 @@ class EmissorNotaService
             //final endereço exterior
 
             //Campos ComExt - Tipo Operaçao Exportação ou quando informando o campo de endereço no exterior
-            comExt: $comExt,            
-
+            comExt: $comExt,
+        
             //dados sobre o serviço
             codigoTributacaoNacional: $dados['cTribNac'],
             codigoServicoMunicipal: $dados['empresa_atividade_id'],
@@ -329,6 +358,8 @@ class EmissorNotaService
 
             //dados da obra
             obra: $obra,
+            //dados do evento
+            atvEvento: $evento
         );
         
         //validar se houver erro voltar para tela de emissão

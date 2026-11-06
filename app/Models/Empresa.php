@@ -183,6 +183,7 @@ class Empresa extends Model
         return [
             '' => 'Nenhum Provedor Selecionado',
             'issnet' => 'Nota Control - ISSNET',
+            'nacional' => 'Ambiente Dados Nacional',
             'outros' => 'Outros Provedores',
         ];
     }

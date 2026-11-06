@@ -54,6 +54,9 @@ class DPSDataSnDTO
         //Nó ComExt
         public readonly ?ComExtDTO $comExt = null,
 
+        //atvEvento
+        public readonly ?EventoDTO $atvEvento = null,
+
         // Serviço
         public readonly string $codigoTributacaoNacional,
         public readonly ?string $codigoServicoMunicipal = null,

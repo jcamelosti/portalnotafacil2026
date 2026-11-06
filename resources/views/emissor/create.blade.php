@@ -96,6 +96,46 @@
                     }
                 });
 
+                $('#txtUFEvento').change(function(e){
+                    if( $(this).val() != '' ) {
+                        e.preventDefault();
+          
+                        $.ajax({
+                            type: 'GET',
+                            url: base_url + '/consultar/cidades/' + $(this).val() + '/json',
+                            dataType: 'json',
+                            cache: false,
+
+                            success: function(data) {
+                                const $cidade = $('#txtCidadeEvento');
+                                $cidade.empty();
+                                $cidade.append(
+                                    $('<option>', {
+                                        value: '',
+                                        text: 'Selecione a Cidade'
+                                    })
+                                );
+
+                                $.each(data, function(index, cidade) {
+                                    $cidade.append(
+                                        $('<option>', {
+                                            value: cidade.codigo,
+                                            text: cidade.municipio
+                                        })
+                                    );
+                                });
+                            },
+
+                            error: function(xhr) {
+                                console.log('ERRO:', xhr);
+                                console.log(xhr.responseText);
+
+                                alert('Verifique os dados Informados e tente novamente.');
+                            }
+                        });
+                    } 
+                });                
+
                 $('#txtUFObras').change(function(e){
                     if( $(this).val() != '' ) {
                         e.preventDefault();
@@ -293,6 +333,10 @@
             var cep = document.querySelector('#txtCepObras');
             VMasker(cep).maskPattern(cepMask[0]);
             cep.addEventListener('input', inputHandler.bind(undefined, cepMask, 14), false);
+
+            var cep = document.querySelector('#txtCepEvento');
+            VMasker(cep).maskPattern(cepMask[0]);
+            cep.addEventListener('input', inputHandler.bind(undefined, cepMask, 14), false);
         </script>
 
         <script type="text/javascript">
@@ -315,6 +359,27 @@
                                     $("#txtBairroObras").val(result.district);//bairro
                                     $("#txtEnderecoObras").val(result.address);
                                     //$('#txtUFObras').val(result.state);
+                                    console.log('Achou o CEP na API CEP.');
+                                } 
+                            }
+                        ).fail(function() {
+                            console.log('Erro API CEP.');
+                            //buscarViaCep(cep);
+                        });
+                    }
+                };
+
+                var consultaCep2 = function(cep){
+                    if(cep != '7500-000' && cep.length >= 9) {
+                        $.getJSON(
+                            "//cdn.apicep.com/file/apicep/" + cep + ".json",
+                            function(result) {
+                                if (result.status === 200) {
+                                    console.log(result);
+                                    $("#txtCidadeEvento").val(result.city).trigger('change');
+                                    $("#txtBairroEvento").val(result.district);//bairro
+                                    $("#txtEnderecoEvento").val(result.address);
+                                    //$('#txtUFEvento').val(result.state);
                                     console.log('Achou o CEP na API CEP.');
                                 } 
                             }
@@ -351,6 +416,37 @@
                         //Valida o formato do CEP.
                         if(validacep.test(cep)) {
                             consultaCep1(valor);
+                        }
+                    }
+                });
+
+
+                $('#txtCepEvento').on('keyup', function(e){
+                    var valor = $(this).val();
+                    //Nova variável "cep" somente com dígitos.
+                    var cep = somenteNumeros(valor);
+
+                    //Verifica se campo cep possui valor informado.
+                    if (cep != "") {
+                        //Expressão regular para validar o CEP.
+                        var validacep = /^[0-9]{8}$/;
+                        //Valida o formato do CEP.
+                        if(validacep.test(cep)) {consultaCep2(valor);}
+                    }
+                });
+
+                $('#txtCepEvento').on('blur', function(e){
+                    var valor = $(this).val();
+                    //Nova variável "cep" somente com dígitos.
+                    var cep = somenteNumeros(valor);
+
+                    //Verifica se campo cep possui valor informado.
+                    if (cep != "") {
+                        //Expressão regular para validar o CEP.
+                        var validacep = /^[0-9]{8}$/;
+                        //Valida o formato do CEP.
+                        if(validacep.test(cep)) {
+                            consultaCep2(valor);
                         }
                     }
                 });

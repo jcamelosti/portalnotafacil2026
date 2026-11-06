@@ -69,6 +69,18 @@ $(document).ready(function () {
     const $txtUFObras           = $('#txtUFObras');
     const $txtComplementoObras  = $('#txtComplementoObras');
 
+    //grupos de eventos
+    const $nomeEvento          = $('#nome_evento');
+    const $dtiniEvento         = $('#dtini_evento');
+    const $dtfimEvento         = $('#dtfim_evento');
+    const $txtCepEvento        = $('#txtCepEvento');
+    const $txtEnderecoEvento   = $('#txtEnderecoEvento');
+    const $txtNumeroEvento     = $('#txtNumeroEvento');
+    const $txtComplementoEvento = $('#txtComplementoEvento');
+    const $txtBairroEvento     = $('#txtBairroEvento');
+    const $txtUFEvento          = $('#txtUFEvento');
+    const $txtCidadeEvento      = $('#txtCidadeEvento');
+
     // ==========================================
     // CONTAINERS
     // ==========================================
@@ -84,6 +96,7 @@ $(document).ready(function () {
     const $divValorCP         = $('#divValorCP');
 
     const $grupoDadosObra     = $('#grupoDadosObra');
+    const $grupoEvento        = $('#grupoEvento');
 
     const cstsCredito = [
         '50', '51', '52', '53', '54', '55', '56',
@@ -963,6 +976,13 @@ $(document).ready(function () {
             '071901'
         ];
 
+        //grupo 12
+        const eventos = [
+            '120801',
+            '120802',
+            '120803',
+        ];
+
         // Remove os pontos
         const codigo = $(this).val().replace(/\./g, '');
 
@@ -988,6 +1008,36 @@ $(document).ready(function () {
             campoNaoObrigatorio($txtUFObras);      
             campoNaoObrigatorio($txtComplementoObras);   
             $grupoDadosObra.hide();
+        }
+
+        //eventos
+        if ($.inArray(codigo, eventos) !== -1) {
+            // É um dos códigos
+            //console.log('Código válido:', codigo);                 
+            $grupoEvento.show();
+            //campoObrigatorio($txtInscImob);        
+            campoObrigatorio($nomeEvento);
+            campoObrigatorio($dtiniEvento);
+            campoObrigatorio($dtfimEvento);
+            campoObrigatorio($txtCepEvento);
+            campoObrigatorio($txtEnderecoEvento);
+            campoObrigatorio($txtNumeroEvento);
+            campoObrigatorio($txtComplementoEvento);
+            campoObrigatorio($txtBairroEvento);
+            campoObrigatorio($txtUFEvento);
+            campoObrigatorio($txtCidadeEvento);
+        }else{
+            campoNaoObrigatorio($nomeEvento);
+            campoNaoObrigatorio($dtiniEvento);
+            campoNaoObrigatorio($dtfimEvento);
+            campoNaoObrigatorio($txtCepEvento);
+            campoNaoObrigatorio($txtEnderecoEvento);
+            campoNaoObrigatorio($txtNumeroEvento);
+            campoNaoObrigatorio($txtComplementoEvento);
+            campoNaoObrigatorio($txtBairroEvento);
+            campoNaoObrigatorio($txtUFEvento);
+            campoNaoObrigatorio($txtCidadeEvento);
+            $grupoEvento.hide();
         }
     });
 
