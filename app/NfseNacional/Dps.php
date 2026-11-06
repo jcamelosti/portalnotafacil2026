@@ -586,12 +586,6 @@ class Dps implements DpsInterface
                 true
             );
         }
-        $this->dom->addChild(
-            $cserv_inner,
-            'xDescServ',
-            $this->std->infdps->serv->cserv->xdescserv,
-            true
-        );
         if (isset($this->std->infdps->serv->cserv->cnbs)) {
             $this->dom->addChild(
                 $cserv_inner,
@@ -600,6 +594,12 @@ class Dps implements DpsInterface
                 true
             );
         }
+        $this->dom->addChild(
+            $cserv_inner,
+            'xDescServ',
+            $this->std->infdps->serv->cserv->xdescserv,
+            true
+        );
         if (isset($this->std->infdps->serv->cserv->cintcontrib)) {
             $this->dom->addChild(
                 $cserv_inner,
@@ -612,98 +612,99 @@ class Dps implements DpsInterface
         //TODO Fazer grupo comExt
         //TODO Fazer grupo lsadppu
         //TODO Fazer grupo obra
-if (isset($this->std->infdps->serv->atvevento)) {
-    $atvEvento_inner = $this->dom->createElement('atvEvento');
-    $serv_inner->appendChild($atvEvento_inner);
+        if (isset($this->std->infdps->serv->atvevento)) {
+            $atvEvento_inner = $this->dom->createElement('atvEvento');
+            $serv_inner->appendChild($atvEvento_inner);
 
-    // Campo: xNome
-    if (isset($this->std->infdps->serv->atvevento->xnome)) {
-        $this->dom->addChild(
-            $atvEvento_inner,
-            'xNome',
-            $this->std->infdps->serv->atvevento->xnome,
-            true
-        );
-    }
+            // Campo: xNome
+            if (isset($this->std->infdps->serv->atvevento->xnome)) {
+                $this->dom->addChild(
+                    $atvEvento_inner,
+                    'xNome',
+                    $this->std->infdps->serv->atvevento->xnome,
+                    true
+                );
+            }
 
-    // Campo: dtIni
-    if (isset($this->std->infdps->serv->atvevento->dtini)) {
-        $this->dom->addChild(
-            $atvEvento_inner,
-            'dtIni',
-            $this->std->infdps->serv->atvevento->dtini,
-            true
-        );
-    }
+            // Campo: dtIni
+            if (isset($this->std->infdps->serv->atvevento->dtini)) {
+                $this->dom->addChild(
+                    $atvEvento_inner,
+                    'dtIni',
+                    $this->std->infdps->serv->atvevento->dtini,
+                    true
+                );
+            }
 
-    // Campo: dtFim
-    if (isset($this->std->infdps->serv->atvevento->dtfim)) {
-        $this->dom->addChild(
-            $atvEvento_inner,
-            'dtFim',
-            $this->std->infdps->serv->atvevento->dtfim,
-            true
-        );
-    }
+            // Campo: dtFim
+            if (isset($this->std->infdps->serv->atvevento->dtfim)) {
+                $this->dom->addChild(
+                    $atvEvento_inner,
+                    'dtFim',
+                    $this->std->infdps->serv->atvevento->dtfim,
+                    true
+                );
+            }
 
-    // Endereço do evento
-    if (isset($this->std->infdps->serv->atvevento->end)) {
-        $end_evento_inner = $this->dom->createElement('end');
-        $atvEvento_inner->appendChild($end_evento_inner);
+            // Endereço do evento
+            if (isset($this->std->infdps->serv->atvevento->end)) {
+                $end_evento_inner = $this->dom->createElement('end');
+                $atvEvento_inner->appendChild($end_evento_inner);
 
-        if (isset($this->std->infdps->serv->atvevento->end->cep)) {
-            $this->dom->addChild(
-                $end_evento_inner,
-                'CEP',
-                $this->std->infdps->serv->atvevento->end->cep,
-                true
-            );
+                if (isset($this->std->infdps->serv->atvevento->end->cep)) {
+                    $this->dom->addChild(
+                        $end_evento_inner,
+                        'CEP',
+                        $this->std->infdps->serv->atvevento->end->cep,
+                        true
+                    );
+                }
+
+                if (isset($this->std->infdps->serv->atvevento->end->xlgr)) {
+                    $this->dom->addChild(
+                        $end_evento_inner,
+                        'xLgr',
+                        $this->std->infdps->serv->atvevento->end->xlgr,
+                        true
+                    );
+                }
+
+                if (isset($this->std->infdps->serv->atvevento->end->nro)) {
+                    $this->dom->addChild(
+                        $end_evento_inner,
+                        'nro',
+                        $this->std->infdps->serv->atvevento->end->nro,
+                        true
+                    );
+                }
+
+                if (isset($this->std->infdps->serv->atvevento->end->xbairro)) {
+                    $this->dom->addChild(
+                        $end_evento_inner,
+                        'xBairro',
+                        $this->std->infdps->serv->atvevento->end->xbairro,
+                        true
+                    );
+                }
+            }
         }
-
-        if (isset($this->std->infdps->serv->atvevento->end->xlgr)) {
-            $this->dom->addChild(
-                $end_evento_inner,
-                'xLgr',
-                $this->std->infdps->serv->atvevento->end->xlgr,
-                true
-            );
-        }
-
-        if (isset($this->std->infdps->serv->atvevento->end->nro)) {
-            $this->dom->addChild(
-                $end_evento_inner,
-                'nro',
-                $this->std->infdps->serv->atvevento->end->nro,
-                true
-            );
-        }
-
-        if (isset($this->std->infdps->serv->atvevento->end->xbairro)) {
-            $this->dom->addChild(
-                $end_evento_inner,
-                'xBairro',
-                $this->std->infdps->serv->atvevento->end->xbairro,
-                true
-            );
-        }
-    }
-}
         //TODO Fazer grupo explRod
+
         //TODO Fazer grupo infoCompl
-
-
-        if (isset($this->std->infdps->serv->infocompl->xinfcomp)) {
+        if (isset($this->std->infdps->serv->cserv->infocompl)) {
             $infocompl_inner = $this->dom->createElement('infoCompl');
             $serv_inner->appendChild($infocompl_inner);
 
-            $this->dom->addChild(
-                $cserv_inner,
-                'cTribNac',
-                $this->std->infdps->serv->infocompl->xinfcomp,
-                true
-            );
+            if(isset($this->std->infdps->serv->cserv->infocompl->xinfcomp) || strlen($this->std->infdps->serv->cserv->infocompl->xinfcomp) > 0){
+                $this->dom->addChild(
+                    $infocompl_inner,
+                    'xInfComp',
+                    $this->std->infdps->serv->cserv->infocompl->xinfcomp,
+                    true
+                );
+            }
         }
-
+        
         $valores_inner = $this->dom->createElement('valores');
         $infdps_inner->appendChild($valores_inner);
         $vservprest_inner = $this->dom->createElement('vServPrest');
@@ -747,7 +748,21 @@ if (isset($this->std->infdps->serv->atvevento)) {
             );
         }
 
-        if ($this->std->infdps->valores->trib->tribmun->tpretissqn !== '1' && isset($this->std->infdps->valores->trib->tribmun->paliq)) {
+        if (
+            $this->std->infdps->prest->regtrib->opsimpnac == 3 &&
+            $this->std->infdps->prest->regtrib->regaptribsn == 1 &&
+            $this->std->infdps->valores->trib->tribmun->tpretissqn == 1
+        ) {
+            $informarAliquota = false;
+        }else{
+            $informarAliquota = true;
+        }
+        
+        if (
+            $this->std->infdps->valores->trib->tribmun->tpretissqn !== '1' && 
+            isset($this->std->infdps->valores->trib->tribmun->paliq) 
+            && $informarAliquota
+        ) {
             $this->dom->addChild(
                 $tribmun_inner,
                 'pAliq',
@@ -755,7 +770,6 @@ if (isset($this->std->infdps->serv->atvevento)) {
                 true
             );
         }
-
 
         if (isset($this->std->infdps->valores->trib->tribfed)) {
             $tribfed_inner = $this->dom->createElement('tribFed');
@@ -915,21 +929,21 @@ if (isset($this->std->infdps->serv->atvevento)) {
             $ibscbs_inner = $this->dom->createElement('IBSCBS');
             $infdps_inner->appendChild($ibscbs_inner);
 
-            if(isset($this->std->infdps->ibscbs->finnfse) && $this->std->infdps->ibscbs->finnfse !== '') {
+            /*if(isset($this->std->infdps->ibscbs->finnfse) && $this->std->infdps->ibscbs->finnfse !== '') {
                 $this->dom->addChild(
                     $ibscbs_inner,
                     'finNFSe',
                     $this->std->infdps->ibscbs->finnfse,
                     true
                 );
-            }
+            }*/
 
-            /*$this->dom->addChild(
+            $this->dom->addChild(
                 $ibscbs_inner,
                 'indFinal',
                 $this->std->infdps->ibscbs->indfinal,
                 true
-            );*/
+            );
 
             $this->dom->addChild(
                 $ibscbs_inner,
@@ -1129,7 +1143,7 @@ if (isset($this->std->infdps->serv->atvevento)) {
                     );
                 }
 
-                if(isset($this->std->infdps->ibscbs)){
+                /*if(isset($this->std->infdps->ibscbs)){
                     $ibscbs_valores_trib_gibscbs_inner = $this->dom->createElement('gIBSCBS');
                     $ibscbs_valores_trib_inner->appendChild($ibscbs_valores_trib_gibscbs_inner);
 
@@ -1149,7 +1163,7 @@ if (isset($this->std->infdps->serv->atvevento)) {
                             true
                         );
                     }
-                }
+                }*/
 
 
 //                if (isset($this->std->infdps->ibscbs->valores->trib->gibscbs->ccredpres)) {

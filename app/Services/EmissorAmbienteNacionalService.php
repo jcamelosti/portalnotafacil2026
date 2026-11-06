@@ -318,7 +318,7 @@ class EmissorAmbienteNacionalService
             //issqn
             tributaIss: $dados['ddlTribISSQN'],
             tipoRetencaoIss: $dados['ddlTipoRetencao'] ?? null,
-            aliquotaIss: $dados['txtAliquota'],//string '2.5'
+            aliquotaIss: number_format($dados['txtAliquota'] ?? null, 2, '.', ''),//string '2.5'
             
             cstPisCofins: $dados['ddlSitTribFederal'],
             //vBCPisCofins
@@ -399,13 +399,14 @@ class EmissorAmbienteNacionalService
             $dom->loadXML($xml);
 
             // 6. Exibe o XML formatado
-            //var_dump($dom->saveXML());
-            //exit;
+            /*var_dump($dom->saveXML());
+            exit;*/
             Log::info("NFSE ADN");
             Log::info($dom->saveXML());
             //exit;
             
             $response = $tools->enviaDpsAdn($dps->render(), 1);//2 para adn, 1 sefin -> 1 é padrão
+            
             Log::info($response);
             
             if (isset($response['nfseXmlGZipB64'])) {
@@ -580,16 +581,22 @@ class EmissorAmbienteNacionalService
         $std->infDPS->serv = new \stdClass();
         $std->infDPS->serv->locPrest = new \stdClass();
         $std->infDPS->serv->locPrest->cLocPrestacao = $dados->localPrestacaoMunicipio;// Código da localidade da prestação do serviço.
-
+        
         $std->infDPS->serv->cServ = new \stdClass();
         $std->infDPS->serv->cServ->cTribNac = $dados->codigoTributacaoNacional;//Código de tributação Nacional
-        //$std->infDPS->serv->cServ->cTribMun = ''; //Código de tributação municipal do ISSQN.
+        //$std->infDPS->serv->cServ->cTribMun = $dados->codigoServicoMunicipal; //Código de tributação municipal do ISSQN.
         $std->infDPS->serv->cServ->xDescServ = $dados->descricaoServico;
 
         //if ((int) (getenv('LOCAL_ENV') ?: 0) === 0) { //não enviar em homologacao
             $std->infDPS->serv->cServ->cNBS = $dados->codigoNbs;//'122051900';// Código NBS correspondente ao serviço prestado
         //}
         //$std->infDPS->serv->cServ->cIntContrib = str_pad($servico->id, 5, '0', STR_PAD_LEFT);;// Código interno do contribuinte - Utilizado para identificação da DPS no Sistema interno do Contribuinte
+
+        /*
+        Informação Complementar
+        */
+        $std->infDPS->serv->cServ->infoCompl = new \stdClass();
+        $std->infDPS->serv->cServ->infoCompl->xInfComp = $dados->informacaoComplementar;
 
         /*
             VALORES
@@ -619,24 +626,22 @@ class EmissorAmbienteNacionalService
         $std->infDPS->valores->trib->tribFed->piscofins->paliqcofins = $dados->aliquotaCofins ?? null;
         $std->infDPS->valores->trib->tribFed->piscofins->tpretpiscofins = $dados->tipoRetencaoPisCofins;
 
-        
+        $retencoes = Utilitarios::obterTributosRetidos($dados->tipoRetencaoPisCofins);
+
         $std->infDPS->valores->trib->tribFed->vretcp = $dados->valorRetencaoCp;
         $std->infDPS->valores->trib->tribFed->vretirrf = $dados->valorRetencaoIrrf;
-        $std->infDPS->valores->trib->tribFed->vretcsll = $dados->valorRetencaoCsll;
-        
-        if($dados->tipoInfoTributos != 1){
 
-        }else{
-
+        if($retencoes['csll']){
+            $std->infDPS->valores->trib->tribFed->vretcsll = $dados->valorRetencaoCsll;
         }
-
+                
         //campos ibs/cbs
         //dd($dados);
         $std->infDPS->ibscbs = new \stdClass();
         if ((int) (getenv('LOCAL_ENV') ?: 0) === 0) {
             $std->infDPS->ibscbs->finNFSe = 0;
         }
-        //$std->infDPS->ibscbs->indfinal = 0;
+        $std->infDPS->ibscbs->indfinal = 0;
         $std->infDPS->ibscbs->cIndOp = $dados->cIndOp;
         $std->infDPS->ibscbs->indDest = 0;//0 – o destinatário é o próprio tomador/adquirente identificado na NFS-e (tomador = adquirente = destinatário);
 

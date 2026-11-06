@@ -401,7 +401,7 @@ class NotaController extends Controller
             $dados = $request->except('_token');
 
             $dados = $this->notaBO->tratarDados($dados);
-
+            
             if( $empresaSessao->sigla_provedor == 'issnet' ){
                 $retorno = $this->emissorService->emitir($dados);
             }elseif( $empresaSessao->sigla_provedor == 'nacional' ){

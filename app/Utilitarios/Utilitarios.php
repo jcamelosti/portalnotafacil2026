@@ -95,7 +95,8 @@ class Utilitarios
             'txtMunicipal',
             'percentualTribFederal',
             'percentualTribEstadual',
-            'percentualTribMunicipal'
+            'percentualTribMunicipal',
+            'aliquotaIss'
         ];
 
         $semPontuacao = [
@@ -363,5 +364,27 @@ class Utilitarios
         $valor = str_replace(',', '.', $valor);
 
         return $valor;
+    }
+
+    public static function obterTributosRetidos(int $tipo): array
+    {
+        $regras = [
+            '0' => ['pis' => false, 'cofins' => false, 'csll' => false],
+            '1' => ['pis' => true,  'cofins' => true,  'csll' => false],
+            '2' => ['pis' => false, 'cofins' => false, 'csll' => false],
+            '3' => ['pis' => true,  'cofins' => true,  'csll' => true],
+            '4' => ['pis' => true,  'cofins' => true,  'csll' => false],
+            '5' => ['pis' => true,  'cofins' => false, 'csll' => false],
+            '6' => ['pis' => false, 'cofins' => true,  'csll' => false],
+            '7' => ['pis' => false, 'cofins' => true,  'csll' => true],
+            '8' => ['pis' => false, 'cofins' => false, 'csll' => true],
+            '9' => ['pis' => true,  'cofins' => false, 'csll' => true],
+        ];
+
+        return $regras[(string) $tipo] ?? [
+            'pis' => false,
+            'cofins' => false,
+            'csll' => false,
+        ];
     }
 }
