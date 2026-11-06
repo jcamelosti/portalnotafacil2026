@@ -136,6 +136,7 @@ class EmissorAmbienteNacionalService
     }
 
     public function emitir($dados){
+        $dados_form_original = $dados;
         $empresa = $this->empresaModel->with(['atividadesEmpresa'])
             ->find(Session::get('empresa_selecionada'));
 
@@ -430,7 +431,7 @@ class EmissorAmbienteNacionalService
                     'nfse_xml'   => $xmlNfse,
                     'num_nfse'   => $nNFSe,
                     'valor'      => $totalNfse,
-                    'dados_emissao' => $dados,
+                    'dados_emissao' => $dados_form_original,
                     'chave' => $response['chaveAcesso']
                 ]);
 

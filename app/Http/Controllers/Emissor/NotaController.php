@@ -619,6 +619,11 @@ class NotaController extends Controller
 
         //dados da nota a ser duplicada
         $nota = $nota->dados_emissao;
+
+        if(!isset($nota['txtTotal'])){
+            session()->flash('danger', 'Não foi possível duplicar está Nota.');
+            return redirect()->back();
+        }
         
         $nota['txtTotal'] = number_format($nota['txtTotal'], 2, ',', '.');
         if($nota['txtDeducaoBaseCalculo'] > 0){

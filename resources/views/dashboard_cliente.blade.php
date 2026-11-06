@@ -7,8 +7,6 @@
             Painel de Administração de Empresa
         </h2>
 
-        @include('components.mensagens')
-
         <div class="mb-6">
             <h2 class="text-lg font-semibold">
                 {{ $empresa->razao_social }} - {{ $empresa->cpf_cnpj_fmt }}
