@@ -400,8 +400,8 @@ class EmissorAmbienteNacionalService
             $dom->loadXML($xml);
 
             // 6. Exibe o XML formatado
-            /*var_dump($dom->saveXML());
-            exit;*/
+            //var_dump($dom->saveXML());
+            //exit;
             Log::info("NFSE ADN");
             Log::info($dom->saveXML());
             //exit;
@@ -629,8 +629,13 @@ class EmissorAmbienteNacionalService
 
         $retencoes = Utilitarios::obterTributosRetidos($dados->tipoRetencaoPisCofins);
 
-        $std->infDPS->valores->trib->tribFed->vretcp = $dados->valorRetencaoCp;
-        $std->infDPS->valores->trib->tribFed->vretirrf = $dados->valorRetencaoIrrf;
+        if(floatval($dados->valorRetencaoCp) > 0){
+            $std->infDPS->valores->trib->tribFed->vretcp = $dados->valorRetencaoCp;
+        }
+        
+        if(floatval($dados->valorRetencaoIrrf) > 0){
+            $std->infDPS->valores->trib->tribFed->vretirrf = $dados->valorRetencaoIrrf;
+        }
 
         if($retencoes['csll']){
             $std->infDPS->valores->trib->tribFed->vretcsll = $dados->valorRetencaoCsll;
@@ -650,12 +655,13 @@ class EmissorAmbienteNacionalService
         $std->infDPS->ibscbs->valores = new \stdClass();
         $std->infDPS->ibscbs->valores->trib = new \stdClass();
 
-        $std->infDPS->ibscbs->valores->trib->cClassTrib = $dados->cClassTrib;
-        $std->infDPS->ibscbs->valores->trib->cst = $dados->cstIbsCbs;
+        //errado em produção
+        //$std->infDPS->ibscbs->valores->trib->cClassTrib = $dados->cClassTrib;
+        //$std->infDPS->ibscbs->valores->trib->cst = $dados->cstIbsCbs;
                
-        /*$std->infDPS->ibscbs->valores->trib->gibscbs = new \stdClass();
+        $std->infDPS->ibscbs->valores->trib->gibscbs = new \stdClass();
         $std->infDPS->ibscbs->valores->trib->gibscbs->cClassTrib = $dados->cClassTrib;
-        $std->infDPS->ibscbs->valores->trib->gibscbs->cst = $dados->cstIbsCbs;*/
+        $std->infDPS->ibscbs->valores->trib->gibscbs->cst = $dados->cstIbsCbs;
         
         //<!-- Demais campos dependem do gTribRegular ou outros regimes -->
         /*
