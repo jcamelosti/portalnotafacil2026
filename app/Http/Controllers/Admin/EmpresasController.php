@@ -12,6 +12,7 @@ use App\Models\EndPoint;
 use App\Models\License;
 use App\Models\Municipio;
 use App\Models\Nbs;
+use App\Models\NotaEmitida;
 use App\Models\Plano;
 use App\Models\Tomador;
 use App\Models\Uf;
@@ -255,25 +256,22 @@ class EmpresasController extends Controller
         $dados = $request->all();
         
         $empresa = $this->empresaModel->find($id); 
-        
         if($dados['is_optante_simples_nac'] == 1){
             $dados['op_simp_nac'] = 3;
-            $dados['tp_reg_apuracao_sn'] = "1";
+            //$dados['tp_reg_apuracao_sn'] = "1";
 
             if($dados['is_mei'] != "0"){
                 $dados['op_simp_nac'] = 2;
             }
         }
 
+
         $empresa->update($dados);
 
-        $provedor = EndPoint::where('codigo_municipio', $empresa->cidade_id)->first();
-
-        if(is_null($provedor) || ($provedor->provedor !== 'issnet') && $empresa->sigla_provedor !== 'issnet' ){
-            //$this->saveOrUpdateSpedy($empresa);
-            //$this->saveOrUpdateFocuNfe($empresa);
+        //$provedor = EndPoint::where('codigo_municipio', $empresa->cidade_id)->first();
+        if($empresa->sigla_provedor == 'outros'){
             try {
-                $this->provedorNfseService->salvar($empresa, 'focunfe');
+                //$this->provedorNfseService->salvar($empresa, 'focunfe');
                 Utilitarios::sendMessage("Empresa sincronizada na FocuNFe " . $empresa->razao_social);
             } catch (\Throwable $e) {
                 Log::error('Erro ao sincronizar empresa com provedor NFS-e', [
@@ -281,9 +279,8 @@ class EmpresasController extends Controller
                     'erro' => $e->getMessage(),
                 ]);
 
-                return back()->withErrors([
-                    'provedor' => 'Não foi possível sincronizar a empresa com o provedor de NFS-e.',
-                ]);
+                //return back()->withErrors(['provedor' => 'Não foi possível sincronizar a empresa com o provedor de NFS-e.',]);
+                session()->flash('info', 'Não foi possível sincronizar a empresa com o provedor de NFS-e.');
             }
         }
         

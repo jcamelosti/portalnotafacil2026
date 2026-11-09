@@ -131,6 +131,10 @@
                 </a>
             @endif
 
+            <a href="{{ route('servicos-mei.duplicar', $servico) }}"
+                class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm">
+                Duplicar
+            </a>
         </div>
 
         {{-- DATAS --}}

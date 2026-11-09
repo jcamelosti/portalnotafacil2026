@@ -151,6 +151,8 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
                 Route::get('servicos/show/{servico}', [NfseNacional::class, 'exibir'])->name('servicos-mei.show');
                 Route::delete('servicos/destroy/{id}', [NfseNacional::class, 'destroy'])->name('servicos-mei.destroy');
 
+                Route::get('servicos/duplicar/{servico}', [NfseNacional::class, 'duplicar'])->name('servicos-mei.duplicar');
+
                 Route::post('servicos/transmitir/{servico}', [NfseNacional::class, 'transmitir'])->name('servicos-mei.transmitir');
                 Route::get('servicos/danfe/{servico}', [NfseNacional::class, 'danfe'])->name('servicos-mei.danfe');
             });        

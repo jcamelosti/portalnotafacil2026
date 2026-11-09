@@ -110,6 +110,20 @@ class NfseNacional extends Controller
         ], 202);
     }
 
+    public function duplicar(Servico $servico){
+        $novoServico = $servico->replicate();
+
+        $novoServico->created_at = now();
+        $novoServico->updated_at = null;
+        $novoServico->chave_nfse = null;
+        $novoServico->data_emissao = null;
+
+        $novoServico->save();
+        session()->flash('success', 'Serviço duplicado com sucesso!');
+        return redirect()
+            ->route('servicos-mei.editar', $novoServico->id);
+    }
+
     public function index(Request $request){
         $campos = $request->all();
         $tomadoresList = $this->tomadoresModel
