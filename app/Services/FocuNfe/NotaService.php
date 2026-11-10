@@ -6,6 +6,8 @@ use App\Models\Empresa;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use RuntimeException;
 
 class NotaService
@@ -49,9 +51,24 @@ class NotaService
                 ? $e->getResponse()->getBody()->getContents()
                 : null;
 
-            throw new RuntimeException(
+            /*throw new RuntimeException(
                 'Erro ao Emitir NFSe no Portal Nota Fácil: ' .
                 ($body ?: $e->getMessage()),
+                $e->getCode(),
+                $e
+            );*/
+
+            $mensagemErro = $body ?: $e->getMessage();
+            $mensagemErro = str_ireplace(
+                'focusnfe.com.br',
+                'portalnotafacil.com.br',
+                $mensagemErro
+            );
+            
+            Log::info($mensagemErro);
+
+            throw new RuntimeException(
+                'Erro ao Emitir NFSe no Portal Nota Fácil: ' . $mensagemErro,
                 $e->getCode(),
                 $e
             );

@@ -26,10 +26,12 @@
                    class="inline-flex justify-center rounded-md border border-blue-700 px-4 py-2 bg-white text-sm font-medium text-gray-700 shadow-sm hover:text-gray-500">
                     Cadastro de NBS
                 </a>
+                @if($empresa->sigla_provedor == 'issnet')
                 <a href="{{ route('empresas.sincDataIssNet', $empresa->id) }}"
                    class="inline-flex justify-center rounded-md border border-blue-700 px-4 py-2 bg-white text-sm font-medium text-gray-700 shadow-sm hover:text-gray-500">
                     Sinc. Dados Cadastrais ISSNet
                 </a>
+                @endif
             </div>
         </div>
 

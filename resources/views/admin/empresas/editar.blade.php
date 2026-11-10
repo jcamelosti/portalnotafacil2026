@@ -38,10 +38,12 @@
                     Cadastro de NBS
                 </a>
 
+                @if($empresa->sigla_provedor == 'issnet')
                 <a href="{{ route('empresas.sincDataIssNet', $empresa->id) }}"
                    class="px-4 py-2 border border-blue-700 bg-white text-sm rounded hover:text-gray-500">
                     Sinc. Dados Cadastrais
                 </a>
+                @endif
 
                 <!--a href="{{ route('admin.empresas.dados-receita', $empresa->id) }}"
                    class="px-4 py-2 border border-blue-700 bg-white text-sm rounded hover:text-gray-500">

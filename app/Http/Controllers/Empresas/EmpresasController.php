@@ -208,6 +208,23 @@ class EmpresasController extends Controller
             return redirect()->back();
         }
 
+        /*if($dados['is_optante_simples_nac'] == 1){
+            $dados['op_simp_nac'] = 3;
+            $dados['regime_tributario'] = 'simples';
+            $dados['regime'] = 'simplesNacional';
+            
+            if($dados['is_mei'] != "0"){
+                $dados['op_simp_nac'] = 2;
+                $dados['regime_tributario'] = 'mei';
+                $dados['regime'] = 'simplesNacionalMEI';
+            }
+            $dados['regime'] = '-';
+        }else{
+            $dados['op_simp_nac'] = 1;
+            $dados['regime'] = 'regimeNormal';
+            $dados['regime_tributario'] = 'normal';
+        }*/
+
         $empresa = $this
             ->empresaModel
             ->create($dados);
@@ -328,6 +345,23 @@ class EmpresasController extends Controller
         $dados = $request->all();
         $userId = Auth::user()->id;
         $empresa = $this->empresaModel->find($id);
+
+        /*if($dados['is_optante_simples_nac'] == 1){
+            $dados['op_simp_nac'] = 3;
+            $dados['regime_tributario'] = 'simples';
+            $dados['regime'] = 'simplesNacional';
+            
+            if($dados['is_mei'] != "0"){
+                $dados['op_simp_nac'] = 2;
+                $dados['regime_tributario'] = 'mei';
+                $dados['regime'] = 'simplesNacionalMEI';
+            }
+            $dados['regime'] = '-';
+        }else{
+            $dados['op_simp_nac'] = 1;
+            $dados['regime'] = 'regimeNormal';
+            $dados['regime_tributario'] = 'normal';
+        }*/
 
         $empresaCompartilhada = $this->empresaCompartilhadaModel->where('empresa_id', $id)
             ->where('autorizado', 'S')
