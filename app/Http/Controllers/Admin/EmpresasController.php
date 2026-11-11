@@ -278,7 +278,7 @@ class EmpresasController extends Controller
         //$provedor = EndPoint::where('codigo_municipio', $empresa->cidade_id)->first();
         if($empresa->sigla_provedor == 'outros'){
             try {
-                //$this->provedorNfseService->salvar($empresa, 'focunfe');
+                $this->provedorNfseService->salvar($empresa, 'focunfe');
                 Utilitarios::sendMessage("Empresa sincronizada na FocuNFe " . $empresa->razao_social);
             } catch (\Throwable $e) {
                 Log::error('Erro ao sincronizar empresa com provedor NFS-e', [
@@ -303,50 +303,139 @@ class EmpresasController extends Controller
      */
     public function destroy($id)
     {
-        try{
-            $empresa = $this->empresaModel->find($id);
-            $cnaes = $this->cnaeModel->where('empresa_id', $id)->get();
-            $atividades = $this->atividadeModel->where('empresa_id', $id)->get();
-            $licenca = $this->licenseModel->where('empresa_id', $id)->get();
-            $tomadores = Tomador::where('empresa_id', $id)->get();
-            $notas = NotaEmitida::where('empresa_id', $id)->get();
-        
-            /*foreach($notas as $n){
-                $n->delete();
+        $empresaId = $id; 
+        return DB::transaction(function () use ($empresaId) {
+
+            // Verifica e bloqueia a empresa durante a operação
+            $empresa = DB::table('empresas')
+                ->where('id', $empresaId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$empresa) {
+                /*throw new \RuntimeException(
+                    "Empresa {$empresaId} não encontrada."
+                );*/
+                session()->flash('info', "Empresa {$empresaId} não encontrada.");
+                return redirect()->route('admin.empresas.index');
             }
 
-            foreach($tomadores as $t){
-                $t->delete();
+            $database = DB::getDatabaseName();
+
+            // Identifica todas as tabelas que possuem empresa_id
+            $tabelas = DB::table('information_schema.columns')
+                ->select('TABLE_NAME')
+                ->where('TABLE_SCHEMA', $database)
+                ->where('COLUMN_NAME', 'empresa_id')
+                ->distinct()
+                ->pluck('TABLE_NAME')
+                ->toArray();
+
+            // Identifica os relacionamentos entre as tabelas
+            $relacionamentos = DB::table(
+                'information_schema.KEY_COLUMN_USAGE'
+            )
+                ->select([
+                    'TABLE_NAME as tabela_filha',
+                    'REFERENCED_TABLE_NAME as tabela_pai',
+                ])
+                ->where('TABLE_SCHEMA', $database)
+                ->whereNotNull('REFERENCED_TABLE_NAME')
+                ->get();
+
+            $conjunto = array_flip($tabelas);
+
+            // Grafo: tabela filha -> tabela pai
+            $grafo = [];
+            $grauEntrada = [];
+
+            foreach ($tabelas as $tabela) {
+                $grafo[$tabela] = [];
+                $grauEntrada[$tabela] = 0;
             }
 
-            foreach($cnaes as $cnae){
-                $cnae->delete();
+            foreach ($relacionamentos as $relacao) {
+
+                $filha = $relacao->tabela_filha;
+                $pai = $relacao->tabela_pai;
+
+                if (
+                    isset($conjunto[$filha]) &&
+                    isset($conjunto[$pai])
+                ) {
+                    if (!in_array($pai, $grafo[$filha])) {
+                        $grafo[$filha][] = $pai;
+                        $grauEntrada[$pai]++;
+                    }
+                }
             }
 
-            foreach($atividades as $atv){
-                $atv->delete();
-            }
-            
-            foreach($licenca as $l){
-                $l->delete();
-            }
+            // Ordenação topológica: filhos antes dos pais
+            $fila = [];
 
-            $faturas = Fatura::where('empresa_id', $empresa->id)->get();
-            
-            foreach ($faturas as $fat) {
-                FaturaItem::where('fatura_id', $fat->id)->delete();
+            foreach ($grauEntrada as $tabela => $grau) {
+                if ($grau === 0) {
+                    $fila[] = $tabela;
+                }
             }
 
-            Fatura::where('empresa_id', $empresa->id)->delete();
+            $ordem = [];
 
-            $empresa->delete();*/
-        }catch(\Exception $e){
-            dd($e->getMessage() . ' ' . $e->getLine());
-        }
+            while (!empty($fila)) {
 
-        session()->flash('message', 'Registro Removido com Sucesso.');
+                $tabela = array_shift($fila);
 
-        return redirect()->route('admin.empresas.index');
+                $ordem[] = $tabela;
+
+                foreach ($grafo[$tabela] as $pai) {
+
+                    $grauEntrada[$pai]--;
+
+                    if ($grauEntrada[$pai] === 0) {
+                        $fila[] = $pai;
+                    }
+                }
+            }
+
+            // Impede exclusão caso existam dependências cíclicas
+            if (count($ordem) !== count($tabelas)) {
+                throw new \RuntimeException(
+                    'Não foi possível determinar a hierarquia das tabelas. '
+                    . 'Existem relacionamentos cíclicos.'
+                );
+            }
+
+            $exclusoes = [];
+
+            // Exclui os registros filhos primeiro
+            foreach ($ordem as $tabela) {
+
+                $quantidade = DB::table($tabela)
+                    ->where('empresa_id', $empresaId)
+                    ->delete();
+
+                $exclusoes[$tabela] = $quantidade;
+            }
+
+            // Exclui a empresa por último
+            $exclusoes['empresas'] = DB::table('empresas')
+                ->where('id', $empresaId)
+                ->delete();
+
+            /*return [
+                'empresa_id' => $empresaId,
+                'sucesso' => true,
+                'exclusoes' => $exclusoes,
+                'total_registros' => array_sum($exclusoes),
+            ];*/
+
+            session()->flash('message', 'Registro Removido com Sucesso.');
+            return redirect()->route('admin.empresas.index');
+        });
+
+        //session()->flash('message', 'Registro Removido com Sucesso.');
+
+        //return redirect()->route('admin.empresas.index');
     }
 
     public function atualizarRegimeEspecial($id)

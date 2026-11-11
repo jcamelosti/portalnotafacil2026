@@ -36,8 +36,12 @@
 
                         <tr class="{{ $vencida ? 'table-danger' : '' }}">
                             <td>{{ $idx + 1 }}</td>
-                            <td>{{ $empresa->id }}</td>
-
+                            <td>
+                                <a href="{{ route('admin.empresas.remover-dados', $empresa->id) }}"
+                                class="inline-block">
+                                    {{ $empresa->id }}
+                                </a>
+                            </td>
                             <td>
                                 <div class="fw-semibold">
                                     {{ $empresa->razao_social }}

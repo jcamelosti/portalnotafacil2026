@@ -171,7 +171,7 @@ class ProvedorNfseService
             'simplesNacionalMEI' => 4,
             default => 1,
         };
-
+        
         $dados = [
             'nome' => $empresa->razao_social,
             'nome_fantasia' => $empresa->nome_fantasia,
@@ -189,11 +189,11 @@ class ProvedorNfseService
             'uf' => $estado->sigla,
             'habilita_nfse' => true,
 
-            'proximo_numero_nfse_producao' => null,
-            'serie_nfse_producao' => null,
+            'proximo_numero_nfse_producao' => $empresa->num_ultimo_dps + 1,
+            'serie_nfse_producao' => $empresa->serie_dps,
 
-            'proximo_numero_nfse_homologacao' => '7',
-            'serie_nfse_homologacao' => '0008',
+            'proximo_numero_nfse_homologacao' => '1',
+            'serie_nfse_homologacao' => '1',
         ];
 
         $certificado = $empresa->certificado->where('empresa_id', $empresa->id)->first();

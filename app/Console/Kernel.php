@@ -25,11 +25,12 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         // $schedule->command('inspire')->hourly();
-        //$schedule->command('consultar-status-notas:cron')->everyMinute();
-        //$schedule->command('delete_bills_expired:cron')->everyMinute();
-        //$schedule->command('remover-notas-antigas:cron')->everyMinute();
-        //$schedule->command('send-email-alert-licence:cron')->dailyAt('09:00');
-        //$schedule->command('send-email-alert-licence:cron')->everyMinute();
+
+        $schedule->command('send-email-alert-licence:cron')->dailyAt('09:00');
+          // Executar todo dia às 02:00
+        $schedule->command('empresas:excluir-licencas-vencidas --dias=90')
+            ->dailyAt('02:00')
+            ->withoutOverlapping();
     }
 
     /**
