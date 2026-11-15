@@ -15,8 +15,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use JCamelo\NfseNacionalLib\DTO\EnderecoDTO;
+use JCamelo\NfseNacionalLib\DTO\EnderecoImovelDTO;
 use JCamelo\NfseNacionalLib\DTO\EnderecoObraDTO;
 use JCamelo\NfseNacionalLib\DTO\EventoDTO;
+use JCamelo\NfseNacionalLib\DTO\ImovelDataDTO;
 use JCamelo\NfseNacionalLib\DTO\ObraDataDTO;
 
 class EmissorNotaService
@@ -249,7 +251,30 @@ class EmissorNotaService
                 )
             );
         }
-        
+
+        $imovelData = null;
+        if(
+            isset($dados['txtEnderecoImovel']) && !empty($dados['txtEnderecoImovel']) &&
+            //isset($dados['txtNumeroImovel']) && !empty($dados['txtNumeroImovel']) &&
+            isset($dados['txtComplementoImovel']) && !empty($dados['txtComplementoImovel']) &&
+            isset($dados['txtUFImovel']) && !empty($dados['txtUFImovel']) &&
+            isset($dados['txtCidadeImovel']) && !empty($dados['txtCidadeImovel']) &&
+            isset($dados['txtCepImovel']) && !empty($dados['txtCepImovel']) &&
+            isset($dados['txtBairroImovel']) && !empty($dados['txtBairroImovel'])
+        ) {
+            $imovelData = new ImovelDataDTO(
+                inscImobFisc: $dados['txtinscImobFisc'],
+                end: new EnderecoImovelDTO(
+                    cMun: $dados['txtCidadeImovel'],
+                    CEP: preg_replace('/[^0-9]/', '', $dados['txtCepImovel']),
+                    xLgr: $dados['txtEnderecoImovel'],
+                    nro: $dados['txtNumeroImovel'],
+                    xCpl: $dados['txtComplementoImovel'],
+                    xBairro: $dados['txtBairroImovel'],
+                )
+            );
+        }
+
         $numeroProximoDPS = $empresa->num_ultimo_dps + 1;
         
         $dataSN = new DPSDataSnDTO(
@@ -359,7 +384,8 @@ class EmissorNotaService
             //dados da obra
             obra: $obra,
             //dados do evento
-            atvEvento: $evento
+            atvEvento: $evento,
+            imovelData: $imovelData
         );
         
         //validar se houver erro voltar para tela de emissão

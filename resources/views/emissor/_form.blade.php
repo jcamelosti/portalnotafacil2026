@@ -1345,7 +1345,118 @@
                         :shadow-outline-gray form-input" oninput="FormataMoeda(this.name,event);" onkeypress="SoNumeros(event); FormataMoeda(this.name,event);" onpaste="return false;">
                             </label>
                         </div>
-             
+
+                        <!--Grupo Imóvel -->
+                        <div id="grupoImovel" style="display: none">
+                            <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
+                                INFORMAÇÕES DE OPERAÇÕES RELACIONADAS A BENS IMÓVEIS
+                            </h4>
+                            
+                           <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Inscrição Imobiliária Fiscal:</span>
+                                    {!! Form::text('txtinscImobFisc', old('txtinscImobFisc', $nota['txtinscImobFisc'] ?? null), ['class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtinscImobFisc']) !!}
+                                    @if ($errors->has('txtinscImobFisc'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtinscImobFisc') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                 <label class="block text-sm">
+                                    <span class="text-gray-700 ">CEP:</span>
+                                    {!! Form::text('txtCepImovel', old('txtCepImovel', $nota['txtCepImovel'] ?? null), ['required', 'maxlength'=>'9' ,'class'=>'cep block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtCepImovel']) !!}
+                                    @if ($errors->has('txtCepImovel'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtCepImovel') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Logradouro:</span>
+                                    {!! Form::text('txtEnderecoImovel', old('txtEnderecoImovel', $nota['txtEnderecoImovel'] ?? null), ['required','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtEnderecoImovel']) !!}
+                                    @if ($errors->has('logradouro'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtEnderecoImovel') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Número:</span>
+                                    {!! Form::text('txtNumeroImovel', old('txtNumeroImovel', $nota['txtNumeroImovel'] ?? null), ['required','maxlength' => '6','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'Se não Possui deixe informe 0(Zero)','id'=>'txtNumeroImovel']) !!}
+                                    @if ($errors->has('txtNumeroImovel'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtNumeroImovel') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+                            </div>
+                             
+                            <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Complemento</span>
+                                    {!! Form::text('txtComplementoImovel', old('txtComplementoImovel', $nota['txtComplementoImovel'] ?? null), ['required','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'', 'id'=>'txtComplementoImovel']) !!}
+                                    @if ($errors->has('txtComplementoImovel'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtComplementoImovel') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Bairro:</span>
+                                    {!! Form::text('txtBairroImovel', old('txtBairroImovel', $nota['txtBairroImovel'] ?? null), ['maxlength' => '255','required','class'=>'block w-full mt-1 text-sm  
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                    :shadow-outline-gray form-input', 'placeholder'=>'Bairro', 'id'=>'txtBairroImovel']) !!}
+                                    @if ($errors->has('txtBairroImovel'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtBairroImovel') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+                               
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">UF:</span>
+                                    {!! Form::select(' txtUFImovel',
+                                    $estados
+                                    ,old('txtUFImovel', $nota['txtUFImovel'] ?? null), ['id'=>'txtUFImovel', 'required','class'=>'block w-full mt-1 text-sm  
+                                    form-select
+                                    focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+                                    @if ($errors->has('txtUFImovel'))
+                                        <span class="text-xs text-red-600 ">
+                                        <strong>{{ $errors->first('txtUFImovel') }}</strong>
+                                    </span>
+                                    @endif
+                                </label>
+
+                                <div id="containerCidade">
+                                    <label class="block text-sm w-10/12" id="cidade_id">
+                                        <span class="text-gray-700 ">Cidade:</span>
+                                        {!! Form::select('txtCidadeImovel', $cidades, old('txtCidadeImovel', $nota['txtCidadeImovel'] ?? null), ['maxlength' => '255','required','class'=>'block w-full mt-1 text-sm  
+                                        focus:border-purple-400 focus:outline-none focus:shadow-outline-purple 
+                                        :shadow-outline-gray form-input', 'placeholder'=>'', 'id' => 'txtCidadeImovel']) !!}
+                                        @if ($errors->has('txtCidadeImovel'))
+                                            <span class="text-xs text-red-600 ">
+                                            <strong>{{ $errors->first('txtCidadeImovel') }}</strong>
+                                        </span>
+                                        @endif
+                                    </label>
+                                </div>
+                            </div>                                                    
+                        </div>
+                        
                         <!--
                             FINAL DO NOVO FORMULÁRIO DAQUI PARA BAIXO                       
                         -->

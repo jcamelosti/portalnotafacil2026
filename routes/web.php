@@ -38,6 +38,9 @@ Route::get('/', function () {
 
 //Route::get('/', [SiteController::class, 'index'])->name('site.home');
 
+
+
+
 //Impressão de Nota
 Route::get('visualizar/nota/{cnpjTomador}/{idNota}', [SiteController::class, 'visualizarNota'])->name('notas.visualizacao-publica');
 

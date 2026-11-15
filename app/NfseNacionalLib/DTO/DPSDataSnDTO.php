@@ -57,6 +57,9 @@ class DPSDataSnDTO
         //atvEvento
         public readonly ?EventoDTO $atvEvento = null,
 
+        //ibs/cbs imovel
+        public readonly ?ImovelDataDTO $imovelData = null,
+
         // Serviço
         public readonly string $codigoTributacaoNacional,
         public readonly ?string $codigoServicoMunicipal = null,

@@ -975,7 +975,102 @@ class Dps implements DpsInterface
                 $this->std->infdps->ibscbs->inddest,
                 true
             );
-            
+
+
+//
+//            //TODO Fazer grupo imovel
+//    
+            if(!is_null($this->std->infdps->ibscbs->imovel)){
+                $ibscbs_imovel_inner = $this->dom->createElement('imovel');
+                $ibscbs_inner->appendChild($ibscbs_imovel_inner);
+
+                $this->dom->addChild(
+                    $ibscbs_imovel_inner,
+                    'inscImobFisc',
+                    $this->std->infdps->ibscbs->imovel->inscimobfisc,
+                    true
+                );
+
+
+                $ibscbs_imovel_end_inner = $this->dom->createElement('end');
+                $ibscbs_imovel_inner->appendChild($ibscbs_imovel_end_inner);
+
+                if(isset($this->std->infdps->ibscbs->imovel->end->endnac)){
+                    $ibscbs_imovel_end_endnac_inner = $this->dom->createElement('endNac');
+                    $ibscbs_imovel_end_inner->appendChild($ibscbs_imovel_end_endnac_inner);
+                    
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endnac_inner,
+                        'cMun',
+                        $this->std->infdps->ibscbs->imovel->end->endnac->cmun,
+                        true
+                    );
+
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endnac_inner,
+                        'CEP',
+                        $this->std->infdps->ibscbs->imovel->end->endnac->cep,
+                        true
+                    );
+                }else{
+                    //exterior -imovel
+                    $ibscbs_imovel_end_endext_inner = $this->dom->createElement('endExt');
+                    $ibscbs_imovel_end_inner->appendChild($ibscbs_imovel_end_endext_inner);
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endext_inner,
+                        'cPais',
+                        $this->std->infdps->ibscbs->imovel->end->endext->cpais,
+                        true
+                    );
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endext_inner,
+                        'cEndPost',
+                        $this->std->infdps->ibscbs->imovel->end->endext->cendpost,
+                        true
+                    );
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endext_inner,
+                        'xCidade',
+                        $this->std->infdps->ibscbs->imovel->end->endext->xcidade,
+                        true
+                    );
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endext_inner,
+                        'xEstProvReg',
+                        $this->std->infdps->ibscbs->imovel->end->endext->xestprovreg,
+                        true
+                    );
+                }
+
+                $this->dom->addChild(
+                    $ibscbs_imovel_end_inner,
+                    'xLgr',
+                    $this->std->infdps->ibscbs->imovel->end->xlgr,
+                    true
+                );
+
+                $this->dom->addChild(
+                    $ibscbs_imovel_end_inner,
+                    'nro',
+                    $this->std->infdps->ibscbs->imovel->end->nro,
+                    true
+                );
+
+                $this->dom->addChild(
+                    $ibscbs_imovel_end_inner,
+                    'xCpl',
+                    $this->std->infdps->ibscbs->imovel->end->xcpl,
+                    true
+                );
+
+                $this->dom->addChild(
+                    $ibscbs_imovel_end_inner,
+                    'xBairro',
+                    $this->std->infdps->ibscbs->imovel->end->xbairro,
+                    true
+                );
+            }
+    
 //            if (isset($this->std->infdps->ibscbs->dest)) {
 //                $ibscbs_dest_inner = $this->dom->createElement('dest');
 //                $ibscbs_inner->appendChild($ibscbs_dest_inner);
@@ -1116,9 +1211,7 @@ class Dps implements DpsInterface
 //                    );
 //                }
             }
-//
-//            //TODO Fazer grupo imovel
-//
+
             if (isset($this->std->infdps->ibscbs->valores)) {
                 $ibscbs_valores_inner = $this->dom->createElement('valores');
                 $ibscbs_inner->appendChild($ibscbs_valores_inner);

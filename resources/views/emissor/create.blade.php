@@ -134,6 +134,46 @@
                             }
                         });
                     } 
+                });  
+                
+                $('#txtUFImovel').change(function(e){
+                    if( $(this).val() != '' ) {
+                        e.preventDefault();
+          
+                        $.ajax({
+                            type: 'GET',
+                            url: base_url + '/consultar/cidades/' + $(this).val() + '/json',
+                            dataType: 'json',
+                            cache: false,
+
+                            success: function(data) {
+                                const $cidade = $('#txtCidadeImovel');
+                                $cidade.empty();
+                                $cidade.append(
+                                    $('<option>', {
+                                        value: '',
+                                        text: 'Selecione a Cidade'
+                                    })
+                                );
+
+                                $.each(data, function(index, cidade) {
+                                    $cidade.append(
+                                        $('<option>', {
+                                            value: cidade.codigo,
+                                            text: cidade.municipio
+                                        })
+                                    );
+                                });
+                            },
+
+                            error: function(xhr) {
+                                console.log('ERRO:', xhr);
+                                console.log(xhr.responseText);
+
+                                alert('Verifique os dados Informados e tente novamente.');
+                            }
+                        });
+                    } 
                 });                
 
                 $('#txtUFObras').change(function(e){
@@ -330,6 +370,10 @@
 
             //Cep
             var cepMask = ['99999-999'];
+            var cep = document.querySelector('#txtCepImovel');
+            VMasker(cep).maskPattern(cepMask[0]);
+            cep.addEventListener('input', inputHandler.bind(undefined, cepMask, 14), false);
+
             var cep = document.querySelector('#txtCepObras');
             VMasker(cep).maskPattern(cepMask[0]);
             cep.addEventListener('input', inputHandler.bind(undefined, cepMask, 14), false);
@@ -390,6 +434,27 @@
                     }
                 };
 
+                 var consultaCep3 = function(cep){
+                    if(cep != '7500-000' && cep.length >= 9) {
+                        $.getJSON(
+                            "//cdn.apicep.com/file/apicep/" + cep + ".json",
+                            function(result) {
+                                if (result.status === 200) {
+                                    console.log(result);
+                                    $("#txtCidadeImovel").val(result.city).trigger('change');
+                                    $("#txtBairroImovel").val(result.district);//bairro
+                                    $("#txtEnderecoImovel").val(result.address);
+                                    //$('#txtUFEvento').val(result.state);
+                                    console.log('Achou o CEP na API CEP.');
+                                } 
+                            }
+                        ).fail(function() {
+                            console.log('Erro API CEP.');
+                            //buscarViaCep(cep);
+                        });
+                    }
+                };
+
                 $('#txtCepObras').on('keyup', function(e){
                     var valor = $(this).val();
                     //Nova variável "cep" somente com dígitos.
@@ -416,6 +481,37 @@
                         //Valida o formato do CEP.
                         if(validacep.test(cep)) {
                             consultaCep1(valor);
+                        }
+                    }
+                });
+
+
+                 $('#txtCepImovel').on('keyup', function(e){
+                    var valor = $(this).val();
+                    //Nova variável "cep" somente com dígitos.
+                    var cep = somenteNumeros(valor);
+
+                    //Verifica se campo cep possui valor informado.
+                    if (cep != "") {
+                        //Expressão regular para validar o CEP.
+                        var validacep = /^[0-9]{8}$/;
+                        //Valida o formato do CEP.
+                        if(validacep.test(cep)) {consultaCep3(valor);}
+                    }
+                });
+
+                $('#txtCepImovel').on('blur', function(e){
+                    var valor = $(this).val();
+                    //Nova variável "cep" somente com dígitos.
+                    var cep = somenteNumeros(valor);
+
+                    //Verifica se campo cep possui valor informado.
+                    if (cep != "") {
+                        //Expressão regular para validar o CEP.
+                        var validacep = /^[0-9]{8}$/;
+                        //Valida o formato do CEP.
+                        if(validacep.test(cep)) {
+                            consultaCep3(valor);
                         }
                     }
                 });

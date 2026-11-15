@@ -15,8 +15,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use JCamelo\NfseNacionalLib\DTO\EnderecoDTO;
+use JCamelo\NfseNacionalLib\DTO\EnderecoImovelDTO;
 use JCamelo\NfseNacionalLib\DTO\EnderecoObraDTO;
 use JCamelo\NfseNacionalLib\DTO\EventoDTO;
+use JCamelo\NfseNacionalLib\DTO\ImovelDataDTO;
 use JCamelo\NfseNacionalLib\DTO\ObraDataDTO;
 
 class EmissorAmbienteNacionalService
@@ -250,6 +252,29 @@ class EmissorAmbienteNacionalService
                 )
             );
         }
+
+        //imovel no ibs/cbs
+        if(
+            isset($dados['txtEnderecoImovel']) && !empty($dados['txtEnderecoImovel']) &&
+            //isset($dados['txtNumeroImovel']) && !empty($dados['txtNumeroImovel']) &&
+            isset($dados['txtComplementoImovel']) && !empty($dados['txtComplementoImovel']) &&
+            isset($dados['txtUFImovel']) && !empty($dados['txtUFImovel']) &&
+            isset($dados['txtCidadeImovel']) && !empty($dados['txtCidadeImovel']) &&
+            isset($dados['txtCepImovel']) && !empty($dados['txtCepImovel']) &&
+            isset($dados['txtBairroImovel']) && !empty($dados['txtBairroImovel'])
+        ) {
+            $imovelData = new ImovelDataDTO(
+                inscImobFisc: $dados['txtinscImobFisc'],
+                end: new EnderecoImovelDTO(
+                    cMun: $dados['txtCidadeImovel'],
+                    CEP: preg_replace('/[^0-9]/', '', $dados['txtCepImovel']),
+                    xLgr: $dados['txtEnderecoImovel'],
+                    nro: $dados['txtNumeroImovel'],
+                    xCpl: $dados['txtComplementoImovel'],
+                    xBairro: $dados['txtBairroImovel'],
+                )
+            );
+        }
         
         $numeroProximoDPS = $empresa->num_ultimo_dps + 1;
         
@@ -359,7 +384,8 @@ class EmissorAmbienteNacionalService
 
             //dados da obra
             obra: $obra,
-            atvEvento: null,
+            atvEvento: $evento,
+            imovelData: $imovelData ?? null
         );
 
         $certificadoCliente = Certificado::where('empresa_id', Session::get('empresa_selecionada'))
@@ -405,7 +431,7 @@ class EmissorAmbienteNacionalService
             Log::info("NFSE ADN");
             Log::info($dom->saveXML());
             //exit;
-            
+            //dd($dps);
             $response = $tools->enviaDpsAdn($dps->render(), 1);//2 para adn, 1 sefin -> 1 é padrão
             
             Log::info($response);
@@ -651,6 +677,28 @@ class EmissorAmbienteNacionalService
         $std->infDPS->ibscbs->cIndOp = $dados->cIndOp;
         $std->infDPS->ibscbs->indDest = 0;//0 – o destinatário é o próprio tomador/adquirente identificado na NFS-e (tomador = adquirente = destinatário);
 
+        //imovel no ibs/cbs
+        $std->infDPS->ibscbs->imovel = new \stdClass();                
+        $std->infDPS->ibscbs->imovel->inscImobFisc = $dados->imovelData->inscImobFisc;
+        $std->infDPS->ibscbs->imovel->end = new \stdClass();                
+       
+        if(is_null($dados->imovelData->end->cPais)){
+            $std->infDPS->ibscbs->imovel->end->endNac = new \stdClass();                
+            $std->infDPS->ibscbs->imovel->end->endNac->cMun = $dados->imovelData->end->cMun;
+            $std->infDPS->ibscbs->imovel->end->endNac->CEP = $dados->imovelData->end->CEP;
+        }else{
+            $std->infDPS->ibscbs->imovel->end->endExt = new \stdClass();                
+            $std->infDPS->ibscbs->imovel->end->endExt->cPais = $dados->imovelData->end->cPais;
+            $std->infDPS->ibscbs->imovel->end->endExt->cEndPost = $dados->imovelData->end->cEndPost;
+            $std->infDPS->ibscbs->imovel->end->endExt->xCidade = $dados->imovelData->end->xCidade;
+            $std->infDPS->ibscbs->imovel->end->endExt->xEstProvReg = $dados->imovelData->end->xEstProvReg;
+        }
+
+        $std->infDPS->ibscbs->imovel->end->xLgr = $dados->imovelData->end->xLgr;
+        $std->infDPS->ibscbs->imovel->end->nro = $dados->imovelData->end->nro;
+        $std->infDPS->ibscbs->imovel->end->xCpl = $dados->imovelData->end->xCpl;
+        $std->infDPS->ibscbs->imovel->end->xBairro = $dados->imovelData->end->xBairro;
+        
         //valores 
         $std->infDPS->ibscbs->valores = new \stdClass();
         $std->infDPS->ibscbs->valores->trib = new \stdClass();
