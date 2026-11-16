@@ -678,27 +678,29 @@ class EmissorAmbienteNacionalService
         $std->infDPS->ibscbs->indDest = 0;//0 – o destinatário é o próprio tomador/adquirente identificado na NFS-e (tomador = adquirente = destinatário);
 
         //imovel no ibs/cbs
-        $std->infDPS->ibscbs->imovel = new \stdClass();                
-        $std->infDPS->ibscbs->imovel->inscImobFisc = $dados->imovelData->inscImobFisc;
-        $std->infDPS->ibscbs->imovel->end = new \stdClass();                
-       
-        if(is_null($dados->imovelData->end->cPais)){
-            $std->infDPS->ibscbs->imovel->end->endNac = new \stdClass();                
-            $std->infDPS->ibscbs->imovel->end->endNac->cMun = $dados->imovelData->end->cMun;
-            $std->infDPS->ibscbs->imovel->end->endNac->CEP = $dados->imovelData->end->CEP;
-        }else{
-            $std->infDPS->ibscbs->imovel->end->endExt = new \stdClass();                
-            $std->infDPS->ibscbs->imovel->end->endExt->cPais = $dados->imovelData->end->cPais;
-            $std->infDPS->ibscbs->imovel->end->endExt->cEndPost = $dados->imovelData->end->cEndPost;
-            $std->infDPS->ibscbs->imovel->end->endExt->xCidade = $dados->imovelData->end->xCidade;
-            $std->infDPS->ibscbs->imovel->end->endExt->xEstProvReg = $dados->imovelData->end->xEstProvReg;
+        if(isset($dados->imovelData) && !is_null($dados->imovelData)){
+            $std->infDPS->ibscbs->imovel = new \stdClass();                
+            $std->infDPS->ibscbs->imovel->inscImobFisc = $dados->imovelData->inscImobFisc;
+            $std->infDPS->ibscbs->imovel->end = new \stdClass();                
+        
+            if(is_null($dados->imovelData->end->cPais)){
+                $std->infDPS->ibscbs->imovel->end->endNac = new \stdClass();                
+                $std->infDPS->ibscbs->imovel->end->endNac->cMun = $dados->imovelData->end->cMun;
+                $std->infDPS->ibscbs->imovel->end->endNac->CEP = $dados->imovelData->end->CEP;
+            }else{
+                $std->infDPS->ibscbs->imovel->end->endExt = new \stdClass();                
+                $std->infDPS->ibscbs->imovel->end->endExt->cPais = $dados->imovelData->end->cPais;
+                $std->infDPS->ibscbs->imovel->end->endExt->cEndPost = $dados->imovelData->end->cEndPost;
+                $std->infDPS->ibscbs->imovel->end->endExt->xCidade = $dados->imovelData->end->xCidade;
+                $std->infDPS->ibscbs->imovel->end->endExt->xEstProvReg = $dados->imovelData->end->xEstProvReg;
+            }
+
+            $std->infDPS->ibscbs->imovel->end->xLgr = $dados->imovelData->end->xLgr;
+            $std->infDPS->ibscbs->imovel->end->nro = $dados->imovelData->end->nro;
+            $std->infDPS->ibscbs->imovel->end->xCpl = $dados->imovelData->end->xCpl;
+            $std->infDPS->ibscbs->imovel->end->xBairro = $dados->imovelData->end->xBairro;
         }
 
-        $std->infDPS->ibscbs->imovel->end->xLgr = $dados->imovelData->end->xLgr;
-        $std->infDPS->ibscbs->imovel->end->nro = $dados->imovelData->end->nro;
-        $std->infDPS->ibscbs->imovel->end->xCpl = $dados->imovelData->end->xCpl;
-        $std->infDPS->ibscbs->imovel->end->xBairro = $dados->imovelData->end->xBairro;
-        
         //valores 
         $std->infDPS->ibscbs->valores = new \stdClass();
         $std->infDPS->ibscbs->valores->trib = new \stdClass();
