@@ -952,23 +952,25 @@ class Dps implements DpsInterface
                 true
             );
 
-//            if (isset($this->std->infdps->ibscbs->tpoper)) {
-//                $this->dom->addChild(
-//                    $ibscbs_inner,
-//                    'tpOper',
-//                    $this->std->infdps->ibscbs->tpoper
-//                );
-//            }
+            if (isset($this->std->infdps->ibscbs->tpoper)) {
+                $this->dom->addChild(
+                    $ibscbs_inner,
+                    'tpOper',
+                    $this->std->infdps->ibscbs->tpoper
+                );
+            }
+
 //
-//            //TODO Fazer grupo gRefNFSe
+//            //            //TODO Fazer grupo gRefNFSe
 //
-//            if (isset($this->std->infdps->ibscbs->tpentegov)) {
-//                $this->dom->addChild(
-//                    $ibscbs_inner,
-//                    'tpEnteGov',
-//                    $this->std->infdps->ibscbs->tpentegov
-//                );
-//            }
+            if (isset($this->std->infdps->ibscbs->tpentgov)) {
+                $this->dom->addChild(
+                    $ibscbs_inner,
+                    'tpEnteGov',
+                    $this->std->infdps->ibscbs->tpentgov
+                );
+            }
+
             $this->dom->addChild(
                 $ibscbs_inner,
                 'indDest',
@@ -978,7 +980,7 @@ class Dps implements DpsInterface
 
 
 //
-//            //TODO Fazer grupo imovel
+//            // grupo imovel
 //    
             if(!is_null($this->std->infdps->ibscbs->imovel)){
                 $ibscbs_imovel_inner = $this->dom->createElement('imovel');

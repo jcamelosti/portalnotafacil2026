@@ -91,6 +91,10 @@ $(document).ready(function () {
     const $txtCepImovel = $('#txtCepImovel');
     const $txtBairroImovel = $('#txtBairroImovel');
 
+    //tpoper tpentgov
+    const $ddlTpEntGov = $('#ddlTpEntGov');
+    const $ddlTpOper = $('#ddlTpOper');
+
     // ==========================================
     // CONTAINERS
     // ==========================================
@@ -1048,6 +1052,32 @@ $(document).ready(function () {
             campoNaoObrigatorio($txtUFEvento);
             campoNaoObrigatorio($txtCidadeEvento);
             $grupoEvento.hide();
+        }
+
+        //nova regra para tpOper e tpEnteGov
+        // Extrai os quatro primeiros dígitos
+        let itemLC116 = codigo.substring(0, 4);
+
+        // Itens específicos da LC 116
+        const itensPermitidos = [
+            '2505',
+            '1509',
+            '1712',
+            '1005'
+        ];
+
+        // Verifica as condições
+        //let exibirCampo = (tpEnteGov !== null && tpEnteGov !== '') ||
+        // Verifica se o código pertence a algum dos itens
+        let exibirCampos = itensPermitidos.includes(itemLC116);
+
+        // Exibe ou oculta os campos
+        if (exibirCampos) {
+            mostrarCampo($ddlTpOper);
+            campoObrigatorio($ddlTpOper);
+        } else {
+            ocultarCampo($ddlTpOper);
+            campoNaoObrigatorio($ddlTpOper);
         }
     });
 

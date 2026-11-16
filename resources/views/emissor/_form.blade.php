@@ -1456,6 +1456,39 @@
                                 </div>
                             </div>                                                    
                         </div>
+
+                        <div id="grupoImovelEnteGov">
+                            <h4 class="mb-4 mt-4 text-base font-semibold text-white bg-gray-500 py-4 px-0 rounded-md">
+                                Tipo de Operação com Entes Governanementais ou outros serviços sobre bens imóveis
+                            </h4>
+
+                            <div class="grid md:grid-cols-4 gap-1 mt-4 mb-4">
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Tipo Ente Governamental:</span>
+                                    <select name="ddlTpEntGov" onchange="" language="javascript" id="ddlTpEntGov" 
+                                    class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray" onclick="">
+                                        <option value="">Selecione</option>
+                                        <option {{ old('ddlTpEntGov', $nota['ddlTpEntGov'] ?? null) == '1' ? 'selected' : '' }} value="1">1 – União</option>
+                                        <option {{ old('ddlTpEntGov', $nota['ddlTpEntGov'] ?? null) == '2' ? 'selected' : '' }} value="2">2 - Estado</option>
+                                        <option {{ old('ddlTpEntGov', $nota['ddlTpEntGov'] ?? null) == '3' ? 'selected' : '' }} value="3">3 – Distrito Federal</option>
+                                        <option {{ old('ddlTpEntGov', $nota['ddlTpEntGov'] ?? null) == '4' ? 'selected' : '' }} value="4">4 – Municípios</option>
+                                    </select>
+                                </label>
+
+                                <label class="block text-sm">
+                                    <span class="text-gray-700 ">Tipo Operação*:</span>
+                                    <select name="ddlTpOper" onchange="" language="javascript" id="ddlTpOper" 
+                                    class="block w-full mt-1 text-sm px-3 py-1.5 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray" onclick="">
+                                        <option value="">Selecione</option>
+                                        <option {{ old('ddlTpOper', $nota['ddlTpOper'] ?? null) == '1' ? 'selected' : '' }} value="1">1 – Fornecimento com pagamento posterior</option>
+                                        <option {{ old('ddlTpOper', $nota['ddlTpOper'] ?? null) == '2' ? 'selected' : '' }} value="2">2 - Recebimento do pagamento com fornecimento já realizado</option>
+                                        <option {{ old('ddlTpOper', $nota['ddlTpOper'] ?? null) == '3' ? 'selected' : '' }} value="3">3 – Fornecimento com pagamento já realizado;</option>
+                                        <option {{ old('ddlTpOper', $nota['ddlTpOper'] ?? null) == '4' ? 'selected' : '' }} value="4">4 – Recebimento do pagamento com fornecimento posterior</option>
+                                        <option {{ old('ddlTpOper', $nota['ddlTpOper'] ?? null) == '5' ? 'selected' : '' }} value="5">5 – Fornecimento e recebimento do pagamento concomitantes</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
                         
                         <!--
                             FINAL DO NOVO FORMULÁRIO DAQUI PARA BAIXO                       

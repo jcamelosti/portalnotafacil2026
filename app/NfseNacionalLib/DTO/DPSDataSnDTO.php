@@ -120,6 +120,9 @@ class DPSDataSnDTO
         public readonly ?int $indDest = null,
         public readonly ?string $cstIbsCbs = null,
         public readonly ?string $cClassTrib = null,
+        public readonly ?string $tpEntGov = null,
+        public readonly ?string $tpOper = null,
+
         
         public readonly ?string $informacaoComplementar = null,
 

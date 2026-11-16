@@ -385,7 +385,9 @@ class EmissorNotaService
             obra: $obra,
             //dados do evento
             atvEvento: $evento,
-            imovelData: $imovelData
+            imovelData: $imovelData,
+            tpEntGov: $dados['ddlTpEntGov'] ?? null,
+            tpOper: $dados['ddlTpOper'] ?? null,
         );
         
         //validar se houver erro voltar para tela de emissão

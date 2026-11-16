@@ -385,7 +385,9 @@ class EmissorAmbienteNacionalService
             //dados da obra
             obra: $obra,
             atvEvento: $evento,
-            imovelData: $imovelData ?? null
+            imovelData: $imovelData ?? null,
+            tpEntGov: $dados['ddlTpEntGov'] ?? null,
+            tpOper: $dados['ddlTpOper'] ?? null,
         );
 
         $certificadoCliente = Certificado::where('empresa_id', Session::get('empresa_selecionada'))
@@ -676,6 +678,8 @@ class EmissorAmbienteNacionalService
         $std->infDPS->ibscbs->indfinal = 0;
         $std->infDPS->ibscbs->cIndOp = $dados->cIndOp;
         $std->infDPS->ibscbs->indDest = 0;//0 – o destinatário é o próprio tomador/adquirente identificado na NFS-e (tomador = adquirente = destinatário);
+        $std->infDPS->ibscbs->tpOper = $dados->tpOper;
+        $std->infDPS->ibscbs->tpEntGov = $dados->tpEntGov;
 
         //imovel no ibs/cbs
         if(isset($dados->imovelData) && !is_null($dados->imovelData)){

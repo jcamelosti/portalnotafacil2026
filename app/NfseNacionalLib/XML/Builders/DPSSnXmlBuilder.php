@@ -1164,19 +1164,26 @@ class DPSSnXmlBuilder
             $data->finNfse
         );
 
-        /*$this->appendOptionalText(
-            $dom,
-            $ibscbs,
-            'indFinal',
-            $data->indFinal ?? 0
-        );*/
-
         $this->appendOptionalText(
             $dom,
             $ibscbs,
             'cIndOp',
             $data->cIndOp
         );
+
+        $this->appendOptionalText(
+            $dom,
+            $ibscbs,
+            'tpOper',
+            $data->tpOper
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $ibscbs,
+            'tpEnteGov',
+            $data->tpEntGov
+        );        
 
         $this->appendOptionalText(
             $dom,
