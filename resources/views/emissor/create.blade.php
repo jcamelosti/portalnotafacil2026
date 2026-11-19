@@ -10,8 +10,6 @@
     </div>
 
  @section('jquery')
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-                integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
         <script src="https://cdn.es.gov.br/scripts/jquery/jquery-maskedinput/1.4.1/jquery.maskedinput-1.4.1.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-masker/1.2.0/vanilla-masker.min.js"
             integrity="sha512-RbMQw6xKGymv6bRMO4z5OxHBzzem7BPEQX7nTJC9G08A70gXdUka76Rvgey83MsSXrIEJddog0vxUKN6iTce2Q=="
@@ -284,6 +282,7 @@
                     $campoSelectDdlSitTribFederal.prop("disabled", false);
                     $campoSelectDdlSitTribFederal.css('background-color', '');
                     buscarIndicadoresOper();
+                    console.log('Buscando Indicadores de Operação');
                 });
             });
 
@@ -346,6 +345,9 @@
                         );
 
                     });
+
+                    // Atualiza o texto exibido pelo select2 sem disparar o handler de change
+                    nbsSelect.trigger('change.select2');
                 });
             }
         </script>

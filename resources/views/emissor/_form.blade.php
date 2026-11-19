@@ -84,7 +84,7 @@
                             <label class="block text-sm">
                                 <span class="text-gray-700 ">Nbs:</span>
                                 {!! Form::select('nbs', []
-                                ,$nota['nbs'] ?? null, ['required','disabled', 'id' => 'nbs','class'=>'block w-full mt-1 text-sm  
+                                ,$nota['nbs'] ?? null, ['required','disabled', 'id' => 'nbs', 'style' => 'width: 100%','class'=>'select2 block w-full mt-1 text-sm  
                                 px-3 py-1.5
                                 form-select
                                 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}

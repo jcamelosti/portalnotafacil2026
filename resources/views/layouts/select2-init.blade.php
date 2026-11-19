@@ -2,6 +2,11 @@
     (function ($) {
         // Inicializa o select2 nos selects com a classe .select2 que ainda não foram inicializados
         window.initSelect2 = function (context) {
+            if (!$.fn.select2) {
+                console.warn('select2 não carregado: verifique se o jQuery não foi incluído novamente na página.');
+                return;
+            }
+
             $(context || document)
                 .find('select.select2')
                 .addBack('select.select2')
