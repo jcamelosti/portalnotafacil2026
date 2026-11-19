@@ -208,6 +208,23 @@ class EmpresasController extends Controller
             return redirect()->back();
         }
 
+        //salvamento de dados cadastrais para empresas diversas para evitar erros
+        $opcaoSimplesNacional = (int) $dados['op_simp_nac'];
+        $dados['dados_cadastrais'] = json_encode([
+            'opcaoMei' => $opcaoSimplesNacional === 2 ? 1 : 2,
+            'optanteSimplesNacional' => in_array($opcaoSimplesNacional, [2, 3], true) ? 1 : 2,
+            'simplesNacional' => [],
+            'permiteOutrasDeducoes' => 2,
+            'permiteDescontoCondicionado' => 2,
+            'permiteDescontoIncondicionado' => 2,
+            'permiteExigibilidadeSuspensaDecisaoJudicial' => 2,
+            'permiteExigibilidadeSuspensaProcAdm' => 2,
+            'permiteTributarFora' => 2,
+            'tributacoesPermitidas' => [
+                'tribISSQN' => ['1'],
+            ],
+        ]);
+
         /*if($dados['is_optante_simples_nac'] == 1){
             $dados['op_simp_nac'] = 3;
             $dados['regime_tributario'] = 'simples';

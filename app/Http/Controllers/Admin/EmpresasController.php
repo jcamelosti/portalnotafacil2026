@@ -273,6 +273,24 @@ class EmpresasController extends Controller
             $dados['regime_tributario'] = 'normal';
         }
 
+
+        //salvamento de dados cadastrais para empresas diversas para evitar erros
+        $opcaoSimplesNacional = (int) $dados['op_simp_nac'];
+        $dados['dados_cadastrais'] = json_encode([
+            'opcaoMei' => $opcaoSimplesNacional === 2 ? 1 : 2,
+            'optanteSimplesNacional' => in_array($opcaoSimplesNacional, [2, 3], true) ? 1 : 2,
+            'simplesNacional' => [],
+            'permiteOutrasDeducoes' => 2,
+            'permiteDescontoCondicionado' => 2,
+            'permiteDescontoIncondicionado' => 2,
+            'permiteExigibilidadeSuspensaDecisaoJudicial' => 2,
+            'permiteExigibilidadeSuspensaProcAdm' => 2,
+            'permiteTributarFora' => 2,
+            'tributacoesPermitidas' => [
+                'tribISSQN' => ['1'],
+            ],
+        ]);
+
         $empresa->update($dados);
 
         //$provedor = EndPoint::where('codigo_municipio', $empresa->cidade_id)->first();

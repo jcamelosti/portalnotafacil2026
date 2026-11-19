@@ -55,14 +55,7 @@
     </script>
     @yield('jquery')
     @yield('otherJS')
-
-    <script type="text/javascript">
-        $(document).ready(function() {
-            let select2Check = $('.select2').length;
-            if(select2Check > 0)
-                $('.select2').select2();
-        });
-    </script>
+    @include('layouts.select2-init')
 </body>
 
 </html>
