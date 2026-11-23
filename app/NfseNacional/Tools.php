@@ -3,6 +3,7 @@
 namespace Hadder\NfseNacional;
 
 use DOMDocument;
+use Illuminate\Support\Facades\Log;
 use NFePHP\Common\Certificate;
 
 class Tools extends RestCurl
@@ -183,7 +184,7 @@ class Tools extends RestCurl
         //$content = $this->canonize($content);
         $content = $this->sign($content, 'infPedReg', '', 'pedRegEvento');
         $content = '<?xml version="1.0" encoding="UTF-8"?>' . $content;
-
+        Log::info($content);
         $gz = gzencode($content);
         $data = base64_encode($gz);
         $dados = [

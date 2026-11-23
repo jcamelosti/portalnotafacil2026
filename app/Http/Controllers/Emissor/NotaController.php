@@ -880,8 +880,11 @@ class NotaController extends Controller
             ]);
         }else{
             $dados = request()->all();
-            $retorno = $this->emissorAmbienteNacionalService->cancelar($dados);
-            dd($retorno);
+            $nota = $this->notasEmitidas->find($id);
+            $retorno = $this->emissorAmbienteNacionalService->cancelar($dados, $nota);
+
+            session()->flash('success', 'Nota Cancelada com Sucesso.');
+            return redirect()->route('notas.show', $retorno['registro']->id);
         }
     }
 }
