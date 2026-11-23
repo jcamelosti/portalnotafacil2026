@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Empresas;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SincronizarAtividadesCnaeJob;
 use App\Models\Certificado;
 use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
@@ -266,8 +267,9 @@ class EmpresasController extends Controller
                 Log::warning('OpenCNPJ: não foi possível sincronizar CNAEs da empresa ' . $empresa->id . ': ' . $e->getMessage());
             }
 
-            //implementar busca de itens lc para adicionar nas atividades
-            
+            // Busca os itens da LC 116 dos CNAEs da empresa e adiciona nas atividades
+            SincronizarAtividadesCnaeJob::dispatch($empresa->id);
+
 
             Utilitarios::sendMessage('Nova empresa cadastrada: ' . $empresa->razao_social . ' - CNPJ: ' . $empresa->cpf_cnpj . ' - Usuário: ' . auth()->user()->id . '  ' .auth()->user()->name);
 
@@ -404,6 +406,9 @@ class EmpresasController extends Controller
         }
 
         $empresa->update($dados);
+
+        // Busca os itens da LC 116 dos CNAEs da empresa e adiciona nas atividades
+        SincronizarAtividadesCnaeJob::dispatch($empresa->id);
 
         //$this->saveOrUpdateSpedy($empresa);
         //$this->saveOrUpdateFocuNfe($empresa);

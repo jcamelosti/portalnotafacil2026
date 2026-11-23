@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SincronizarAtividadesCnaeJob;
 use App\Models\CnaeLc;
 use Illuminate\Http\Request;
 
@@ -305,6 +306,9 @@ class EmpresasController extends Controller
         } catch (\Exception $e) {
             Log::warning('OpenCNPJ: não foi possível sincronizar CNAEs da empresa ' . $empresa->id . ': ' . $e->getMessage());
         }
+
+        // Busca os itens da LC 116 dos CNAEs da empresa e adiciona nas atividades
+        SincronizarAtividadesCnaeJob::dispatch($empresa->id);
 
         //$provedor = EndPoint::where('codigo_municipio', $empresa->cidade_id)->first();
         if($empresa->sigla_provedor == 'outros'){

@@ -38,4 +38,10 @@ return [
     'opencnpj' => [
         'url' => env('OPENCNPJ_API_URL', 'https://api.opencnpj.org'),
     ],
+
+    'cnaes' => [
+        'url' => env('API_CNAES_URL', 'https://cnaes.portalnotafacil.com.br/api/v1'),
+        'email' => trim((string) env('API_CNAES_EMAIL')),
+        'chave' => trim((string) env('API_CNAE_CHAVE')),
+    ],
 ];
