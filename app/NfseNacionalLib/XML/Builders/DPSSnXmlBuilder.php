@@ -1164,13 +1164,6 @@ class DPSSnXmlBuilder
             $data->finNfse
         );
 
-        /*$this->appendOptionalText(
-            $dom,
-            $ibscbs,
-            'indFinal',
-            $data->indFinal ?? 0
-        );*/
-
         $this->appendOptionalText(
             $dom,
             $ibscbs,
@@ -1181,9 +1174,138 @@ class DPSSnXmlBuilder
         $this->appendOptionalText(
             $dom,
             $ibscbs,
+            'tpOper',
+            $data->tpOper
+        );
+
+        $this->appendOptionalText(
+            $dom,
+            $ibscbs,
+            'tpEnteGov',
+            $data->tpEntGov
+        );        
+
+        $this->appendOptionalText(
+            $dom,
+            $ibscbs,
             'indDest',
             $data->indDest
         );
+
+        //imovel
+        if(!is_null($data->imovelData)){
+            /*
+            * imovel
+            */
+            $ibscbsImovel = $dom->createElement(
+                'imovel'
+            );
+
+            $ibscbs->appendChild($ibscbsImovel);
+
+            //inscImobFisc
+             $this->appendOptionalText(
+                $dom,
+                $ibscbsImovel,
+                'inscImobFisc',
+                $data->imovelData->inscImobFisc
+            );
+
+            //end
+            $end = $dom->createElement(
+                'end'
+            );
+            $ibscbsImovel->appendChild($end);
+
+            /*<endNac>
+            <!--  Informação obrigatória. Código do município do endereço da obra. (Tabela do IBGE)  -->
+            <cMun> ? </cMun>
+            <!--  Código de Endereçamento Postal numérico do endereço nacional da obra.  -->
+            <CEP> ? </CEP>
+            </endNac>*/
+            
+            if(!is_null($data->imovelData->end->cMun)){
+                $endNac = $dom->createElement(
+                    'endNac'
+                );
+                $end->appendChild($endNac);
+
+                $this->appendText(
+                    $dom,
+                    $endNac,
+                    'cMun',
+                    $data->imovelData->end->cMun
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endNac,
+                    'CEP',
+                    $data->imovelData->end->CEP
+                );
+            }else{
+                $endExt = $dom->createElement(
+                    'endExt'
+                );
+                $end->appendChild($endExt);
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'cPais',
+                    $data->imovelData->end->cPais
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'cEndPost',
+                    $data->imovelData->end->cEndPost
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'xCidade',
+                    $data->imovelData->end->xCidade
+                );
+
+                $this->appendText(
+                    $dom,
+                    $endExt,
+                    'xEstProvReg',
+                    $data->imovelData->end->xEstProvReg
+                );
+            }
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'xLgr',
+                $data->imovelData->end->xLgr
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'nro',
+                $data->imovelData->end->nro
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'xCpl',
+                $data->imovelData->end->xCpl
+            );
+
+            $this->appendOptionalText(
+                $dom,
+                $end,
+                'xBairro',
+                $data->imovelData->end->xBairro
+            );
+        }
 
         /*
          * valores

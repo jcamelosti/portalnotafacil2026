@@ -952,30 +952,127 @@ class Dps implements DpsInterface
                 true
             );
 
-//            if (isset($this->std->infdps->ibscbs->tpoper)) {
-//                $this->dom->addChild(
-//                    $ibscbs_inner,
-//                    'tpOper',
-//                    $this->std->infdps->ibscbs->tpoper
-//                );
-//            }
+            if (isset($this->std->infdps->ibscbs->tpoper)) {
+                $this->dom->addChild(
+                    $ibscbs_inner,
+                    'tpOper',
+                    $this->std->infdps->ibscbs->tpoper
+                );
+            }
+
 //
-//            //TODO Fazer grupo gRefNFSe
+//            //            //TODO Fazer grupo gRefNFSe
 //
-//            if (isset($this->std->infdps->ibscbs->tpentegov)) {
-//                $this->dom->addChild(
-//                    $ibscbs_inner,
-//                    'tpEnteGov',
-//                    $this->std->infdps->ibscbs->tpentegov
-//                );
-//            }
+            if (isset($this->std->infdps->ibscbs->tpentgov)) {
+                $this->dom->addChild(
+                    $ibscbs_inner,
+                    'tpEnteGov',
+                    $this->std->infdps->ibscbs->tpentgov
+                );
+            }
+
             $this->dom->addChild(
                 $ibscbs_inner,
                 'indDest',
                 $this->std->infdps->ibscbs->inddest,
                 true
             );
-            
+
+
+//
+//            // grupo imovel
+//    
+            if(!is_null($this->std->infdps->ibscbs->imovel)){
+                $ibscbs_imovel_inner = $this->dom->createElement('imovel');
+                $ibscbs_inner->appendChild($ibscbs_imovel_inner);
+
+                $this->dom->addChild(
+                    $ibscbs_imovel_inner,
+                    'inscImobFisc',
+                    $this->std->infdps->ibscbs->imovel->inscimobfisc,
+                    true
+                );
+
+
+                $ibscbs_imovel_end_inner = $this->dom->createElement('end');
+                $ibscbs_imovel_inner->appendChild($ibscbs_imovel_end_inner);
+
+                if(isset($this->std->infdps->ibscbs->imovel->end->endnac)){
+                    $ibscbs_imovel_end_endnac_inner = $this->dom->createElement('endNac');
+                    $ibscbs_imovel_end_inner->appendChild($ibscbs_imovel_end_endnac_inner);
+                    
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endnac_inner,
+                        'cMun',
+                        $this->std->infdps->ibscbs->imovel->end->endnac->cmun,
+                        true
+                    );
+
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endnac_inner,
+                        'CEP',
+                        $this->std->infdps->ibscbs->imovel->end->endnac->cep,
+                        true
+                    );
+                }else{
+                    //exterior -imovel
+                    $ibscbs_imovel_end_endext_inner = $this->dom->createElement('endExt');
+                    $ibscbs_imovel_end_inner->appendChild($ibscbs_imovel_end_endext_inner);
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endext_inner,
+                        'cPais',
+                        $this->std->infdps->ibscbs->imovel->end->endext->cpais,
+                        true
+                    );
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endext_inner,
+                        'cEndPost',
+                        $this->std->infdps->ibscbs->imovel->end->endext->cendpost,
+                        true
+                    );
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endext_inner,
+                        'xCidade',
+                        $this->std->infdps->ibscbs->imovel->end->endext->xcidade,
+                        true
+                    );
+                    $this->dom->addChild(
+                        $ibscbs_imovel_end_endext_inner,
+                        'xEstProvReg',
+                        $this->std->infdps->ibscbs->imovel->end->endext->xestprovreg,
+                        true
+                    );
+                }
+
+                $this->dom->addChild(
+                    $ibscbs_imovel_end_inner,
+                    'xLgr',
+                    $this->std->infdps->ibscbs->imovel->end->xlgr,
+                    true
+                );
+
+                $this->dom->addChild(
+                    $ibscbs_imovel_end_inner,
+                    'nro',
+                    $this->std->infdps->ibscbs->imovel->end->nro,
+                    true
+                );
+
+                $this->dom->addChild(
+                    $ibscbs_imovel_end_inner,
+                    'xCpl',
+                    $this->std->infdps->ibscbs->imovel->end->xcpl,
+                    true
+                );
+
+                $this->dom->addChild(
+                    $ibscbs_imovel_end_inner,
+                    'xBairro',
+                    $this->std->infdps->ibscbs->imovel->end->xbairro,
+                    true
+                );
+            }
+    
 //            if (isset($this->std->infdps->ibscbs->dest)) {
 //                $ibscbs_dest_inner = $this->dom->createElement('dest');
 //                $ibscbs_inner->appendChild($ibscbs_dest_inner);
@@ -1116,9 +1213,7 @@ class Dps implements DpsInterface
 //                    );
 //                }
             }
-//
-//            //TODO Fazer grupo imovel
-//
+
             if (isset($this->std->infdps->ibscbs->valores)) {
                 $ibscbs_valores_inner = $this->dom->createElement('valores');
                 $ibscbs_inner->appendChild($ibscbs_valores_inner);
@@ -1229,7 +1324,7 @@ class Dps implements DpsInterface
         return $this->dom->saveXML();
     }
 
-    public function renderEvento(stdClass $std = null)
+    /*public function renderEvento(stdClass $std = null)
     {
         if ($this->dom->hasChildNodes()) {
             $this->dom = new Dom('1.0', 'UTF-8');
@@ -1239,7 +1334,7 @@ class Dps implements DpsInterface
 
         $this->init($std);
         $this->evento = $this->dom->createElement('pedRegEvento');
-        $this->evento->setAttribute('versao', '1.00');
+        $this->evento->setAttribute('versao', '1.01');
         $this->evento->setAttribute('xmlns', 'http://www.sped.fazenda.gov.br/nfse');
 
         $infpedreg_inner = $this->dom->createElement('infPedReg');
@@ -1317,11 +1412,128 @@ class Dps implements DpsInterface
         }
 
         $dps = $this->dom->createElement('DPS');
-        $dps->setAttribute('versao', '1.00');
+        $dps->setAttribute('versao', '1.01');
         $dps->setAttribute('xmlns', 'http://www.sped.fazenda.gov.br/nfse');
         $this->evento->appendChild($infpedreg_inner);
         $this->dom->appendChild($this->evento);
-        /*        return str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $this->dom->saveXML());*/
+        //        return str_replace('<?xml version="1.0" encoding="UTF-8"?>', '', $this->dom->saveXML());
+        return $this->dom->saveXML();
+    }*/
+
+    public function renderEvento(stdClass $std = null)
+    {
+        if ($this->dom->hasChildNodes()) {
+            $this->dom = new Dom('1.0', 'UTF-8');
+            $this->dom->preserveWhiteSpace = false;
+            $this->dom->formatOutput = false;
+        }
+
+        $this->init($std);
+
+        $this->evento = $this->dom->createElement('pedRegEvento');
+        $this->evento->setAttribute('versao', '1.01');
+        $this->evento->setAttribute('xmlns', 'http://www.sped.fazenda.gov.br/nfse');
+
+        $infpedreg_inner = $this->dom->createElement('infPedReg');
+
+        // Identificador: PRE + chave NFS-e + código do evento
+        $chNFSe = preg_replace('/\D/', '', $this->std->infpedreg->chnfse);
+
+        $tipoEvento = '101101';
+
+        if (strlen($chNFSe) !== 50) {
+            throw new \InvalidArgumentException(
+                'A chave da NFS-e deve possuir 50 dígitos.'
+            );
+        }
+
+        $id = 'PRE' . $chNFSe . $tipoEvento;
+
+        if (!preg_match('/^PRE[0-9]{56}$/', $id)) {
+            throw new \InvalidArgumentException(
+                'Identificador do pedido de evento inválido: ' . $id
+            );
+        }
+
+        $infpedreg_inner->setAttribute('Id', $id);
+
+        $this->dom->addChild(
+            $infpedreg_inner,
+            'tpAmb',
+            $this->std->infpedreg->tpamb,
+            true
+        );
+
+        $this->dom->addChild(
+            $infpedreg_inner,
+            'verAplic',
+            $this->std->infpedreg->veraplic,
+            true
+        );
+
+        $this->dom->addChild(
+            $infpedreg_inner,
+            'dhEvento',
+            $this->std->infpedreg->dhevento,
+            true
+        );
+
+        if (isset($this->std->infpedreg->cnpjautor)) {
+            $this->dom->addChild(
+                $infpedreg_inner,
+                'CNPJAutor',
+                $this->std->infpedreg->cnpjautor,
+                true
+            );
+        } elseif (isset($this->std->infpedreg->cpfautor)) {
+            $this->dom->addChild(
+                $infpedreg_inner,
+                'CPFAutor',
+                $this->std->infpedreg->cpfautor,
+                true
+            );
+        }
+
+        $this->dom->addChild(
+            $infpedreg_inner,
+            'chNFSe',
+            $chNFSe,
+            true
+        );
+
+        // Evento de cancelamento
+        if (isset($this->std->infpedreg->e101101)) {
+
+            $e101101_inner = $this->dom->createElement('e101101');
+
+            $infpedreg_inner->appendChild($e101101_inner);
+
+            $this->dom->addChild(
+                $e101101_inner,
+                'xDesc',
+                'Cancelamento de NFS-e',
+                true
+            );
+
+            $this->dom->addChild(
+                $e101101_inner,
+                'cMotivo',
+                $this->std->infpedreg->e101101->cmotivo,
+                true
+            );
+
+            $this->dom->addChild(
+                $e101101_inner,
+                'xMotivo',
+                $this->std->infpedreg->e101101->xmotivo,
+                true
+            );
+        }
+
+        $this->evento->appendChild($infpedreg_inner);
+
+        $this->dom->appendChild($this->evento);
+
         return $this->dom->saveXML();
     }
 

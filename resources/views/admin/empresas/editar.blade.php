@@ -19,10 +19,10 @@
             <!-- AÇÕES -->
             <div class="flex flex-wrap gap-2 bg-gray-50 px-4 py-3 mt-4 justify-end">
 
-                <!--a href="{{ route('admin.empresa-cnaes.index', ['empresa-id' => $empresa->id]) }}"
+                <a href="{{ route('admin.empresa-cnaes.index', ['empresa-id' => $empresa->id]) }}"
                    class="px-4 py-2 border border-blue-700 bg-white text-sm rounded hover:text-gray-500">
                     CNAES
-                </a-->
+                </a>
 
                 <a href="{{ route('admin.empresa-atividades.index', ['empresa-id' => $empresa->id]) }}"
                    class="px-4 py-2 border border-blue-700 bg-white text-sm rounded hover:text-gray-500">
@@ -38,10 +38,12 @@
                     Cadastro de NBS
                 </a>
 
+                @if($empresa->sigla_provedor == 'issnet')
                 <a href="{{ route('empresas.sincDataIssNet', $empresa->id) }}"
                    class="px-4 py-2 border border-blue-700 bg-white text-sm rounded hover:text-gray-500">
                     Sinc. Dados Cadastrais
                 </a>
+                @endif
 
                 <!--a href="{{ route('admin.empresas.dados-receita', $empresa->id) }}"
                    class="px-4 py-2 border border-blue-700 bg-white text-sm rounded hover:text-gray-500">

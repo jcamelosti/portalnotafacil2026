@@ -81,6 +81,20 @@ $(document).ready(function () {
     const $txtUFEvento          = $('#txtUFEvento');
     const $txtCidadeEvento      = $('#txtCidadeEvento');
 
+    //imovel ibs/cbs
+    const $txtinscImobFisc   = $('#txtinscImobFisc');
+    const $txtEnderecoImovel = $('#txtEnderecoImovel');
+    const $txtNumeroImovel = $('#txtNumeroImovel');
+    const $txtComplementoImovel = $('#txtComplementoImovel');
+    const $txtUFImovel = $('#txtUFImovel');
+    const $txtCidadeImovel = $('#txtCidadeImovel');
+    const $txtCepImovel = $('#txtCepImovel');
+    const $txtBairroImovel = $('#txtBairroImovel');
+
+    //tpoper tpentgov
+    const $ddlTpEntGov = $('#ddlTpEntGov');
+    const $ddlTpOper = $('#ddlTpOper');
+
     // ==========================================
     // CONTAINERS
     // ==========================================
@@ -1039,7 +1053,116 @@ $(document).ready(function () {
             campoNaoObrigatorio($txtCidadeEvento);
             $grupoEvento.hide();
         }
+
+        //nova regra para tpOper e tpEnteGov
+        // Extrai os quatro primeiros dígitos
+        let itemLC116 = codigo.substring(0, 4);
+
+        // Itens específicos da LC 116
+        const itensPermitidos = [
+            '2505',
+            '1509',
+            '1712',
+            '1005'
+        ];
+
+        // Verifica as condições
+        //let exibirCampo = (tpEnteGov !== null && tpEnteGov !== '') ||
+        // Verifica se o código pertence a algum dos itens
+        let exibirCampos = itensPermitidos.includes(itemLC116);
+
+        // Exibe ou oculta os campos
+        if (exibirCampos) {
+            mostrarCampo($ddlTpOper);
+            campoObrigatorio($ddlTpOper);
+        } else {
+            ocultarCampo($ddlTpOper);
+            campoNaoObrigatorio($ddlTpOper);
+        }
     });
+
+    /*
+    <MensagemRetorno>
+            <Codigo>E0932</Codigo>
+            <Mensagem>É obrigatório o grupo de informações relativo ao imóvel na DPS quando o código indicador da operação informado for relativo a operações com imóveis (020101, 020201 ou 020301), conforme a tabela IndOp do ANEXO_C-INDOP_IBSCBS-SNNFSe-ESPEC.</Mensagem>
+            <Correcao>Se o código de tributação nacional (cTribNac) não pertencer a algum dos subitens 07.02.01, 07.02.02, 07.04.01, 07.05,01, 07.05.02, 07.06.01, 07.06.02, 07.07.01, 07.08.01, 07.17.01, 07.19.01, 14.14.03 e 14.14.04 da lista de serviços e, o código indicador da operação (cIndOp) for relativo a operações com imóveis (020101, 020201 ou 020301), então o grupo de informações de imóvel é obrigatório.</Correcao>
+          </MensagemRetorno>
+    */
+    $ddlIndicadorOperacao.on('change', function (event) {
+        event.preventDefault(); 
+        
+        const codigosTributacao = [
+            '070201',
+            '070202',
+            '070401',
+            '070501',
+            '070502',
+            '070601',
+            '070602',
+            '070701',
+            '070801',
+            '071701',
+            '071901',
+            '141403',
+            '141404'
+        ];
+
+        const codigosOperacaoImovel = [
+            '020101',
+            '020201',
+            '020301'
+        ];
+             
+        // Código de tributação nacional (remove pontos)
+        const cTribNac = ($('#cTribNac').val() || '').replace(/\D/g, '');
+
+        // Código indicador da operação
+        const cIndOp = ($(this).val() || '').trim();
+
+        // Verifica se o código de tributação NÃO pertence à lista
+        const tributacaoForaDaLista = !codigosTributacao.includes(cTribNac);
+
+        // Verifica se a operação é relativa a imóveis
+        const operacaoImovel = codigosOperacaoImovel.includes(cIndOp);
+
+        // Regra de obrigatoriedade
+        const imovelObrigatorio = tributacaoForaDaLista && operacaoImovel;
+
+
+         if (imovelObrigatorio) {
+            // Tornar grupo de informações do imóvel obrigatório
+            console.log('Grupo de informações do imóvel é obrigatório.');
+
+            // Exemplo:
+            $('#grupoImovel').show();
+            [
+                $txtinscImobFisc,
+                $txtEnderecoImovel,
+                $txtNumeroImovel,
+                $txtComplementoImovel,
+                $txtUFImovel,
+                $txtCidadeImovel,
+                $txtCepImovel,
+                $txtBairroImovel
+            ].forEach(campo => campoObrigatorio(campo));        
+
+        } else {
+            console.log('Grupo de informações do imóvel não é obrigatório.');
+
+            // Exemplo:
+            $('#grupoImovel').hide();
+            [
+                $txtinscImobFisc,
+                $txtEnderecoImovel,
+                $txtNumeroImovel,
+                $txtComplementoImovel,
+                $txtUFImovel,
+                $txtCidadeImovel,
+                $txtCepImovel,
+                $txtBairroImovel
+            ].forEach(campo => campoNaoObrigatorio(campo));            
+        }
+    });    
 
     function consultarPercentualTribNac(cTribNac){
         $.getJSON('/c/emissor/obter/percentual-trib-nac?q=' + cTribNac, function (data) {

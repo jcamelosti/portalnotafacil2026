@@ -34,4 +34,14 @@ return [
         'url' => env('SPEDY_API_URL', 'https://api.spedy.com.br/v1'),
         'api_key' => env('SPEDY_API_KEY'),
     ],
+
+    'opencnpj' => [
+        'url' => env('OPENCNPJ_API_URL', 'https://api.opencnpj.org'),
+    ],
+
+    'cnaes' => [
+        'url' => env('API_CNAES_URL', 'https://cnaes.portalnotafacil.com.br/api/v1'),
+        'email' => trim((string) env('API_CNAES_EMAIL')),
+        'chave' => trim((string) env('API_CNAE_CHAVE')),
+    ],
 ];

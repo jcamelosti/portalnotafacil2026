@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Empresas;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SincronizarAtividadesCnaeJob;
 use App\Models\Certificado;
 use App\Models\Empresa;
 use App\Models\EmpresaAtividade;
@@ -12,6 +13,7 @@ use App\Models\Municipio;
 use App\Models\Nbs;
 use App\Models\Uf;
 use App\Services\FocuNfe\GestaoService;
+use App\Services\OpenCnpj\OpenCnpjService;
 use App\Traits\IssnetTrait;
 use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
@@ -19,6 +21,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use JCamelo\NfseNacionalLib\Manager\CertificateManager;
 use JCamelo\NfseNacionalLib\Services\NFSeService;
@@ -44,7 +47,8 @@ class EmpresasController extends Controller
         EmpresaAtividade $atividadeModel,
         License $licenseModel, Certificado $certificadoModel, EmpresaCompartilhada $empresaCompartilhadaModel, Nbs $nbsModel,
         private CertificateManager $certManager, 
-        private GestaoService $focuNfeService
+        private GestaoService $focuNfeService,
+        private OpenCnpjService $openCnpjService
     )
     {
         $this->empresaModel = $empresaModel;
@@ -208,9 +212,45 @@ class EmpresasController extends Controller
             return redirect()->back();
         }
 
+        //salvamento de dados cadastrais para empresas diversas para evitar erros
+        $opcaoSimplesNacional = (int) $dados['op_simp_nac'];
+        $dados['dados_cadastrais'] = json_encode([
+            'opcaoMei' => $opcaoSimplesNacional === 2 ? 1 : 2,
+            'optanteSimplesNacional' => in_array($opcaoSimplesNacional, [2, 3], true) ? 1 : 2,
+            'simplesNacional' => [],
+            'permiteOutrasDeducoes' => 2,
+            'permiteDescontoCondicionado' => 2,
+            'permiteDescontoIncondicionado' => 2,
+            'permiteExigibilidadeSuspensaDecisaoJudicial' => 2,
+            'permiteExigibilidadeSuspensaProcAdm' => 2,
+            'permiteTributarFora' => 2,
+            'tributacoesPermitidas' => [
+                'tribISSQN' => ['1'],
+            ],
+        ]);
+
+        /*if($dados['is_optante_simples_nac'] == 1){
+            $dados['op_simp_nac'] = 3;
+            $dados['regime_tributario'] = 'simples';
+            $dados['regime'] = 'simplesNacional';
+            
+            if($dados['is_mei'] != "0"){
+                $dados['op_simp_nac'] = 2;
+                $dados['regime_tributario'] = 'mei';
+                $dados['regime'] = 'simplesNacionalMEI';
+            }
+            $dados['regime'] = '-';
+        }else{
+            $dados['op_simp_nac'] = 1;
+            $dados['regime'] = 'regimeNormal';
+            $dados['regime_tributario'] = 'normal';
+        }*/
+
         $empresa = $this
             ->empresaModel
             ->create($dados);
+
+        
 
         //$this->saveOrUpdateSpedy($empresa);
         //$this->saveOrUpdateFocuNfe($empresa);
@@ -219,8 +259,18 @@ class EmpresasController extends Controller
             License::create([
                 'empresa_id' => $empresa->id,
                 'validate' => Carbon::now()->subDay(1)->format('Y-m-d')
-            ]);            
-            
+            ]);
+
+            try {
+                $this->openCnpjService->sincronizarCnaes($empresa);
+            } catch (Exception $e) {
+                Log::warning('OpenCNPJ: não foi possível sincronizar CNAEs da empresa ' . $empresa->id . ': ' . $e->getMessage());
+            }
+
+            // Busca os itens da LC 116 dos CNAEs da empresa e adiciona nas atividades
+            SincronizarAtividadesCnaeJob::dispatch($empresa->id);
+
+
             Utilitarios::sendMessage('Nova empresa cadastrada: ' . $empresa->razao_social . ' - CNPJ: ' . $empresa->cpf_cnpj . ' - Usuário: ' . auth()->user()->id . '  ' .auth()->user()->name);
 
             session()->flash('message', 'Registro Inserido com Sucesso.');
@@ -329,6 +379,23 @@ class EmpresasController extends Controller
         $userId = Auth::user()->id;
         $empresa = $this->empresaModel->find($id);
 
+        /*if($dados['is_optante_simples_nac'] == 1){
+            $dados['op_simp_nac'] = 3;
+            $dados['regime_tributario'] = 'simples';
+            $dados['regime'] = 'simplesNacional';
+            
+            if($dados['is_mei'] != "0"){
+                $dados['op_simp_nac'] = 2;
+                $dados['regime_tributario'] = 'mei';
+                $dados['regime'] = 'simplesNacionalMEI';
+            }
+            $dados['regime'] = '-';
+        }else{
+            $dados['op_simp_nac'] = 1;
+            $dados['regime'] = 'regimeNormal';
+            $dados['regime_tributario'] = 'normal';
+        }*/
+
         $empresaCompartilhada = $this->empresaCompartilhadaModel->where('empresa_id', $id)
             ->where('autorizado', 'S')
             ->where('solicitante_user_id', $userId)->first();
@@ -339,6 +406,9 @@ class EmpresasController extends Controller
         }
 
         $empresa->update($dados);
+
+        // Busca os itens da LC 116 dos CNAEs da empresa e adiciona nas atividades
+        SincronizarAtividadesCnaeJob::dispatch($empresa->id);
 
         //$this->saveOrUpdateSpedy($empresa);
         //$this->saveOrUpdateFocuNfe($empresa);

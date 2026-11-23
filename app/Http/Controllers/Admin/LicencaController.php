@@ -96,7 +96,6 @@ class LicencaController extends Controller
             session()->flash('danger', 'Este registro já foi alterado. Agora aguarde 2h para poder altera-lo novamente.');
             return redirect()->back();
         }*/
-
         $estaVencido = Carbon::parse($l->validate)->isPast();
 
         if ($estaVencido) {

@@ -15,8 +15,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use JCamelo\NfseNacionalLib\DTO\EnderecoDTO;
+use JCamelo\NfseNacionalLib\DTO\EnderecoImovelDTO;
 use JCamelo\NfseNacionalLib\DTO\EnderecoObraDTO;
 use JCamelo\NfseNacionalLib\DTO\EventoDTO;
+use JCamelo\NfseNacionalLib\DTO\ImovelDataDTO;
 use JCamelo\NfseNacionalLib\DTO\ObraDataDTO;
 
 class EmissorAmbienteNacionalService
@@ -250,6 +252,29 @@ class EmissorAmbienteNacionalService
                 )
             );
         }
+
+        //imovel no ibs/cbs
+        if(
+            isset($dados['txtEnderecoImovel']) && !empty($dados['txtEnderecoImovel']) &&
+            //isset($dados['txtNumeroImovel']) && !empty($dados['txtNumeroImovel']) &&
+            isset($dados['txtComplementoImovel']) && !empty($dados['txtComplementoImovel']) &&
+            isset($dados['txtUFImovel']) && !empty($dados['txtUFImovel']) &&
+            isset($dados['txtCidadeImovel']) && !empty($dados['txtCidadeImovel']) &&
+            isset($dados['txtCepImovel']) && !empty($dados['txtCepImovel']) &&
+            isset($dados['txtBairroImovel']) && !empty($dados['txtBairroImovel'])
+        ) {
+            $imovelData = new ImovelDataDTO(
+                inscImobFisc: $dados['txtinscImobFisc'],
+                end: new EnderecoImovelDTO(
+                    cMun: $dados['txtCidadeImovel'],
+                    CEP: preg_replace('/[^0-9]/', '', $dados['txtCepImovel']),
+                    xLgr: $dados['txtEnderecoImovel'],
+                    nro: $dados['txtNumeroImovel'],
+                    xCpl: $dados['txtComplementoImovel'],
+                    xBairro: $dados['txtBairroImovel'],
+                )
+            );
+        }
         
         $numeroProximoDPS = $empresa->num_ultimo_dps + 1;
         
@@ -359,7 +384,10 @@ class EmissorAmbienteNacionalService
 
             //dados da obra
             obra: $obra,
-            atvEvento: null,
+            atvEvento: $evento,
+            imovelData: $imovelData ?? null,
+            tpEntGov: $dados['ddlTpEntGov'] ?? null,
+            tpOper: $dados['ddlTpOper'] ?? null,
         );
 
         $certificadoCliente = Certificado::where('empresa_id', Session::get('empresa_selecionada'))
@@ -405,7 +433,7 @@ class EmissorAmbienteNacionalService
             Log::info("NFSE ADN");
             Log::info($dom->saveXML());
             //exit;
-            
+            //dd($dps);
             $response = $tools->enviaDpsAdn($dps->render(), 1);//2 para adn, 1 sefin -> 1 é padrão
             
             Log::info($response);
@@ -650,6 +678,32 @@ class EmissorAmbienteNacionalService
         $std->infDPS->ibscbs->indfinal = 0;
         $std->infDPS->ibscbs->cIndOp = $dados->cIndOp;
         $std->infDPS->ibscbs->indDest = 0;//0 – o destinatário é o próprio tomador/adquirente identificado na NFS-e (tomador = adquirente = destinatário);
+        $std->infDPS->ibscbs->tpOper = $dados->tpOper;
+        $std->infDPS->ibscbs->tpEntGov = $dados->tpEntGov;
+
+        //imovel no ibs/cbs
+        if(isset($dados->imovelData) && !is_null($dados->imovelData)){
+            $std->infDPS->ibscbs->imovel = new \stdClass();                
+            $std->infDPS->ibscbs->imovel->inscImobFisc = $dados->imovelData->inscImobFisc;
+            $std->infDPS->ibscbs->imovel->end = new \stdClass();                
+        
+            if(is_null($dados->imovelData->end->cPais)){
+                $std->infDPS->ibscbs->imovel->end->endNac = new \stdClass();                
+                $std->infDPS->ibscbs->imovel->end->endNac->cMun = $dados->imovelData->end->cMun;
+                $std->infDPS->ibscbs->imovel->end->endNac->CEP = $dados->imovelData->end->CEP;
+            }else{
+                $std->infDPS->ibscbs->imovel->end->endExt = new \stdClass();                
+                $std->infDPS->ibscbs->imovel->end->endExt->cPais = $dados->imovelData->end->cPais;
+                $std->infDPS->ibscbs->imovel->end->endExt->cEndPost = $dados->imovelData->end->cEndPost;
+                $std->infDPS->ibscbs->imovel->end->endExt->xCidade = $dados->imovelData->end->xCidade;
+                $std->infDPS->ibscbs->imovel->end->endExt->xEstProvReg = $dados->imovelData->end->xEstProvReg;
+            }
+
+            $std->infDPS->ibscbs->imovel->end->xLgr = $dados->imovelData->end->xLgr;
+            $std->infDPS->ibscbs->imovel->end->nro = $dados->imovelData->end->nro;
+            $std->infDPS->ibscbs->imovel->end->xCpl = $dados->imovelData->end->xCpl;
+            $std->infDPS->ibscbs->imovel->end->xBairro = $dados->imovelData->end->xBairro;
+        }
 
         //valores 
         $std->infDPS->ibscbs->valores = new \stdClass();
@@ -682,5 +736,216 @@ class EmissorAmbienteNacionalService
         $std->infDPS->valores->trib->totTrib->ptottribsn = $dados->percentualTotalTributos;
         
         return $std;
+    }
+
+    public function cancelar(array $dados, NotaEmitida $nota){
+        $empresa = $this->empresaModel->with(['atividadesEmpresa'])
+            ->find(Session::get('empresa_selecionada'));
+
+        $std = new \stdClass();
+        // Atenção: no seu código, 'npedregevento' é lido diretamente na raiz de $this->std
+        $std->npedregevento = '001'; // Ou '1', conforme o método generatePre() espera
+
+        // Grupo infPedReg
+        $std->infpedreg = new \stdClass();
+        $std->infpedreg->tpamb     = $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1; //1 - Produção, 2 - Homologação // 1 = Produção | 2 = Homologação
+        $std->infpedreg->veraplic  = '1.0.0';
+        $std->infpedreg->dhevento  = date('Y-m-d\TH:i:sP'); // Ex: 2026-11-20T10:22:00-03:00
+
+        // Informe apenas CNPJAutor OU CPFAutor (não ambos)
+        $std->infpedreg->cnpjautor = $empresa->cpf_cnpj;
+        // $std->infpedreg->cpfautor = '00000000000';
+
+        // Chave de acesso de 50 dígitos da NFS-e a ser cancelada
+        $std->infpedreg->chnfse = substr($dados['chave_nfse'], 3);
+
+        // Grupo do evento de cancelamento (e101101)
+        $std->infpedreg->e101101 = new \stdClass();
+        $std->infpedreg->e101101->xdesc   = 'Cancelamento de NFS-e';
+        $std->infpedreg->e101101->cmotivo = $dados['motivo']; // 1 = Erro na Emissão | 2 = Serviço não Prestado | 9 = Outros
+        $std->infpedreg->e101101->xmotivo = $dados['justificativa'];
+        
+        $certificadoCliente = Certificado::where('empresa_id', Session::get('empresa_selecionada'))
+            ->first();
+
+        if(getenv("AMBIENTE_PRODUCAO") == 0){
+            $path = getenv("CAMINHO_CERTIFICADO_LOCAL");
+        }else{
+            $path = getenv("CAMINHO_CERTIFICADO_PROD");
+        }
+        
+        $certificado = $path.$certificadoCliente->arquivo;
+        
+        try {
+            $config = new \stdClass();
+            $config->tpamb = $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1; //1 - Produção, 2 - Homologação
+            
+            $configJson = json_encode($config);
+            
+            $content = file_get_contents($certificado);
+            $password = base64_decode($certificadoCliente->senha);
+
+            $cert = \NFePHP\Common\Certificate::readPfx($content, $password);
+            $tools = new \Hadder\NfseNacional\Tools($configJson, $cert);
+            //$response = $tools->cancelaNfse($std);
+            $response = [
+                "tipoAmbiente" => 2,
+                "versaoAplicativo" => "SefinNacional_1.6.0",
+                "dataHoraProcessamento" => "2026-11-23T15:36:08.8146246-03:00",
+                "eventoXmlGZipB64" => "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"
+            ];
+                
+            if (isset($response['eventoXmlGZipB64'])) {
+                $xmlNfse = gzdecode(base64_decode($response['eventoXmlGZipB64']));
+                $dadosCancelamento = $this->extrairDadosCancelamento($xmlNfse);
+                
+                Utilitarios::sendMessage("Nota SN - Cancelada com Sucesso! \n\nEmpresa: {$empresa->razao_social}");
+
+                Log::info($xmlNfse);
+
+                $nota->cancelada = 1;
+                $nota->data_cancelamento = Carbon::parse($dadosCancelamento['data_processamento'])
+                    ->format('Y-m-d H:i:s');
+                $nota->chave = $dadosCancelamento['pedido']['chave_nfse'];
+                $nota->motivo_cancelamento = $dadosCancelamento['pedido']['motivo'];
+
+                $nota->save();
+                    
+                return [
+                    'error' => false,
+                    'mensagem' => 'Nota Cancelada com Sucesso',
+                    'registro' => $nota
+                ];
+            } else {
+                Log::info('Erros ao emitir NFSe: ' . json_encode($response));
+                if (isset($response['erros']) && !empty($response['erros'])) {
+                    $mensagemErro = '';
+                    foreach ($response['erros'] as $erro) {
+                        $mensagemErro .= $erro['Codigo'] . ' - ' . $erro['Descricao'] . "\n";
+
+                        if(isset($erro['Complemento']) && !empty($erro['Complemento'])){
+                            $mensagemErro .= 'Complemento: ' . $erro['Complemento'] . "\n";
+                        }
+
+                        DB::insert(
+                            'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                            [
+                                $empresa->id,
+                                'Erros ao emitir NFSe: ' . $erro['Codigo'] . ' - ' . $erro['Descricao'] . (isset($erro['Complemento']) ? ' Complemento: ' . $erro['Complemento'] : ''),
+                            ]
+                        );
+                    }
+                    //return redirect()->back()->with('danger', 'Erros ao emitir NFSe: ' . $mensagemErro);
+                    return [
+                        'error' => true,
+                        'mensagem' => 'Erros ao emitir NFSe: ' . $mensagemErro,
+                        'registro' => null
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            DB::insert(
+                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                [
+                    $empresa->id,
+                    $e->getMessage(),
+                ]
+            );
+            return [
+                'error' => true,
+                'mensagem' => 'Erro ao emitir NFSe: ' . $e->getMessage(),
+                'registro' => null
+            ];
+        }
+    }
+
+    protected function extrairDadosCancelamento(string $xml): array
+    {
+        $dom = new \DOMDocument();
+
+        $dom->preserveWhiteSpace = false;
+
+        if (!$dom->loadXML($xml, LIBXML_NONET)) {
+            throw new \RuntimeException(
+                'XML inválido.'
+            );
+        }
+
+        $xpath = new \DOMXPath($dom);
+
+        $xpath->registerNamespace(
+            'nfse',
+            'http://www.sped.fazenda.gov.br/nfse'
+        );
+
+        $get = function (string $query) use ($xpath) {
+            $node = $xpath->query($query)->item(0);
+
+            return $node ? trim($node->nodeValue) : null;
+        };
+
+        return [
+            'id_evento' => $get(
+                '//nfse:infEvento/@Id'
+            ),
+
+            'versao' => $get(
+                '//nfse:evento/@versao'
+            ),
+
+            'aplicacao' => $get(
+                '//nfse:verAplic'
+            ),
+
+            'ambiente' => $get(
+                '//nfse:ambGer'
+            ),
+
+            'sequencial' => $get(
+                '//nfse:nSeqEvento'
+            ),
+
+            'data_processamento' => $get(
+                '//nfse:dhProc'
+            ),
+
+            'numero_dfse' => $get(
+                '//nfse:nDFSe'
+            ),
+
+            'pedido' => [
+                'id' => $get(
+                    '//nfse:infPedReg/@Id'
+                ),
+
+                'ambiente' => $get(
+                    '//nfse:infPedReg/nfse:tpAmb'
+                ),
+
+                'data_evento' => $get(
+                    '//nfse:dhEvento'
+                ),
+
+                'cnpj_autor' => $get(
+                    '//nfse:CNPJAutor'
+                ),
+
+                'chave_nfse' => $get(
+                    '//nfse:chNFSe'
+                ),
+
+                'codigo_evento' => $get(
+                    '//*[local-name()="e101101"]/*[local-name()="cMotivo"]'
+                ),
+
+                'descricao_evento' => $get(
+                    '//*[local-name()="e101101"]/*[local-name()="xDesc"]'
+                ),
+
+                'motivo' => $get(
+                    '//*[local-name()="e101101"]/*[local-name()="xMotivo"]'
+                ),
+            ],
+        ];
     }
 }

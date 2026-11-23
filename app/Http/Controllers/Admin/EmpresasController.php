@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SincronizarAtividadesCnaeJob;
 use App\Models\CnaeLc;
 use Illuminate\Http\Request;
 
@@ -18,6 +19,7 @@ use App\Models\Tomador;
 use App\Models\Uf;
 use App\Models\User;
 use App\Services\Nfse\ProvedorNfseService;
+use App\Services\OpenCnpj\OpenCnpjService;
 use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +49,8 @@ class EmpresasController extends Controller
         Plano $planoModel,
         User $userModel,
         Nbs $nbsModel,
-        ProvedorNfseService $provedorNfseService
+        ProvedorNfseService $provedorNfseService,
+        private OpenCnpjService $openCnpjService
     )
     {
         $this->empresaModel = $empresaModel;
@@ -174,6 +177,12 @@ class EmpresasController extends Controller
             $empresaAdd->inscricao_municipal = '00000';
             $empresaAdd->save();
 
+            try {
+                $this->openCnpjService->sincronizarCnaes($empresaAdd);
+            } catch (\Exception $e) {
+                Log::warning('OpenCNPJ: não foi possível sincronizar CNAEs da empresa ' . $empresaAdd->id . ': ' . $e->getMessage());
+            }
+
             License::create([
                 'empresa_id' => $empresaAdd->id,
                 'validate' => Carbon::now()->subDay(1)->format('Y-m-d')
@@ -258,20 +267,53 @@ class EmpresasController extends Controller
         $empresa = $this->empresaModel->find($id); 
         if($dados['is_optante_simples_nac'] == 1){
             $dados['op_simp_nac'] = 3;
-            //$dados['tp_reg_apuracao_sn'] = "1";
-
+            $dados['regime_tributario'] = 'simples';
+            $dados['regime'] = 'simplesNacional';
+            
             if($dados['is_mei'] != "0"){
                 $dados['op_simp_nac'] = 2;
+                $dados['regime_tributario'] = 'mei';
+                $dados['regime'] = 'simplesNacionalMEI';
             }
+            $dados['regime'] = '-';
+        }else{
+            $dados['op_simp_nac'] = 1;
+            $dados['regime'] = 'regimeNormal';
+            $dados['regime_tributario'] = 'normal';
         }
 
+        //salvamento de dados cadastrais para empresas diversas para evitar erros
+        $opcaoSimplesNacional = (int) $dados['op_simp_nac'];
+        $dados['dados_cadastrais'] = json_encode([
+            'opcaoMei' => $opcaoSimplesNacional === 2 ? 1 : 2,
+            'optanteSimplesNacional' => in_array($opcaoSimplesNacional, [2, 3], true) ? 1 : 2,
+            'simplesNacional' => [],
+            'permiteOutrasDeducoes' => 2,
+            'permiteDescontoCondicionado' => 2,
+            'permiteDescontoIncondicionado' => 2,
+            'permiteExigibilidadeSuspensaDecisaoJudicial' => 2,
+            'permiteExigibilidadeSuspensaProcAdm' => 2,
+            'permiteTributarFora' => 2,
+            'tributacoesPermitidas' => [
+                'tribISSQN' => ['1'],
+            ],
+        ]);
 
         $empresa->update($dados);
+
+        try {
+            $this->openCnpjService->sincronizarCnaes($empresa);
+        } catch (\Exception $e) {
+            Log::warning('OpenCNPJ: não foi possível sincronizar CNAEs da empresa ' . $empresa->id . ': ' . $e->getMessage());
+        }
+
+        // Busca os itens da LC 116 dos CNAEs da empresa e adiciona nas atividades
+        SincronizarAtividadesCnaeJob::dispatch($empresa->id);
 
         //$provedor = EndPoint::where('codigo_municipio', $empresa->cidade_id)->first();
         if($empresa->sigla_provedor == 'outros'){
             try {
-                //$this->provedorNfseService->salvar($empresa, 'focunfe');
+                $this->provedorNfseService->salvar($empresa, 'focunfe');
                 Utilitarios::sendMessage("Empresa sincronizada na FocuNFe " . $empresa->razao_social);
             } catch (\Throwable $e) {
                 Log::error('Erro ao sincronizar empresa com provedor NFS-e', [
@@ -296,50 +338,139 @@ class EmpresasController extends Controller
      */
     public function destroy($id)
     {
-        try{
-            $empresa = $this->empresaModel->find($id);
-            $cnaes = $this->cnaeModel->where('empresa_id', $id)->get();
-            $atividades = $this->atividadeModel->where('empresa_id', $id)->get();
-            $licenca = $this->licenseModel->where('empresa_id', $id)->get();
-            $tomadores = Tomador::where('empresa_id', $id)->get();
-            $notas = NotaEmitida::where('empresa_id', $id)->get();
-        
-            /*foreach($notas as $n){
-                $n->delete();
+        $empresaId = $id; 
+        return DB::transaction(function () use ($empresaId) {
+
+            // Verifica e bloqueia a empresa durante a operação
+            $empresa = DB::table('empresas')
+                ->where('id', $empresaId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$empresa) {
+                /*throw new \RuntimeException(
+                    "Empresa {$empresaId} não encontrada."
+                );*/
+                session()->flash('info', "Empresa {$empresaId} não encontrada.");
+                return redirect()->route('admin.empresas.index');
             }
 
-            foreach($tomadores as $t){
-                $t->delete();
+            $database = DB::getDatabaseName();
+
+            // Identifica todas as tabelas que possuem empresa_id
+            $tabelas = DB::table('information_schema.columns')
+                ->select('TABLE_NAME')
+                ->where('TABLE_SCHEMA', $database)
+                ->where('COLUMN_NAME', 'empresa_id')
+                ->distinct()
+                ->pluck('TABLE_NAME')
+                ->toArray();
+
+            // Identifica os relacionamentos entre as tabelas
+            $relacionamentos = DB::table(
+                'information_schema.KEY_COLUMN_USAGE'
+            )
+                ->select([
+                    'TABLE_NAME as tabela_filha',
+                    'REFERENCED_TABLE_NAME as tabela_pai',
+                ])
+                ->where('TABLE_SCHEMA', $database)
+                ->whereNotNull('REFERENCED_TABLE_NAME')
+                ->get();
+
+            $conjunto = array_flip($tabelas);
+
+            // Grafo: tabela filha -> tabela pai
+            $grafo = [];
+            $grauEntrada = [];
+
+            foreach ($tabelas as $tabela) {
+                $grafo[$tabela] = [];
+                $grauEntrada[$tabela] = 0;
             }
 
-            foreach($cnaes as $cnae){
-                $cnae->delete();
+            foreach ($relacionamentos as $relacao) {
+
+                $filha = $relacao->tabela_filha;
+                $pai = $relacao->tabela_pai;
+
+                if (
+                    isset($conjunto[$filha]) &&
+                    isset($conjunto[$pai])
+                ) {
+                    if (!in_array($pai, $grafo[$filha])) {
+                        $grafo[$filha][] = $pai;
+                        $grauEntrada[$pai]++;
+                    }
+                }
             }
 
-            foreach($atividades as $atv){
-                $atv->delete();
-            }
-            
-            foreach($licenca as $l){
-                $l->delete();
-            }
+            // Ordenação topológica: filhos antes dos pais
+            $fila = [];
 
-            $faturas = Fatura::where('empresa_id', $empresa->id)->get();
-            
-            foreach ($faturas as $fat) {
-                FaturaItem::where('fatura_id', $fat->id)->delete();
+            foreach ($grauEntrada as $tabela => $grau) {
+                if ($grau === 0) {
+                    $fila[] = $tabela;
+                }
             }
 
-            Fatura::where('empresa_id', $empresa->id)->delete();
+            $ordem = [];
 
-            $empresa->delete();*/
-        }catch(\Exception $e){
-            dd($e->getMessage() . ' ' . $e->getLine());
-        }
+            while (!empty($fila)) {
 
-        session()->flash('message', 'Registro Removido com Sucesso.');
+                $tabela = array_shift($fila);
 
-        return redirect()->route('admin.empresas.index');
+                $ordem[] = $tabela;
+
+                foreach ($grafo[$tabela] as $pai) {
+
+                    $grauEntrada[$pai]--;
+
+                    if ($grauEntrada[$pai] === 0) {
+                        $fila[] = $pai;
+                    }
+                }
+            }
+
+            // Impede exclusão caso existam dependências cíclicas
+            if (count($ordem) !== count($tabelas)) {
+                throw new \RuntimeException(
+                    'Não foi possível determinar a hierarquia das tabelas. '
+                    . 'Existem relacionamentos cíclicos.'
+                );
+            }
+
+            $exclusoes = [];
+
+            // Exclui os registros filhos primeiro
+            foreach ($ordem as $tabela) {
+
+                $quantidade = DB::table($tabela)
+                    ->where('empresa_id', $empresaId)
+                    ->delete();
+
+                $exclusoes[$tabela] = $quantidade;
+            }
+
+            // Exclui a empresa por último
+            $exclusoes['empresas'] = DB::table('empresas')
+                ->where('id', $empresaId)
+                ->delete();
+
+            /*return [
+                'empresa_id' => $empresaId,
+                'sucesso' => true,
+                'exclusoes' => $exclusoes,
+                'total_registros' => array_sum($exclusoes),
+            ];*/
+
+            session()->flash('message', 'Registro Removido com Sucesso.');
+            return redirect()->route('admin.empresas.index');
+        });
+
+        //session()->flash('message', 'Registro Removido com Sucesso.');
+
+        //return redirect()->route('admin.empresas.index');
     }
 
     public function atualizarRegimeEspecial($id)

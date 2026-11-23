@@ -37,12 +37,14 @@ class NotaEmitida extends Model
 
 
     public function getCanCancelAttribute(){       
-        $diff = now()->diffInDays($this->created_at);
+        /*$diff = now()->diffInDays($this->created_at);
         
         if($diff <= 2){
             return true;
         }
 
-        return false;
+        return false;*/
+
+        return true;
     }
 }

@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\EmpresaCnae;
 //use App\Models\EmpresaCnae;
 use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
-use stdClass;
 
 class EmpresaCnaeController extends Controller
 {
     private $cnaesModel;
 
-    public function __construct(stdClass $cnaesModel)
+    public function __construct(EmpresaCnae $cnaesModel)
     {
         $this->cnaesModel = $cnaesModel;
     }

@@ -23,6 +23,8 @@ use App\Models\Tomador;
 use App\Models\Uf;
 use App\Services\EmissorAmbienteNacionalService;
 use App\Services\EmissorNotaService;
+use App\Services\FocuNfe\FocunfseService;
+use App\Services\FocuNfe\GerarDadosNfseService;
 use App\Services\NotaFiscalAuthorization;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -30,9 +32,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
-
-use JCamelo\NfseNacionalLib\Services\NFSeService;
-
 
 use function PHPUnit\Framework\isNull;
 
@@ -56,6 +55,7 @@ class NotaController extends Controller
     protected NotaFiscalAuthorization $notaAuthorization;
     private $consultaCorrelacaoModel;
     private EmissorAmbienteNacionalService $emissorAmbienteNacionalService;
+    private FocunfseService $focuNfService;
     
     public function __construct(
         Empresa $empresaModel, 
@@ -73,7 +73,8 @@ class NotaController extends Controller
         Pais $paisesModel, 
         NotaFiscalAuthorization $notaAuthorization,
         CorrelacaoTribNacNbs $consultaCorrelacaoModel,
-        EmissorAmbienteNacionalService $emissorAmbienteNacionalService
+        EmissorAmbienteNacionalService $emissorAmbienteNacionalService,
+        FocunfseService $focuNfService
     ){
         $this->empresaModel = $empresaModel;
         $this->tomadorModel = $tomadorModel;
@@ -94,6 +95,8 @@ class NotaController extends Controller
         $this->notaAuthorization = $notaAuthorization;
         $this->consultaCorrelacaoModel = $consultaCorrelacaoModel;
         $this->emissorAmbienteNacionalService = $emissorAmbienteNacionalService;
+
+        $this->focuNfService = $focuNfService;
     }
 
     public function index(){
@@ -416,7 +419,10 @@ class NotaController extends Controller
                     return redirect()->route('nota.index');
                 }
             }else{
-                dd("Provedor Desconhecido");
+                $servico = new GerarDadosNfseService;
+                $dados = $servico->gerarDados($dados);
+                $payload = $this->focuNfService->gerarPayload($empresaSessao, $dados);
+                $retorno = $this->focuNfService->enviar($empresaSessao, $payload);
             }
             
             return redirect()->route('notas.show', $retorno['registro']->id);
@@ -845,5 +851,40 @@ class NotaController extends Controller
                 
         
         return response()->json($indOpIbsCbs,200,[],JSON_UNESCAPED_UNICODE);
+    }
+
+    public function cancelar(int $id){
+        if(request()->method() == 'GET'){
+            $nota = $this->notasEmitidas->find($id);
+            $xml = simplexml_load_string($nota->nfse_xml);
+            $xml->registerXPathNamespace(
+                'ns',
+                'http://www.sped.fazenda.gov.br/nfse'
+            );
+
+            $resultado = $xml->xpath('//ns:infNFSe/@Id');
+
+            $chaveNfse = (string) $resultado[0];
+
+            $motivo = [
+                null => 'Informe o Motivo',
+                1 => 'Erro na Emissão',
+                2 => 'Serviço não Prestado',
+                9 => 'Outros'
+            ];
+
+            return view('emissor.cancelamento_nacional')->with([
+                'nota' => $nota,
+                'motivo' => $motivo,
+                'chave_nfse' => $chaveNfse
+            ]);
+        }else{
+            $dados = request()->all();
+            $nota = $this->notasEmitidas->find($id);
+            $retorno = $this->emissorAmbienteNacionalService->cancelar($dados, $nota);
+
+            session()->flash('success', 'Nota Cancelada com Sucesso.');
+            return redirect()->route('notas.show', $retorno['registro']->id);
+        }
     }
 }
