@@ -852,4 +852,36 @@ class NotaController extends Controller
         
         return response()->json($indOpIbsCbs,200,[],JSON_UNESCAPED_UNICODE);
     }
+
+    public function cancelar(int $id){
+        if(request()->method() == 'GET'){
+            $nota = $this->notasEmitidas->find($id);
+            $xml = simplexml_load_string($nota->nfse_xml);
+            $xml->registerXPathNamespace(
+                'ns',
+                'http://www.sped.fazenda.gov.br/nfse'
+            );
+
+            $resultado = $xml->xpath('//ns:infNFSe/@Id');
+
+            $chaveNfse = (string) $resultado[0];
+
+            $motivo = [
+                null => 'Informe o Motivo',
+                1 => 'Erro na Emissão',
+                2 => 'Serviço não Prestado',
+                9 => 'Outros'
+            ];
+
+            return view('emissor.cancelamento_nacional')->with([
+                'nota' => $nota,
+                'motivo' => $motivo,
+                'chave_nfse' => $chaveNfse
+            ]);
+        }else{
+            $dados = request()->all();
+            $retorno = $this->emissorAmbienteNacionalService->cancelar($dados);
+            dd($retorno);
+        }
+    }
 }

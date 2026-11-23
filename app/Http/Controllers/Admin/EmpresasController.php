@@ -18,6 +18,7 @@ use App\Models\Tomador;
 use App\Models\Uf;
 use App\Models\User;
 use App\Services\Nfse\ProvedorNfseService;
+use App\Services\OpenCnpj\OpenCnpjService;
 use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +48,8 @@ class EmpresasController extends Controller
         Plano $planoModel,
         User $userModel,
         Nbs $nbsModel,
-        ProvedorNfseService $provedorNfseService
+        ProvedorNfseService $provedorNfseService,
+        private OpenCnpjService $openCnpjService
     )
     {
         $this->empresaModel = $empresaModel;
@@ -174,6 +176,12 @@ class EmpresasController extends Controller
             $empresaAdd->inscricao_municipal = '00000';
             $empresaAdd->save();
 
+            try {
+                $this->openCnpjService->sincronizarCnaes($empresaAdd);
+            } catch (\Exception $e) {
+                Log::warning('OpenCNPJ: não foi possível sincronizar CNAEs da empresa ' . $empresaAdd->id . ': ' . $e->getMessage());
+            }
+
             License::create([
                 'empresa_id' => $empresaAdd->id,
                 'validate' => Carbon::now()->subDay(1)->format('Y-m-d')
@@ -273,7 +281,6 @@ class EmpresasController extends Controller
             $dados['regime_tributario'] = 'normal';
         }
 
-
         //salvamento de dados cadastrais para empresas diversas para evitar erros
         $opcaoSimplesNacional = (int) $dados['op_simp_nac'];
         $dados['dados_cadastrais'] = json_encode([
@@ -292,6 +299,12 @@ class EmpresasController extends Controller
         ]);
 
         $empresa->update($dados);
+
+        try {
+            $this->openCnpjService->sincronizarCnaes($empresa);
+        } catch (\Exception $e) {
+            Log::warning('OpenCNPJ: não foi possível sincronizar CNAEs da empresa ' . $empresa->id . ': ' . $e->getMessage());
+        }
 
         //$provedor = EndPoint::where('codigo_municipio', $empresa->cidade_id)->first();
         if($empresa->sigla_provedor == 'outros'){

@@ -34,4 +34,8 @@ return [
         'url' => env('SPEDY_API_URL', 'https://api.spedy.com.br/v1'),
         'api_key' => env('SPEDY_API_KEY'),
     ],
+
+    'opencnpj' => [
+        'url' => env('OPENCNPJ_API_URL', 'https://api.opencnpj.org'),
+    ],
 ];

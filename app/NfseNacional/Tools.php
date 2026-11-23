@@ -183,12 +183,13 @@ class Tools extends RestCurl
         //$content = $this->canonize($content);
         $content = $this->sign($content, 'infPedReg', '', 'pedRegEvento');
         $content = '<?xml version="1.0" encoding="UTF-8"?>' . $content;
+
         $gz = gzencode($content);
         $data = base64_encode($gz);
         $dados = [
             'pedidoRegistroEventoXmlGZipB64' => $data
         ];
-        $operacao = 'nfse/' . $std->infPedReg->chNFSe . '/eventos';
+        $operacao = 'nfse/' . $std->infpedreg->chnfse . '/eventos';
         $retorno = $this->postData($operacao, json_encode($dados));
         return $retorno;
     }

@@ -163,14 +163,28 @@
 
                                 @if($nota->cancelada == '0')
                                     @if($nota->can_cancel)
-                                        <!--a href="{{ route('notas.cancelar-issnet', $nota->id) }}"
-                                        class="px-3 py-1 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
-                                            Cancelar
-                                        </a-->
+                                        @if($nota->empresa->sigla_provedor == 'issnet')
+                                            <!--a href="{{ route('notas.cancelar-issnet', $nota->id) }}"
+                                            class="px-3 py-1 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
+                                                Cancelar
+                                            </a-->
+                                            <span class="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-200 rounded">
+                                                Cancelamento Somente pelo ISSNET
+                                            </span>
+                                        @elseif($nota->empresa->sigla_provedor == 'nacional')
+                                            <a href="{{ route('notas.adn-cancelar', $nota->id) }}"
+                                            class="px-3 py-1 text-xs font-semibold text-white bg-red-600 rounded hover:bg-red-700">
+                                                Cancelar
+                                            </a>
+                                        @else
+                                            <span class="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-200 rounded">
+                                                Cancelamento Indisponível
+                                            </span>
+                                        @endif
                                     @else
-                                        <!--span class="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-200 rounded">
-                                            Indisponível
-                                        </span-->
+                                        <span class="px-3 py-1 text-xs font-semibold text-gray-500 bg-gray-200 rounded">
+                                            Cancelamento Indisponível
+                                        </span>
                                     @endif
                                 @else
                                     <span class="px-3 py-1 text-xs font-semibold text-white bg-red-800 rounded">

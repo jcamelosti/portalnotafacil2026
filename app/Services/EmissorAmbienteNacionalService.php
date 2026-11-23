@@ -737,4 +737,136 @@ class EmissorAmbienteNacionalService
         
         return $std;
     }
+
+    public function cancelar(array $dados){
+        $empresa = $this->empresaModel->with(['atividadesEmpresa'])
+            ->find(Session::get('empresa_selecionada'));
+
+        $std = new \stdClass();
+        // Atenção: no seu código, 'npedregevento' é lido diretamente na raiz de $this->std
+        $std->npedregevento = '001'; // Ou '1', conforme o método generatePre() espera
+
+        // Grupo infPedReg
+        $std->infpedreg = new \stdClass();
+        $std->infpedreg->tpamb     = $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1; //1 - Produção, 2 - Homologação // 1 = Produção | 2 = Homologação
+        $std->infpedreg->veraplic  = '1.0.0';
+        $std->infpedreg->dhevento  = date('Y-m-d\TH:i:sP'); // Ex: 2026-11-20T10:22:00-03:00
+
+        // Informe apenas CNPJAutor OU CPFAutor (não ambos)
+        $std->infpedreg->cnpjautor = $empresa->cpf_cnpj;
+        // $std->infpedreg->cpfautor = '00000000000';
+
+        // Chave de acesso de 50 dígitos da NFS-e a ser cancelada
+        $std->infpedreg->chnfse    = substr($dados['chave_nfse'], 3);
+
+        // Grupo do evento de cancelamento (e101101)
+        $std->infpedreg->e101101 = new \stdClass();
+        $std->infpedreg->e101101->xdesc   = 'Cancelamento de NFS-e';
+        $std->infpedreg->e101101->cmotivo = $dados['motivo']; // 1 = Erro na Emissão | 2 = Serviço não Prestado | 9 = Outros
+        $std->infpedreg->e101101->xmotivo = $dados['justificativa'];
+        
+        $certificadoCliente = Certificado::where('empresa_id', Session::get('empresa_selecionada'))
+            ->first();
+
+        if(getenv("AMBIENTE_PRODUCAO") == 0){
+            $path = getenv("CAMINHO_CERTIFICADO_LOCAL");
+        }else{
+            $path = getenv("CAMINHO_CERTIFICADO_PROD");
+        }
+        
+        $certificado = $path.$certificadoCliente->arquivo;
+        
+        try {
+            $config = new \stdClass();
+            $config->tpamb = $empresa->ambiente_emissao == 'HOMOLOGACAO' ? 2 : 1; //1 - Produção, 2 - Homologação
+            
+            $configJson = json_encode($config);
+            
+            $content = file_get_contents($certificado);
+            $password = base64_decode($certificadoCliente->senha);
+
+            $cert = \NFePHP\Common\Certificate::readPfx($content, $password);
+            $tools = new \Hadder\NfseNacional\Tools($configJson, $cert);
+            $response = $tools->cancelaNfse($std);
+            
+            Log::info($response);
+            dd($response);
+            /*
+            
+            if (isset($response['nfseXmlGZipB64'])) {
+                $xmlNfse = gzdecode(base64_decode($response['nfseXmlGZipB64']));
+
+                $empresa->num_ultimo_dps = $numeroProximoDPS; //recebo o ultimo emitido
+                $empresa->save();
+
+                Utilitarios::sendMessage("Nota SN - Emitida com Sucesso! \n\nEmpresa: {$empresa->razao_social} \nChave NFSe: {$response['chaveAcesso']}");
+
+                Log::info($xmlNfse);
+
+                $xml = simplexml_load_string($xmlNfse);
+                $xml->registerXPathNamespace('nfse', 'http://www.sped.fazenda.gov.br/nfse');
+                $nNFSe = (string) $xml->xpath('//nfse:nNFSe')[0];
+
+
+                $ne = NotaEmitida::create([
+                    'empresa_id' => $empresa->id,
+                    'tomador_id' => $tomador->id,
+                    'nfse_xml'   => $xmlNfse,
+                    'num_nfse'   => $nNFSe,
+                    'valor'      => $totalNfse,
+                    'dados_emissao' => $dados_form_original,
+                    'chave' => $response['chaveAcesso']
+                ]);
+
+                //session()->flash('success', 'Nota Fiscal Emitida com Sucesso.');
+                
+                return [
+                    'error' => false,
+                    'mensagem' => 'Nota Emitida com Sucesso',
+                    'registro' => $ne
+                ];
+            } else {
+                Log::info('Erros ao emitir NFSe: ' . json_encode($response));
+                if (isset($response['erros']) && !empty($response['erros'])) {
+                    $mensagemErro = '';
+                    foreach ($response['erros'] as $erro) {
+                        $mensagemErro .= $erro['Codigo'] . ' - ' . $erro['Descricao'] . "\n";
+
+                        if(isset($erro['Complemento']) && !empty($erro['Complemento'])){
+                            $mensagemErro .= 'Complemento: ' . $erro['Complemento'] . "\n";
+                        }
+
+                        DB::insert(
+                            'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                            [
+                                $empresa->id,
+                                'Erros ao emitir NFSe: ' . $erro['Codigo'] . ' - ' . $erro['Descricao'] . (isset($erro['Complemento']) ? ' Complemento: ' . $erro['Complemento'] : ''),
+                            ]
+                        );
+                    }
+                    //return redirect()->back()->with('danger', 'Erros ao emitir NFSe: ' . $mensagemErro);
+                    return [
+                        'error' => true,
+                        'mensagem' => 'Erros ao emitir NFSe: ' . $mensagemErro,
+                        'registro' => null
+                    ];
+                }
+            }*/
+        } catch (\Exception $e) {
+            /*DB::insert(
+                'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
+                [
+                    $empresa->id,
+                    $e->getMessage(),
+                ]
+            );
+            return [
+                'error' => true,
+                'mensagem' => 'Erro ao emitir NFSe: ' . $e->getMessage(),
+                'registro' => null
+            ];*/
+
+            dd('Exception',$e->getMessage(), $e->getLine(), $e->getFile());
+        }
+    }
 }

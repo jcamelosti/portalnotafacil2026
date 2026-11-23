@@ -12,6 +12,7 @@ use App\Models\Municipio;
 use App\Models\Nbs;
 use App\Models\Uf;
 use App\Services\FocuNfe\GestaoService;
+use App\Services\OpenCnpj\OpenCnpjService;
 use App\Traits\IssnetTrait;
 use App\Utilitarios\Utilitarios;
 use Carbon\Carbon;
@@ -19,6 +20,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use JCamelo\NfseNacionalLib\Manager\CertificateManager;
 use JCamelo\NfseNacionalLib\Services\NFSeService;
@@ -44,7 +46,8 @@ class EmpresasController extends Controller
         EmpresaAtividade $atividadeModel,
         License $licenseModel, Certificado $certificadoModel, EmpresaCompartilhada $empresaCompartilhadaModel, Nbs $nbsModel,
         private CertificateManager $certManager, 
-        private GestaoService $focuNfeService
+        private GestaoService $focuNfeService,
+        private OpenCnpjService $openCnpjService
     )
     {
         $this->empresaModel = $empresaModel;
@@ -246,6 +249,8 @@ class EmpresasController extends Controller
             ->empresaModel
             ->create($dados);
 
+        
+
         //$this->saveOrUpdateSpedy($empresa);
         //$this->saveOrUpdateFocuNfe($empresa);
 
@@ -253,8 +258,17 @@ class EmpresasController extends Controller
             License::create([
                 'empresa_id' => $empresa->id,
                 'validate' => Carbon::now()->subDay(1)->format('Y-m-d')
-            ]);            
+            ]);
+
+            try {
+                $this->openCnpjService->sincronizarCnaes($empresa);
+            } catch (Exception $e) {
+                Log::warning('OpenCNPJ: não foi possível sincronizar CNAEs da empresa ' . $empresa->id . ': ' . $e->getMessage());
+            }
+
+            //implementar busca de itens lc para adicionar nas atividades
             
+
             Utilitarios::sendMessage('Nova empresa cadastrada: ' . $empresa->razao_social . ' - CNPJ: ' . $empresa->cpf_cnpj . ' - Usuário: ' . auth()->user()->id . '  ' .auth()->user()->name);
 
             session()->flash('message', 'Registro Inserido com Sucesso.');

@@ -110,6 +110,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             Route::get('nota/imprimir/pdf/{prestador}/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'imprimirNota'])->name('notas.pdf');
             Route::get('nota/imprimir/xml/{prestador}/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'baixarXml'])->name('notas.xml');
             Route::get('nota/cancelar/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'cancelarNota'])->name('notas.cancelar');
+            Route::any('nota/adn/cancelar/{id}', [\App\Http\Controllers\Emissor\NotaController::class, 'cancelar'])->name('notas.adn-cancelar');
             Route::get('notas/emitidas',  [\App\Http\Controllers\Emissor\NotaController::class, 'listarNotaEmitidas'])->name('notas.emitidas-listagem');
             Route::get('nota/print/xml/{nota}', [\App\Http\Controllers\Emissor\NotaController::class, 'visualizarXmlNota'])->name('notas.visualizar-xml');
             Route::any('nota/cancelar/{id}/issnet', [\App\Http\Controllers\Emissor\NotaController::class, 'cancelarNotaIssNet'])->name('notas.cancelar-issnet');

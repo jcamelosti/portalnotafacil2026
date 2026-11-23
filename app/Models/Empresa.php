@@ -113,6 +113,11 @@ class Empresa extends Model
         return $this->hasMany(EmpresaAtividade::class, 'empresa_id', 'id');
     }
 
+    public function cnaes()
+    {
+        return $this->hasMany(EmpresaCnae::class, 'empresa_id', 'id');
+    }
+
     /*public function naturezaOperacoes()
     {
         return $this->hasMany(EmpresaNaturezaOperacao::class, 'empresa_id', 'id');
