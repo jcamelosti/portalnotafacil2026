@@ -31,6 +31,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('empresas:excluir-licencas-vencidas --dias=90')
             ->dailyAt('02:00')
             ->withoutOverlapping();
+
+        // Excluir certificados digitais vencidos todo dia às 03:00
+        $schedule->command('certificados:excluir-vencidos')
+            ->dailyAt('03:00')
+            ->withoutOverlapping();
     }
 
     /**

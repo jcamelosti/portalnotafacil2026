@@ -1,6 +1,7 @@
 <?php
 namespace JCamelo\NfseNacionalLib\Services;
 
+use Exception;
 use Illuminate\Support\Facades\Log;
 use JCamelo\NfseNacionalLib\DTO\CadastroDTO;
 use JCamelo\NfseNacionalLib\Manager\CertificateManager;
@@ -166,6 +167,10 @@ class ISSNetService
 
         Log::info("DADOS CADASTRAIS");
         Log::info($response);
+
+        if(empty($response) || is_null($response)){
+            throw new Exception("Não foi possível consultar os Dados Cadastrais");
+        }
 
         $cadastroXml = $this->extractCadastro($response);
         
