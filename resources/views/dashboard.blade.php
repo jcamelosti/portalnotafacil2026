@@ -474,7 +474,7 @@
                     <div class="p-6 text-center sm:p-8">
 
                         <p class="text-sm font-bold uppercase tracking-wider text-cool-gray-500">
-                            Certificado Digital a partir de
+                            Certificado Digital A1 CNPJ
                         </p>
 
                         <!-- Preço -->
