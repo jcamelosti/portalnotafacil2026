@@ -62,6 +62,8 @@ Route::get('/checar/retorno/mercadopago/{id}', [MercadoPagoController::class, 'c
 
 Route::post('/retorno/mercadopago', [MercadoPagoController::class, 'index'])->name('mercadopago.webhook');//mercadopago - notification_url
 Route::post('/webhook/mercadopago/capture', [MercadoPagoController::class, 'webHookResponse'])->name('mercadopago.webhook-response');//mercado pago webhook
+
+
 Route::post('/webhook/infinitepay/capture', [InfinitePayWebHookController::class, 'webHookResponse'])->name('infinitypay.webhook-response');//infinitypay webhook
 
 /*Route::get('/foto/{hash}', function ($hash) {
@@ -81,8 +83,8 @@ Route::get('/testes/focunfe', [TesteNfeNacionalController::class, 'cadastraEmpre
 
 Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', 'dados.faturamento', 'checar.acesso.empresa']], function () {
     Route::group(['prefix' => 'c'], function() {
-        /*Route::get('/pagamento-realizado', [DashboardController::class, 'pagamentoRealizado'])->name('pagamentoRealizado');
-        Route::get('/trazernotas/{empresaId}', [\App\Http\Controllers\Emissor\NotaController::class, 'getNotasEmpresa'])->name('sincnotasempresa');
+        Route::get('/pagamento-realizado', [DashboardController::class, 'pagamentoRealizado'])->name('pagamentoRealizado');
+        /*Route::get('/trazernotas/{empresaId}', [\App\Http\Controllers\Emissor\NotaController::class, 'getNotasEmpresa'])->name('sincnotasempresa');
         Route::get('/sinc/notas/{empresaId}', [\App\Http\Controllers\Emissor\NotaController::class, 'sincronizarNotasRecentes'])->name('sincronizarNotasRecentes');*/
     
         Route::get('/', [\App\Http\Controllers\Emissor\DashboardController::class, 'dashboard'])->name('dashboard');

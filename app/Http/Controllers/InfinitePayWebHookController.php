@@ -33,8 +33,13 @@ class InfinitePayWebHookController extends Controller
     
     public function webHookResponse(Request $request){
         $dados = $request->all();
-        $num_doc = $dados['order_nsu'];
-        $transaction_id = $dados['transaction_nsu'];
+        $num_doc = $dados['order_nsu'] ?? null;
+        $transaction_id = $dados['transaction_nsu'] ?? null;
+
+        if(is_null($num_doc) || is_null($transaction_id)){
+            Log::info($dados);
+            return [];
+        }
         
         $notificacao = [
                 'metodo_origem' => 'InfinitePayWebHookController::index',

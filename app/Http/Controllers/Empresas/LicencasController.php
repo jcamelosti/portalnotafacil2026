@@ -262,121 +262,8 @@ class LicencasController extends Controller
         }
     }
 
-    /* Versão gerar Pix com Safe2Pay - Abandonada pois há taxas de 1% - adotado mercado pago em 26-12-2022 */
-    /*public function gerarPix($faturaId){
-        try{
-            $fatura = $this->faturaModel
-                ->find(base64_decode($faturaId));
-
-            $plano = $fatura->items()
-                ->first()
-                ->plano()
-                ->first();
-
-            $varPlano = $fatura->items()
-                ->first()
-                ->variacaoPlano()
-                ->first();
-
-            $empresa = $fatura->empresa()->first();
-            $cliente = $empresa
-                ->responsavel()
-                ->first()
-                ->cliente()
-                ->first();
-
-            if(is_null($cliente)){
-                $cliente = new Cliente();
-                $cliente->cpf_cnpj = $empresa->cpf_cnpj;
-                $cliente->telefone1 = $empresa->telefone1;
-                $cliente->cep = $empresa->cep;
-                $cliente->endereco = $empresa->logradouro;
-                $cliente->numero = $empresa->numero;
-                $cliente->complemento = $empresa->complemento;
-                $cliente->bairro = $empresa->bairro;
-                $cliente->cidade_id = $empresa->cidade_id;
-            }
-
-            set_time_limit(20000);
-            ini_set("max_execution_time", 20000);
-
-            //PIX DINAMICO
-            $sendData = [
-                'IsSandbox' => false,
-                'Application' => 'Portal Nota Fácil',
-                'Vendor' => 'Portal Nota Fácil',
-                'PaymentMethod' => '6',
-                "Reference"     => $fatura->num_doc,
-                "CallbackUrl"   => 'https://emissor.portalnotafacil.com.br/retorno/safe2pay',
-                'Customer' => [
-                    'Name' => ucwords(strtolower(Auth::user()->name)),
-                    'Identity' => preg_replace('/[^0-9]/', '', $cliente->cpf_cnpj),
-                    'Phone' => preg_replace('/[^0-9]/', '', $cliente->telefone1),
-                    'Email' => Auth::user()->email,
-                    'Address' =>
-                        [
-                            'ZipCode' => preg_replace('/[^0-9]/', '', $cliente->cep),
-                            'Street' => $cliente->endereco,
-                            'Number' => $cliente->numero,
-                            'Complement' => $cliente->complemento,
-                            'District' => $cliente->bairro,
-                            'CityName' => $cliente->cidade()->first()->municipio,
-                            'StateInitials' => $cliente->cidade()->first()->estado()->first()->sigla,
-                            'CountryName' => 'Brasil',//Fixo
-                        ],
-                ],
-                'Products' => [
-                    [
-                        'Code' => '001',
-                        'Description' => 'PLANO: ' . $plano->plano_nome . '| VARIAÇÃO: ' . $varPlano->descricao,
-                        'UnitPrice' => number_format($fatura->total,2),
-                        'Quantity' => 1,
-                    ],
-                ],
-            ];
-            
-            $pix = json_encode($sendData);
-            
-            $opts = array(
-                'http'=>array(
-                    'method'=>"POST",
-                    'header'=>"X-API-KEY: 81A153D2CF054DB3B67906F533A1BC58\r\n" .
-                        "Content-type: application/json\r\n",
-                    'content'=> $pix
-                )
-            );
-            $context = stream_context_create($opts);
-            $result = file_get_contents('https://payment.safe2pay.com.br/v2/Payment', false, $context);
-
-            if ($result === FALSE) {
-                session()->flash('danger', 'Não foi possível Gerar o PIX.');
-                return redirect()->route('area-cliente');
-            }
-            $retorno = json_decode($result);
-
-            if(isset($retorno->HasError) && $retorno->HasError){
-                session()->flash('danger', $retorno->Error);
-                return redirect()->route('area-cliente');
-            }
-            
-            $fatura->transacao_id = $retorno->ResponseDetail->IdTransaction;
-            $fatura->safe2pay_pix_data = json_encode($retorno);
-            $fatura->save();
-
-            //Utilitarios::sendMessage('Cliente Portal Nota Fácil ' . $empresa->razao_social . ' Solicitou Renovação de Licença ' . $varPlano->descricao);
-        
-            return view('licenciamento.chave_pix', compact([
-                'retorno',
-                'fatura'
-            ]));
-        }catch(Exception $e){
-            session()->flash('danger', 'Não foi possível gerar a Chave PIX. Tente Novamente');
-            return redirect()->route('area-cliente');
-        }
-    }*/
-
     /* Gerando Pagamento Via Mercado Pago */
-    public function gerarPix($faturaId){
+    /*public function gerarPix($faturaId){
         try{
             $fatura = $this->faturaModel
                 ->find(base64_decode($faturaId));
@@ -478,7 +365,7 @@ class LicencasController extends Controller
             session()->flash('danger', 'Não foi possível gerar a Chave PIX. Tente Novamente');
             return redirect()->route('area-cliente');
         }
-    }
+    }*/
 
 
     /*
@@ -558,7 +445,7 @@ class LicencasController extends Controller
     }
 
     /* Gerando Cobrança Via InfinitePay via PIX */
-    /*public function gerarPix($faturaId){
+    public function gerarPix($faturaId){
         $faturaId = base64_decode($faturaId);
 
         $fatura = $this->faturaModel
@@ -617,8 +504,8 @@ class LicencasController extends Controller
                 'email' => auth()->user()->email,
                 'phone_number' => '+55'. $cliente->telefone1
             ],
-            'redirect_url' => "https://https://nfse-nacional.portalnotafacil.com.br/c/pagamento-realizado",
-            'webhook_url'=> 'https://https://nfse-nacional.portalnotafacil.com.br/webhook/infinitepay/capture',
+            'redirect_url' => "https://nfse-nacional.portalnotafacil.com.br/c/pagamento-realizado",
+            'webhook_url'=> 'https://nfse-nacional.portalnotafacil.com.br/webhook/infinitepay/capture',
             'address' => [
                 "cep" => $cliente->cep,
                 "street"=> $cliente->endereco,
@@ -633,7 +520,7 @@ class LicencasController extends Controller
         $result = $response->json();
 
         return redirect()->away($result['url']);
-    }*/
+    }
 
     public function index(Request $request){
         $campos = $request->all();
