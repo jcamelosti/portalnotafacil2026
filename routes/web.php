@@ -279,6 +279,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca', '
             Route::get('empresa/{id}/renovacao', [LicencasController::class, 'renovacao'])->name('renovacao');
             Route::get('empresas/renovacao/ordem-pagamento/{plano}', [LicencasController::class, 'gerarOrdemPagamento'])->name('gerar-fatura');
             Route::get('gerar-chave-pix/{faturaId}', [LicencasController::class, 'gerarPix'])->name('gerar-pix');
+            Route::get('infinite-pay/gerar-chave-pix/{faturaId}', [LicencasController::class, 'infinitePayGerarPix'])->name('inifite-pay-gerar-pix');
             //Route::get('gerar-chave-pix/{fatura_id}', ['as' => 'gerar-pix', 'uses' => 'LicenciamentoController@gerarPix']);
             //Route::get('gerar-boleto/{fatura_id}', ['as' => 'gerar-boleto', 'uses' => 'LicenciamentoController@boleto']);
             //Route::any('cartao-credito/{fatura_id}', ['as' => 'gerar-cartaocredito', 'uses' => 'LicenciamentoController@cartaoCredito']);

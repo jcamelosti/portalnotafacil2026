@@ -263,7 +263,7 @@ class LicencasController extends Controller
     }
 
     /* Gerando Pagamento Via Mercado Pago */
-    /*public function gerarPix($faturaId){
+    public function gerarPix($faturaId){
         try{
             $fatura = $this->faturaModel
                 ->find(base64_decode($faturaId));
@@ -365,7 +365,7 @@ class LicencasController extends Controller
             session()->flash('danger', 'Não foi possível gerar a Chave PIX. Tente Novamente');
             return redirect()->route('area-cliente');
         }
-    }*/
+    }
 
 
     /*
@@ -445,7 +445,7 @@ class LicencasController extends Controller
     }
 
     /* Gerando Cobrança Via InfinitePay via PIX */
-    public function gerarPix($faturaId){
+    public function infinitePayGerarPix($faturaId){
         $faturaId = base64_decode($faturaId);
 
         $fatura = $this->faturaModel
