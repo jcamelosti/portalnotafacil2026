@@ -60,6 +60,8 @@ class NFSeService
         // 🔥 1. GERAR XML (usa seu Factory + Builders)
         $xml = DPSFactory::make($data, $xml);
 
+        Log::info($xml);
+
         // 🔥 3. ESCOLHER PROVIDER
         $driver = NFSeProviderFactory::make($provider);
 
@@ -152,6 +154,8 @@ class NFSeService
 
             $pagina                 // Página
         );
+
+        dd($xml);
         
         $driver = NFSeProviderFactory::make($provider);
 

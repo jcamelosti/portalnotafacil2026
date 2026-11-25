@@ -33,9 +33,9 @@ class ISSNetService
             $cert
         );
 
-        /*Log::info($response);
+        //Log::info($response);
 
-        $response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
+        /*$response = preg_replace("/(<\/?)(\w+):([^>]*>)/", "$1$2$3", $response);
         $retorno = simplexml_load_string( $response );
         
         return $retorno;*/
@@ -343,8 +343,9 @@ class ISSNetService
             $soap,
             $cert
         );
-
-        dd($this->parse($response));
+        
+        return $response;
+        //return $this->parse($response);
     }
 
     public function consultarNfseServicosTomados(string $xml, int $empresaId){

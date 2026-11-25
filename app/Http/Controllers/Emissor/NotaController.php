@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Emissor;
 use App\Business\NotasBO;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\NotaCreateRequest;
+use App\Jobs\ImportarServicosPrestadosJob;
 use App\Models\Certificado;
 use App\Models\ClassificacaoTributaria;
 use App\Models\CorrelacaoTribMunTribNac;
@@ -589,31 +590,20 @@ class NotaController extends Controller
     }
 
     public function consultarServicosPrestados(Request $request){
-        if($request->method() == 'GET'){
-            $data = [
-                'data_inicio' => request()->data_inicio ?? Carbon::today()->subDays(4)->format('Y-m-d'),
-                'data_fim'    => request()->data_fim ?? Carbon::today()->format('Y-m-d'),
-            ];
-            return view('notas.servicos-prestados')->with([
-                'data' => $data
-            ]);
-        }else{
-            $dataInicio = Carbon::parse($request->data_inicio)->startOfDay();
-            $dataFim = Carbon::parse($request->data_fim)->startOfDay();
+        $empresaId = Session::get('empresa_selecionada');
 
-            if ($dataInicio->diffInDays($dataFim) > 10) {
-                return back()->withErrors([
-                    'data_fim' => 'O período não pode ser superior a 5 dias.'
-                ]);
-            }
-
-            $this->emissorService->consultarServicosPrestados($request->all());
-            
-            session()->flash('success', 'Nota Atualizadas com Sucesso.');
+        if (empty($empresaId)) {
+            session()->flash('danger', 'Nenhuma empresa selecionada.');
             return redirect()->route('nota.index');
         }
 
-        session()->flash('danger', 'Recurso não Disponível.');
+        // Consulta hoje + 60 dias para trás, em janelas de 10 dias (em segundo plano)
+        ImportarServicosPrestadosJob::dispatch((int) $empresaId);
+
+        session()->flash('message', 'Consulta das notas dos últimos '
+            . ImportarServicosPrestadosJob::DIAS_RETROATIVOS
+            . ' dias agendada. As notas aparecerão na listagem em alguns minutos.');
+
         return redirect()->route('nota.index');
     }
 

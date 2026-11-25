@@ -618,110 +618,305 @@ class EmissorNotaService
         return $retorno;
     }
 
-    public function consultarServicosPrestados(array $dados){
-        $empresa = $this->empresaModel->find(Session::get('empresa_selecionada'));
+    /**
+     * Consulta as NFS-e prestadas no período e importa as que ainda não existem.
+     * Quando chamada fora de uma requisição (Job), informe a $empresa.
+     */
+    public function consultarServicosPrestados(array $dados, ?Empresa $empresa = null){
+        $empresa = $empresa ?? $this->empresaModel->find(Session::get('empresa_selecionada'));
 
-        $retorno = $this->nfse->consultarNfseServicosTomados(
+        if (is_null($empresa)) {
+            return ['error' => true, 'data' => null, 'message' => 'Empresa não encontrada.'];
+        }
+
+        $retorno = $this->nfse->consultarNfseServicosPrestados(
             'issnet',
             $empresa->id,
-            $empresa->cpf_cnpj,//cnpj            
+            $empresa->cpf_cnpj,//cnpj
             $empresa->inscricao_municipal,
             null,
             $dados['data_inicio'],//dt ini
             $dados['data_fim'],//dt fim
             null
         );
+        
+        if ($retorno instanceof \SimpleXMLElement) {
+            $retorno = $retorno->asXML();
+        }
 
-        if(isset($retorno['ConsultarNfseServicoTomadoResponse']['ConsultarNfseServicoTomadoResposta']['ListaNfse']['CompNfse'])){
-            $lista = $retorno['ConsultarNfseServicoTomadoResponse']['ConsultarNfseServicoTomadoResposta']['ListaNfse']['CompNfse'];
-            $inserirAtualizar = [];
+        if (empty($retorno) || !is_string($retorno)) {
+            return ['error' => true, 'data' => null, 'message' => 'Retorno vazio do provedor.'];
+        }
 
-            if(count($lista) == 1){
-                $inserirAtualizar[0] = [
-                    'nNfse' => $lista['NFSe']['infNFSe']['nNFSe'],
-                    'valor' => $lista['NFSe']['infNFSe']['valores']['vBC'],
-                    'cpf_cnpj' => $lista['NFSe']['infNFSe']['DPS']['infDPS']['toma']['CNPJ'],
-                    'nDPS' => $lista['NFSe']['infNFSe']['DPS']['infDPS']['nDPS'],
-                    'serieDps' => $lista['NFSe']['infNFSe']['DPS']['infDPS']['serie'],
-                    'data_criacao' => $lista['NFSe']['infNFSe']['dhProc']
+        $ns = 'http://www.sped.fazenda.gov.br/nfse';
+
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        // Mantém os espaços originais: o XML contém assinaturas digitais
+        $dom->preserveWhiteSpace = true;
+
+        if (!@$dom->loadXML(trim($retorno))) {
+            return ['error' => true, 'data' => null, 'message' => 'Não foi possível interpretar o XML de retorno.'];
+        }
+
+        $xpath = new \DOMXPath($dom);
+        $xpath->registerNamespace('n', $ns);
+
+        // Retorna o texto do primeiro nó encontrado (ou null)
+        $valor = function (string $query, ?\DOMNode $contexto = null) use ($xpath) {
+            $nodes = $contexto ? $xpath->query($query, $contexto) : $xpath->query($query);
+            return ($nodes !== false && $nodes->length > 0) ? trim($nodes->item(0)->textContent) : null;
+        };
+
+        // Mensagens de erro do provedor
+        $mensagensErro = $xpath->query('//n:ListaMensagemRetorno/n:MensagemRetorno');
+        if ($mensagensErro->length > 0) {
+            $mensagem = [];
+            foreach ($mensagensErro as $msg) {
+                $texto = 'Erro: #' . $valor('n:Codigo', $msg) . ' - ' . $valor('n:Mensagem', $msg);
+                if ($correcao = $valor('n:Correcao', $msg)) {
+                    $texto .= ' Solução: ' . $correcao;
+                }
+                $mensagem[] = $texto;
+            }
+            return ['error' => true, 'data' => null, 'message' => implode(' / ', $mensagem)];
+        }
+
+        $listaComp = $xpath->query('//n:ListaNfse/n:CompNfse');
+
+        if ($listaComp->length == 0) {
+            return ['error' => false, 'data' => [], 'message' => 'Nenhuma nota encontrada no período.'];
+        }
+
+        // Notas já gravadas para a empresa (evita duplicidade)
+        $notasExistentes = NotaEmitida::where('empresa_id', $empresa->id)
+            ->pluck('num_nfse')
+            ->map(fn ($n) => (string) $n)
+            ->flip();
+
+        // Empresas do usuário dono da empresa (tomadores "do usuário")
+        $empresasDoUsuario = $this->empresaModel
+            ->where('user_id', $empresa->user_id)
+            ->pluck('id')
+            ->all();
+
+        $cacheTomadores = [];
+        $insertBatch = [];
+        $ignoradas = 0;
+        $agora = Carbon::now()->format('Y-m-d H:i:s');
+
+        DB::beginTransaction();
+
+        try {
+            foreach ($listaComp as $comp) {
+                $nfseNode = $xpath->query('n:NFSe', $comp)->item(0);
+                if (!$nfseNode) {
+                    continue;
+                }
+
+                // Ignora notas fora do padrão nacional
+                if (!$this->isNfsePadraoNacional($nfseNode, $xpath, $valor, $empresa)) {
+                    $ignoradas++;
+                    Log::warning('NFS-e ignorada (fora do padrão nacional)', [
+                        'empresa_id' => $empresa->id,
+                        'nNFSe' => $valor('n:infNFSe/n:nNFSe', $nfseNode),
+                    ]);
+                    continue;
+                }
+
+                $inf = $xpath->query('n:infNFSe', $nfseNode)->item(0);
+                $infDps = $xpath->query('n:DPS/n:infDPS', $inf)->item(0);
+
+                $nNfse = $valor('n:nNFSe', $inf);
+
+                if (isset($notasExistentes[$nNfse])) {
+                    continue;
+                }
+
+                // Monta o XML da NFSe isolado, com o namespace no elemento raiz.
+                // Obs.: não usar importNode — o PHP renomeia a <Signature> para "default:Signature".
+                $xmlNfse = $dom->saveXML($nfseNode);
+                if (!preg_match('/^<NFSe\b[^>]*\sxmlns="/', $xmlNfse)) {
+                    $xmlNfse = preg_replace('/^<NFSe\b/', '<NFSe xmlns="' . $ns . '"', $xmlNfse, 1);
+                }
+                $xmlNfse = '<?xml version="1.0" encoding="utf-8"?>' . $xmlNfse;
+
+                // Tomador
+                $tomaNode = $infDps ? $xpath->query('n:toma', $infDps)->item(0) : null;
+                $tomador = $tomaNode
+                    ? $this->obterOuCriarTomadorXml($tomaNode, $xpath, $valor, $empresa, $empresasDoUsuario, $cacheTomadores)
+                    : null;
+
+                $vServ = $infDps ? $valor('n:valores/n:vServPrest/n:vServ', $infDps) : null;
+                $dhEmi = $infDps ? $valor('n:dhEmi', $infDps) : null;
+                $dataEmissao = $dhEmi ?? $valor('n:dhProc', $inf);
+            
+                $idNfse = $inf->getAttribute('Id');
+                $insertBatch[] = [
+                    'empresa_id' => $empresa->id,
+                    'tomador_id' => $tomador ? $tomador->id : null,
+                    'nfse_xml'   => $xmlNfse,
+                    'num_nfse'   => $nNfse,
+                    'valor'      => (float) ($vServ ?? $valor('n:valores/n:vLiq', $inf) ?? 0),
+                    'chave'      => $idNfse ? preg_replace('/^NFS/', '', $idNfse) : null,
+                    'dados_emissao' => null,
+                    'cancelada' => 0,
+                    'motivo_cancelamento' => null,
+                    'data_cancelamento' => null,
+                    'created_at' => $dataEmissao
+                        ? Carbon::parse($dataEmissao)->setTimezone(config('app.timezone'))->format('Y-m-d H:i:s')
+                        : $agora,
+                    'updated_at' => $agora,
                 ];
 
-                if(isset($nota['ListaEvento'])){
-                    if(isset($nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['e101101'])){
-                        $dadosEvento = $nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['dhEvento'];
-                        $dadosEventoCancelamento = $nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['e101101'];
-                        $inserirAtualizar[0]['motivo_cancelamento'] = $dadosEventoCancelamento['cMotivo'];
-                        $inserirAtualizar[0]['motivo'] = $dadosEventoCancelamento['xDesc'] .' - '.$dadosEventoCancelamento['xMotivo'];
-                        $inserirAtualizar[0]['data_evento'] = $dadosEvento;
-                    }
-                }
-            }else{
-                foreach($lista as $key => $nota){
-                    $inserirAtualizar[$key] = [
-                        'nNfse' => $nota['NFSe']['infNFSe']['nNFSe'],
-                        'valor' => $nota['NFSe']['infNFSe']['valores']['vBC'],
-                        'cpf_cnpj' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['toma']['CNPJ'],
-                        'nDPS' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['nDPS'],
-                        'serieDps' => $nota['NFSe']['infNFSe']['DPS']['infDPS']['serie'],
-                        'data_criacao' => $nota['NFSe']['infNFSe']['dhProc']
-                    ];
-
-                    if(isset($nota['ListaEvento'])){
-                        if(isset($nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['e101101'])){
-                            $dadosEvento = $nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['dhEvento'];
-                            $dadosEventoCancelamento = $nota['ListaEvento']['evento']['infEvento']['pedRegEvento']['infPedReg']['e101101'];
-                            $inserirAtualizar[$key]['motivo_cancelamento'] = $dadosEventoCancelamento['cMotivo'];
-                            $inserirAtualizar[$key]['motivo'] = $dadosEventoCancelamento['xDesc'] .' - '.$dadosEventoCancelamento['xMotivo'];
-                            $inserirAtualizar[$key]['data_evento'] = $dadosEvento;
-                        }
-                    }
-                }
+                $notasExistentes[$nNfse] = true;
             }
 
-            $insertBatch = [];
-
-            foreach($inserirAtualizar as $novoRegistros){
-                $tomador = Tomador::where('empresa_id', $empresa->id)->where('cpf_cnpj', $novoRegistros['cpf_cnpj'])->first();
-                
-                if(is_null($tomador)){
-                    $dadosTomador = Utilitarios::consultarEmpresaCNPJ( $novoRegistros['cpf_cnpj'] );
-                    $tomador = new Tomador();
-                    $dadosTomador['empresa_id'] = $empresa->id;
-
-                    $municipio = Municipio::with('estado')
-                        ->where('municipio', $dadosTomador['municipio'])
-                        ->whereHas('estado', function ($query) use ($dadosTomador) {
-                            $query->where('sigla', $dadosTomador['uf']);
-                        })
-                        ->first();
-                    $dadosTomador['cidade_id'] = $municipio->codigo;
-                    $tomador->fill($dadosTomador);
-                    $tomador->save();
-                }
-
-                $existe = NotaEmitida::where('empresa_id', $empresa->id)
-                    ->where('num_nfse', $novoRegistros['nNfse'])
-                    ->first();
-                
-                if(is_null($existe)){
-                    $xmlNfse =$this->obterXml($empresa, $novoRegistros['nNfse']);
-
-                    $insertBatch[] = [
-                        'empresa_id' => $empresa->id,
-                        'tomador_id' => $tomador->id,
-                        'nfse_xml'   => $xmlNfse,
-                        'num_nfse'   => $novoRegistros['nNfse'],
-                        'valor'      => $novoRegistros['valor'],
-                        'dados_emissao' => null,
-                        'cancelada' => isset($novoRegistros['motivo']) ? 1 : 0,
-                        'motivo_cancelamento' => isset($novoRegistros['motivo']) ? $novoRegistros['motivo'] : '-',
-                        'data_cancelamento' => isset($novoRegistros['motivo']) ? date('Y-m-d', strtotime($novoRegistros['data_evento'])) : null,
-                        'created_at' => date('Y-m-d G:i:s', strtotime($novoRegistros['data_criacao']))
-                    ];
-                }
+            if (!empty($insertBatch)) {
+                NotaEmitida::insert($insertBatch);
             }
 
-            NotaEmitida::insert($insertBatch);
+            DB::commit();
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            Log::error('Erro ao importar serviços prestados: ' . $e->getMessage(), ['empresa_id' => $empresa->id]);
+
+            return ['error' => true, 'data' => null, 'message' => 'Erro ao importar as notas: ' . $e->getMessage()];
         }
+
+        $mensagem = count($insertBatch) . ' nota(s) importada(s) com sucesso.';
+        if ($ignoradas > 0) {
+            $mensagem .= ' ' . $ignoradas . ' nota(s) ignorada(s) por estarem fora do padrão nacional.';
+        }
+
+        return [
+            'error' => false,
+            'data' => array_column($insertBatch, 'num_nfse'),
+            'ignoradas' => $ignoradas,
+            'message' => $mensagem
+        ];
+    }
+
+    /**
+     * Verifica se a <NFSe> segue o leiaute nacional:
+     * <NFSe versao xmlns="http://www.sped.fazenda.gov.br/nfse">
+     *   <infNFSe Id="NFS + 50 dígitos"> nNFSe, dhProc, emit, valores,
+     *     <DPS><infDPS Id="DPS + 42 dígitos"> dhEmi, prest, serv, valores
+     * e se foi emitida pela própria empresa.
+     */
+    protected function isNfsePadraoNacional(\DOMElement $nfse, \DOMXPath $xpath, callable $valor, Empresa $empresa): bool
+    {
+        if ($nfse->namespaceURI !== 'http://www.sped.fazenda.gov.br/nfse' || !$nfse->hasAttribute('versao')) {
+            return false;
+        }
+
+        $inf = $xpath->query('n:infNFSe', $nfse)->item(0);
+        if (!$inf || !preg_match('/^NFS\d{50}$/', $inf->getAttribute('Id'))) {
+            return false;
+        }
+
+        $infDps = $xpath->query('n:DPS/n:infDPS', $inf)->item(0);
+        if (!$infDps || !preg_match('/^DPS\d{42}$/', $infDps->getAttribute('Id'))) {
+            return false;
+        }
+
+        $obrigatorios = [
+            [$inf, 'n:nNFSe'],
+            [$inf, 'n:dhProc'],
+            [$inf, 'n:emit'],
+            [$inf, 'n:valores'],
+            [$infDps, 'n:dhEmi'],
+            [$infDps, 'n:prest'],
+            [$infDps, 'n:serv'],
+            [$infDps, 'n:valores/n:vServPrest/n:vServ'],
+        ];
+
+        foreach ($obrigatorios as [$contexto, $caminho]) {
+            if ($xpath->query($caminho, $contexto)->length === 0) {
+                return false;
+            }
+        }
+
+        // A nota precisa ter sido emitida pela empresa consultada
+        $docEmitente = $valor('n:emit/n:CNPJ', $inf) ?? $valor('n:emit/n:CPF', $inf);
+        $docEmpresa = preg_replace('/\D/', '', (string) $empresa->cpf_cnpj);
+
+        return $docEmitente === $docEmpresa;
+    }
+
+    /**
+     * Localiza o tomador pelo CPF/CNPJ entre os tomadores globais ou das empresas
+     * do usuário dono da empresa. Se não existir, cadastra a partir do XML (<toma>).
+     */
+    protected function obterOuCriarTomadorXml(
+        \DOMNode $toma,
+        \DOMXPath $xpath,
+        callable $valor,
+        Empresa $empresa,
+        array $empresasDoUsuario,
+        array &$cache
+    ): ?Tomador {
+        $documento = $valor('n:CNPJ', $toma) ?? $valor('n:CPF', $toma);
+        $nif = $valor('n:NIF', $toma);
+
+        $chaveCache = $documento ?? ('NIF:' . $nif);
+        if (isset($cache[$chaveCache])) {
+            return $cache[$chaveCache];
+        }
+
+        if (empty($documento) && empty($nif)) {
+            return null;
+        }
+
+        $tomador = $this->tomadorModel
+            ->where(function ($q) use ($documento, $nif) {
+                if (!empty($documento)) {
+                    $q->where('cpf_cnpj', $documento);
+                } else {
+                    $q->where('nif', $nif);
+                }
+            })
+            ->where(function ($q) use ($empresasDoUsuario) {
+                $q->whereIn('empresa_id', $empresasDoUsuario) // pertence ao usuário
+                    ->orWhereNull('empresa_id')                 // global
+                    ->orWhere('cpf_cnpj', '99999999999');       // global (consumidor)
+            })
+            // prioriza o tomador da própria empresa
+            ->orderByRaw('CASE WHEN empresa_id = ? THEN 0 ELSE 1 END', [$empresa->id])
+            ->first();
+
+        if (is_null($tomador)) {
+            $endExt = $xpath->query('n:end/n:endExt', $toma)->item(0);
+
+            $dadosTomador = [
+                'empresa_id'          => $empresa->id,
+                'razao_social'        => $valor('n:xNome', $toma),
+                'cpf_cnpj'            => $documento ?? 'NAO_INFORMADO',
+                'inscricao_municipal' => $valor('n:IM', $toma),
+                'email'               => $valor('n:email', $toma),
+                'telefone1'           => $valor('n:fone', $toma),
+                'logradouro'          => $valor('n:end/n:xLgr', $toma),
+                'numero'              => $valor('n:end/n:nro', $toma),
+                'complemento'         => $valor('n:end/n:xCpl', $toma),
+                'bairro'              => $valor('n:end/n:xBairro', $toma) ?? 'NAO_INFORMADO',
+                'nif'                 => $nif,
+            ];
+
+            if ($endExt) {
+                $dadosTomador['cidade_id'] = '99999';
+                $dadosTomador['cep']       = $valor('n:cEndPost', $endExt) ?? '00000000';
+                $dadosTomador['pais']      = $valor('n:cPais', $endExt);
+                $dadosTomador['cidade']    = $valor('n:xCidade', $endExt);
+                $dadosTomador['provincia'] = $valor('n:xEstProvReg', $endExt);
+            } else {
+                $dadosTomador['cidade_id'] = $valor('n:end/n:endNac/n:cMun', $toma);
+                $dadosTomador['cep']       = $valor('n:end/n:endNac/n:CEP', $toma);
+            }
+
+            $tomador = $this->tomadorModel->newInstance();
+            $tomador->fill($dadosTomador);
+            $tomador->save();
+        }
+
+        return $cache[$chaveCache] = $tomador;
     }
 }
