@@ -302,7 +302,7 @@ class EmissorAmbienteNacionalService
             regApTribSN: $empresa->tp_reg_apuracao_sn,//só quando for do simples
             regEspTrib: $empresa->tp_regime_esp_trib_mun,
 
-            //dados tomador - quando não for no exterior
+            //dados tomador - quando não for no exterior            
             cnpjTomador: strlen($tomador->cpf_cnpj) == 14 ? $tomador->cpf_cnpj : null,
             cpfTomador: strlen($tomador->cpf_cnpj) < 14 ? $tomador->cpf_cnpj : null,
             razaoTomador: $tomador->razao_social,
@@ -498,6 +498,7 @@ class EmissorAmbienteNacionalService
                 }
             }
         } catch (\Exception $e) {
+            Log::info($e->getMessage() . ' ->> ' . $e->getFile(). '  linha  ' . $e->getLine());
             DB::insert(
                 'INSERT INTO internal_logs (empresa_id, description) VALUES (?, ?)',
                 [
@@ -583,25 +584,28 @@ class EmissorAmbienteNacionalService
         /*
             DADOS TOMADOR
         */
-        $std->infDPS->toma = new \stdClass();
 
-        if(!empty($dados->cpfTomador) || !is_null($dados->cpfTomador)){
-            $std->infDPS->toma->CPF = $dados->cpfTomador;
-        }else{
-            $std->infDPS->toma->CNPJ = $dados->cnpjTomador;
-        }
-        
-        $std->infDPS->toma->xNome = $dados->razaoTomador; 
+        if($dados->cpfTomador !== '99999999999'){
+            $std->infDPS->toma = new \stdClass();
 
-        $std->infDPS->toma->end = new \stdClass();
-        $std->infDPS->toma->end->xLgr = $dados->logradouroTomador;
-        $std->infDPS->toma->end->nro = $dados->numeroTomador;
-        $std->infDPS->toma->end->xCpl = $dados->complementoTomador;
-        $std->infDPS->toma->end->xBairro = $dados->bairroTomador;
+            if(!empty($dados->cpfTomador) || !is_null($dados->cpfTomador)){
+                $std->infDPS->toma->CPF = $dados->cpfTomador;
+            }else{
+                $std->infDPS->toma->CNPJ = $dados->cnpjTomador;
+            }
+            
+            $std->infDPS->toma->xNome = $dados->razaoTomador; 
 
-        $std->infDPS->toma->end->endNac = new \stdClass();
-        $std->infDPS->toma->end->endNac->cMun = $dados->codigoMunicipioTomador; //Código IBGE 7 dígitos
-        $std->infDPS->toma->end->endNac->CEP = $dados->cepTomador;
+            $std->infDPS->toma->end = new \stdClass();
+            $std->infDPS->toma->end->xLgr = $dados->logradouroTomador;
+            $std->infDPS->toma->end->nro = $dados->numeroTomador;
+            $std->infDPS->toma->end->xCpl = $dados->complementoTomador;
+            $std->infDPS->toma->end->xBairro = $dados->bairroTomador;
+
+            $std->infDPS->toma->end->endNac = new \stdClass();
+            $std->infDPS->toma->end->endNac->cMun = $dados->codigoMunicipioTomador; //Código IBGE 7 dígitos
+            $std->infDPS->toma->end->endNac->CEP = $dados->cepTomador;
+        }        
 
         /*
         Serviços

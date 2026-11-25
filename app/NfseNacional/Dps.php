@@ -981,8 +981,8 @@ class Dps implements DpsInterface
 
 //
 //            // grupo imovel
-//    
-            if(!is_null($this->std->infdps->ibscbs->imovel)){
+//          dd();
+            if(isset($this->std->infdps->ibscbs->imovel) && !is_null($this->std->infdps->ibscbs->imovel)){
                 $ibscbs_imovel_inner = $this->dom->createElement('imovel');
                 $ibscbs_inner->appendChild($ibscbs_imovel_inner);
 

@@ -489,7 +489,7 @@ class LicencasController extends Controller
 
         $centavos = (int) round($fatura->total * 100);
 
-        $url = 'https://api.infinitepay.io/invoices/public/checkout/links';
+        $url = 'https://api.checkout.infinitepay.io/links';
         $dados =  [
             "handle" => "josue-24685881-9n8",
             "items" => [
