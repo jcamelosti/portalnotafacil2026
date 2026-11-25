@@ -218,6 +218,22 @@
     <div>
     @endif
 
+    <div class="grid grid-cols-1 gap-1 mt-4">
+        <label class="block text-sm">
+            <span class="text-gray-700 ">Envia XML/DANFSe para Tomador:</span>
+            {!! Form::select('disparar_email_tomador', ['1' => 'Sim', '2' => 'Não']
+            ,2, ['required','class'=>'block w-full mt-1 text-sm  
+            
+            form-select
+            focus:border-purple-400 focus:outline-none focus:shadow-outline-purple :shadow-outline-gray']) !!}
+            @if ($errors->has('disparar_email_tomador'))
+                <span class="text-xs text-red-600 ">
+                <strong>{{ $errors->first('disparar_email_tomador') }}</strong>
+            </span>
+            @endif
+        </label>
+    <div>
+
     <div class="grid grid-cols-4 gap-1 mt-4">
         <label class="block text-sm">
             <span class="text-gray-700 ">Empresa é MEI?:</span>

@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Jobs\EnviarNfseEmailJob;
 use App\Models\Certificado;
 use App\Models\Empresa;
 use App\Models\NotaEmitida;
@@ -464,6 +465,10 @@ class EmissorAmbienteNacionalService
                 ]);
 
                 //session()->flash('success', 'Nota Fiscal Emitida com Sucesso.');
+
+                if($empresa->disparar_email_tomador == 1){
+                    EnviarNfseEmailJob::dispatch($ne->id);
+                }
                 
                 return [
                     'error' => false,

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Emissor;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\EnviarNfseEmailJob;
 use App\Models\Empresa;
 use App\Models\NotaEmitida;
 use App\Services\NotaFiscalServico\DanfsePdfService;
@@ -76,17 +77,22 @@ class TesteNfeNacionalController extends Controller
 
         //Utilitarios::sendMessage("Mensagem Para Vários Usuários do ChatBot");
 
-        /*$nota = NotaEmitida::where('id', 61)->first();
+        $nota = NotaEmitida::where('id', 61)->first();
         
         $danfsePdfService = app(DanfsePdfService::class);
         $pdf = $danfsePdfService->renderFromXml($nota->nfse_xml);
+
+        // Envio por e-mail via fila (PDF é gerado dentro do job)
+        EnviarNfseEmailJob::dispatch($nota->id);
+        // Agendado: EnviarNfseEmailJob::dispatch($nota->id)->delay(now()->addMinutes(5));
+        // Outro destinatário: EnviarNfseEmailJob::dispatch($nota->id, 'cliente@exemplo.com');
 
         return response($pdf, 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="NFSe.pdf"',
             'Content-Transfer-Encoding' => 'binary',
             'Accept-Ranges' => 'bytes',
-        ]);*/
+        ]);
 
         dd('aqui');
     }
