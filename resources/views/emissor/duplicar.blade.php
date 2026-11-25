@@ -75,7 +75,7 @@
                     empresa_id: "{{ old('empresa_id') }}",
                     cTribMun: "{{ old('empresa_atividade_id') }}",
                     cTribNac: "{{ old('cTribNac') }}",
-                    nbs: "{{ old('nbs') }}"
+                    nbs: "{{ old('nbs', $nota['nbs']) }}"
                 };
 
                 $campoSelectNbs.prop("disabled", false);
@@ -218,7 +218,7 @@
 
                 $('#cTribNac').on('change', function () {
                     carregarNbs(
-                        oldData.cTribNac,
+                        oldData.nbs,
                         $(this).val()
                     );
 
@@ -406,7 +406,7 @@
                 let ddlRegimeEspecial   = @json(old('ddlRegimeEspecial'));
                 let ddlSitTribFederal   = @json(old('ddlSitTribFederal'));
                 let ddlTipoRetFederal   = @json(old('ddlTipoRetFederal'));
-                let ddlIndicadorOperacao = @json(old('ddlIndicadorOperacao'));
+                let ddlIndicadorOperacao = @json(old('ddlIndicadorOperacao', $nota['ddlIndicadorOperacao']));
                 let ddlSituacaoTributaria = @json(old('ddlSituacaoTributaria'));
                 let ddlClassificacaoTributaria = @json(old('ddlClassificacaoTributaria'));
                 let cTribNac = @json(old('cTribNac'));
@@ -417,11 +417,26 @@
                     $('#cTribNac').val(cTribNac)//.trigger('change');
                 }
 
-                if (nbs) {
+                /*if (nbs) {
                     $('#nbs').prop('disabled', false);
                     $('#nbs').css('background-color', '');
                     $('#nbs').val(nbs).trigger('change');
-                }
+                }*/
+
+                //alterar o select2 para pegar o valor correto
+                /*if (nbs) {
+                    let $nbs = $('#nbs');
+                    $nbs.prop('disabled', false);
+                    $nbs.css('background-color', '');
+
+                    // Se a option ainda não existe (lista carregada via AJAX), cria para o select2 conseguir exibir
+                    if ($nbs.find('option[value="' + nbs + '"]').length === 0) {
+                        $nbs.append(new Option(nbs, nbs, true, true));
+                    }
+
+                    // Atualiza o select2 sem disparar os handlers de change
+                    $nbs.val(String(nbs)).trigger('change.select2');
+                }*/
 
                 if (atividade_municipal) {
                     $('#empresa_atividade_id').prop('disabled', false);
@@ -494,11 +509,11 @@
                     
                     await esperar(2000); 
 
-                    $('#nbs')
+                    /*$('#nbs')
                         .prop('disabled', false)
                         .css('background-color', '')
-                        .val(String(nota.nbs))
-                        .trigger('change');
+                        .val(String(nota.nbs));
+                        //.trigger('change');*/
 
                     $('#ddlTribISSQN').trigger('change');
                     $('#ddlRegimeEspecial').trigger('change');
@@ -509,6 +524,12 @@
                     $('#ddlIndicadorOperacao').trigger('change');
                     $('#ddlSituacaoTributaria').val(String(nota.ddlSituacaoTributaria));
                     $('#ddlSituacaoTributaria').trigger('change');  
+
+                    /*if (ddlIndicadorOperacao) {
+                        $('#ddlIndicadorOperacao').prop('disabled', false);
+                        $('#ddlIndicadorOperacao').css('background-color', '');
+                        $('#ddlIndicadorOperacao').val(ddlIndicadorOperacao).trigger('change');
+                    }*/
                     
                      // Aguarda 2 segundos de forma limpa
                     await esperar(2000); 
