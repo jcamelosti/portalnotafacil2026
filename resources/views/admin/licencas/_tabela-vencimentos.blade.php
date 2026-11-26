@@ -36,7 +36,7 @@
                                 {{ $empresa->id }}
                             @endif
                         </td>
-                        <td class="px-4 py-3 font-semibold">{{ $empresa->razao_social }}</td>
+                        <td class="px-4 py-3 font-semibold">{{ Str::limit($empresa->razao_social, 30, '...') }}</td>
                         <td class="px-4 py-3">{{ $empresa->cpf_cnpj }}</td>
                         <td class="px-4 py-3">{{ $empresa->name }}</td>
                         <td class="px-4 py-3">

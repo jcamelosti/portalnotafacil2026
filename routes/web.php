@@ -19,6 +19,7 @@ use App\Http\Controllers\ServicosTomados\NotaTomadasController;
 use App\Http\Controllers\SiteController;
 use App\Http\Controllers\TestSpedyController;
 use App\Http\Controllers\Tomadores\TomadoresController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -38,7 +39,30 @@ Route::get('/', function () {
 
 //Route::get('/', [SiteController::class, 'index'])->name('site.home');
 
+Route::get('/executar-migrate', function () {
 
+    /*try {
+
+        Artisan::call('migrate', [
+            '--force' => true,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Migrations executadas com sucesso!',
+            'output' => Artisan::output(),
+        ]);
+
+    } catch (\Throwable $e) {
+
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], 500);
+
+    }*/
+
+});
 
 
 //Impressão de Nota
