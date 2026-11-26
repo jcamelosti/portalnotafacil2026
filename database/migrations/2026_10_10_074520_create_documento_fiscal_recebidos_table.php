@@ -13,7 +13,7 @@ class CreateDocumentoFiscalRecebidosTable extends Migration
      */
     public function up()
     {
-        Schema::create('documento_fiscal_recebidos', function (Blueprint $table) {
+        /*Schema::create('documento_fiscal_recebidos', function (Blueprint $table) {
             $table->id();
 
              $table->foreignId('empresa_id')
@@ -35,7 +35,7 @@ class CreateDocumentoFiscalRecebidosTable extends Migration
 
             // Facilita consultas por tipo de documento
             $table->index(['empresa_id', 'tipo_documento']);
-        });
+        });*/
     }
 
     /**
@@ -45,6 +45,6 @@ class CreateDocumentoFiscalRecebidosTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('documento_fiscal_recebidos');
+        //Schema::dropIfExists('documento_fiscal_recebidos');
     }
 }

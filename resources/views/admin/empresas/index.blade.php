@@ -160,6 +160,12 @@
                                 Liberar Licença
                             </a>
 
+                            <a href="{{ route('admin.licencas.edit', $item->id) }}"
+                            class="inline-flex items-center px-3 py-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-700 transition">
+
+                                Editar Licença
+                            </a>
+
                         </div>
 
                     </div>

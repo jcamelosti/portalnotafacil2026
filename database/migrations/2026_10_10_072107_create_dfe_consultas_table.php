@@ -13,7 +13,7 @@ class CreateDfeConsultasTable extends Migration
      */
     public function up()
     {
-        Schema::create('dfe_consultas', function (Blueprint $table) {
+        /*Schema::create('dfe_consultas', function (Blueprint $table) {
             $table->id();
             
             $table->foreignId('empresa_id')->unique()->constrained()->cascadeOnDelete();
@@ -25,7 +25,7 @@ class CreateDfeConsultasTable extends Migration
             $table->timestamp('finalizada_em')->nullable();
             
             $table->timestamps();
-        });
+        });*/
     }
 
     /**
@@ -35,6 +35,6 @@ class CreateDfeConsultasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('dfe_consultas');
+        //Schema::dropIfExists('dfe_consultas');
     }
 }

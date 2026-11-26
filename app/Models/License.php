@@ -41,6 +41,11 @@ class License extends Model
         return $this->belongsTo(Empresa::class);
     }
 
+    public function logs()
+    {
+        return $this->hasMany(LicenseLog::class)->orderBy('id', 'DESC');
+    }
+
     public function licenca($empresaId){
         $resultado = null;
 

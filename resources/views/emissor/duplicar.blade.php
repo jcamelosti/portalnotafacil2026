@@ -398,13 +398,12 @@
             /*
             Manter campo preenchidos
             */
-            
             $(document).ready(function () {
                 let nbs = @json(old('nbs', $nota['nbs']));
                 let atividade_municipal = @json(old('empresa_atividade_id'));
                 let ddlTribISSQN        = @json(old('ddlTribISSQN'));
                 let ddlRegimeEspecial   = @json(old('ddlRegimeEspecial'));
-                let ddlSitTribFederal   = @json(old('ddlSitTribFederal'));
+                let ddlSitTribFederal   = @json(old('ddlSitTribFederal', $nota['ddlSitTribFederal']));
                 let ddlTipoRetFederal   = @json(old('ddlTipoRetFederal'));
                 let ddlIndicadorOperacao = @json(old('ddlIndicadorOperacao', $nota['ddlIndicadorOperacao']));
                 let ddlSituacaoTributaria = @json(old('ddlSituacaoTributaria'));
@@ -518,7 +517,7 @@
                     $('#ddlTribISSQN').trigger('change');
                     $('#ddlRegimeEspecial').trigger('change');
                     $('#ddlTipoRetencao').trigger('change');
-                    $('#ddlSitTribFederal').trigger('change');
+                    $('#ddlSitTribFederal').val(String(nota.ddlSitTribFederal)).trigger('change');
                     $('#ddlTipoRetFederal').val(String(nota.ddlTipoRetFederal));
 
                     $('#ddlIndicadorOperacao').trigger('change');

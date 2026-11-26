@@ -92,13 +92,17 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca']],
         Route::resource('usuarios', UsuariosController::class);
         Route::resource('empresa-cnaes', EmpresaCnaeController::class);
         Route::resource('empresa-atividades', EmpresaAtividadeController::class);
-        Route::resource('licencas', LicencaController::class);
-        Route::resource('faturas', FaturaController::class);
+        // Rotas específicas de licenças ANTES do resource, para não serem capturadas por licencas/{empresa}
         Route::group(['prefix' => 'licencas', 'as'=>'licencas.'], function () {
             Route::get('/licenca/{id}', [LicencaController::class, 'licenca'])->name('licenca');
             Route::get('renovar/{id}', [LicencaController::class, 'renovar'])->name('renovar');
             Route::get('vencimentos', [LicencaController::class, 'vencimentosLicencas'])->name('vencimentos');
-        });     
+        });
+        // Gestão de Licenças: o parâmetro é o ID da EMPRESA (empresas sem licença também podem ser editadas)
+        Route::resource('licencas', LicencaController::class)
+            ->only(['index', 'edit', 'update'])
+            ->parameters(['licencas' => 'empresa']);
+        Route::resource('faturas', FaturaController::class);
         Route::resource('notas', NotaController::class);
         Route::get('notas/consultar-url/{nota}', [NotaController::class, 'obterUrlNfse'])->name('notas.consultar-url');     
         Route::resource('protocolos', ProtocoloController::class);    

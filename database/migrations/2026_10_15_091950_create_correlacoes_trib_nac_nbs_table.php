@@ -13,7 +13,7 @@ class CreateCorrelacoesTribNacNbsTable extends Migration
      */
     public function up()
     {
-        Schema::create('correlacoes_trib_nac_nbs', function (Blueprint $table) {
+        /*Schema::create('correlacoes_trib_nac_nbs', function (Blueprint $table) {
             $table->id();
 
             // Código e descrição da tributação nacional
@@ -48,7 +48,7 @@ class CreateCorrelacoesTribNacNbsTable extends Migration
                 ['c_trib_nac', 'c_nbs', 'c_class_trib'],
                 'idx_correlacao_trib_nbs_class'
             );
-        });
+        });*/
     }
 
     /**
@@ -58,6 +58,6 @@ class CreateCorrelacoesTribNacNbsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('correlacoes_trib_nac_nbs');
+        //Schema::dropIfExists('correlacoes_trib_nac_nbs');
     }
 }
