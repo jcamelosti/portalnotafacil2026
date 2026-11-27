@@ -3,15 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Empresa;
-use App\Models\EmpresaCompartilhada;
-use App\Models\Fatura;
 use App\Models\License;
-//use App\Models\NotaEmitida;
 use App\Models\User;
+use App\Services\Usuarios\ExclusaoUsuarioService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
+use Laravel\Fortify\Rules\Password;
 
 class UsuariosController extends Controller
 {
@@ -25,62 +24,68 @@ class UsuariosController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
+     * Listagem com filtros por usuário, texto (nome/e-mail) e perfil.
      */
     public function index(Request $request)
     {
-        $campos = $request->all();
-        $users = $this->userModel//->orderBy('name', 'asc')
-        ->where(function($query) use($campos) {
-            if(isset($campos['user_id']) && $campos['user_id'] != '0'){
-                $query->where('id', $campos['user_id']);
-            }
-        })
-        ->orderBy('created_at', 'desc')
-        ->paginate(10);
-        
+        $campos = $request->only(['user_id', 'busca', 'perfil']);
+
+        $users = $this->userModel
+            ->withCount(['empresas', 'empresasCompartilhadas'])
+            ->when(!empty($campos['user_id']) && $campos['user_id'] != '0', function ($q) use ($campos) {
+                $q->where('id', $campos['user_id']);
+            })
+            ->when(!empty($campos['busca']), function ($q) use ($campos) {
+                $termo = '%' . trim($campos['busca']) . '%';
+                $q->where(function ($sub) use ($termo) {
+                    $sub->where('name', 'like', $termo)->orWhere('email', 'like', $termo);
+                });
+            })
+            ->when(isset($campos['perfil']) && in_array($campos['perfil'], ['0', '1'], true), function ($q) use ($campos) {
+                $q->where('is_admin', $campos['perfil']);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(15)
+            ->appends($campos);
+
         $usersList = $this->userModel->listEmpresasCountByUser();
-        
+
         return view('admin.usuarios.index')->with([
             'users' => $users,
             'usersList' => $usersList,
-            'pesquisa' => $campos
+            'pesquisa' => $campos,
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        //
+        return view('admin.usuarios.criar', ['user' => new User()]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        //
+        $dados = $request->validate($this->regras(), [], $this->atributos());
+
+        $user = new User();
+        $user->forceFill([
+            'name' => $dados['name'],
+            'email' => mb_strtolower($dados['email']),
+            'password' => Hash::make($dados['password']),
+            'is_admin' => $request->boolean('is_admin') ? '1' : '0',
+            'email_verified_at' => $request->boolean('email_verificado') ? now() : null,
+        ])->save();
+
+        session()->flash('message', 'Usuário <strong>' . e($user->name) . '</strong> cadastrado com sucesso.');
+        return redirect()->route('admin.usuarios.index');
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Detalhes do usuário com as empresas próprias e compartilhadas.
      */
     public function show($id)
     {
-        $user = $this->userModel->find($id);
-        
+        $user = $this->userModel->findOrFail($id);
+
         $empresas = $this->licencaModel
             ->select(
                 'empresas.id',
@@ -106,100 +111,118 @@ class UsuariosController extends Controller
         return view('admin.usuarios.show', compact('empresas', 'user'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
-        //
+        $user = $this->userModel->findOrFail($id);
+        return view('admin.usuarios.editar', compact('user'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
-        //
+        $user = $this->userModel->findOrFail($id);
+        $dados = $request->validate($this->regras($user), [], $this->atributos());
+
+        $isAdmin = $request->boolean('is_admin') ? '1' : '0';
+        if ($user->id === Auth::id() && $isAdmin !== '1') {
+            return back()->withInput()->withErrors(['is_admin' => 'Você não pode remover o seu próprio acesso de administrador.']);
+        }
+
+        $user->forceFill([
+            'name' => $dados['name'],
+            'email' => mb_strtolower($dados['email']),
+            'is_admin' => $isAdmin,
+        ]);
+
+        if (!empty($dados['password'])) {
+            $user->password = Hash::make($dados['password']);
+        }
+
+        if ($request->boolean('email_verificado')) {
+            $user->email_verified_at = $user->email_verified_at ?? now();
+        } else {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        session()->flash('message', 'Usuário <strong>' . e($user->name) . '</strong> atualizado com sucesso.');
+        return redirect()->route('admin.usuarios.index');
     }
 
     /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * Tela de confirmação da exclusão, com o resumo do que será removido.
      */
-    public function destroy($id)
+    public function confirmarExclusao($id, ExclusaoUsuarioService $exclusao)
     {
-        $user = $this->userModel->find($id);
-        $name = $user->name;    
-        //$user->delete();
+        $user = $this->userModel->findOrFail($id);
 
-        EmpresaCompartilhada::where('solicitante_user_id', $id)->delete();
-        EmpresaCompartilhada::where('proprietario_user_id', $id)->delete();
-        
-        $empresas_usuario = Empresa::where('user_id', $id)->get();
-        $faturas = Fatura::where('user_id', $id)->get();
-        
-        try {
-            DB::transaction(function () use ($faturas, $empresas_usuario) {
-                // Removendo faturas
-                foreach ($faturas as $fat) {
-                    $fat->items()->forceDelete();
-                    $fat->forceDelete();
-                }
-
-                // Removendo empresas e relacionamentos
-                foreach ($empresas_usuario as $emp) {
-
-                    $emp->notasEmitidas()->forceDelete();
-                    $emp->atividadesEmpresa()->forceDelete();
-                    $emp->cnaes()->forceDelete();
-                    //$emp->naturezaOperacoes()->forceDelete();
-                    $emp->tomadores()->forceDelete();
-
-                    $emp->licenca?->forceDelete();
-
-                    $emp->forceDelete();
-                }
-
-            });
-
-            $user->forceDelete();
-
-            session()->flash('message', 'Usuário: ' . $name . ' foi removido.');
-            return redirect()->route('admin.usuarios.index');
-        } catch (\Throwable $e) {
-            report($e);
-            session()->flash('message', 'Usuário: ' . $name . ' não foi removido.');
+        if ($user->id === Auth::id()) {
+            session()->flash('danger', 'Você não pode excluir o seu próprio usuário.');
             return redirect()->route('admin.usuarios.index');
         }
+
+        return view('admin.usuarios.excluir', [
+            'user' => $user,
+            'resumo' => $exclusao->resumo($user),
+        ]);
     }
 
-    public function autenticar($userId){
-        //if (Auth::user()->id == $userId) {
-            //Auth::loginUsingId($userId);
-            /*dd(
-                Auth::getDefaultDriver(),
-                get_class(Auth::guard())
-            );*/
-            //Auth::guard('sanctum')->loginUsingId($userId);
-            //session()->flash('message', 'Você está logado como: ' . Auth::user()->name);
-            /*$user = User::findOrFail($userId);
+    /**
+     * Exclui o usuário e todos os registros relacionados.
+     * Exige que o e-mail do usuário seja digitado como confirmação.
+     */
+    public function destroy(Request $request, $id, ExclusaoUsuarioService $exclusao)
+    {
+        $user = $this->userModel->findOrFail($id);
 
-            Auth::guard('web')->login($user);
+        if ($user->id === Auth::id()) {
+            session()->flash('danger', 'Você não pode excluir o seu próprio usuário.');
+            return redirect()->route('admin.usuarios.index');
+        }
 
-            request()->session()->regenerate();*/
-        /*} else {
-            session()->flash('danger', 'Você não possui essa autorização!');
-        }*/
+        if (mb_strtolower(trim((string) $request->input('confirmacao'))) !== mb_strtolower($user->email)) {
+            return redirect()->route('admin.usuarios.excluir', $user->id)
+                ->withErrors(['confirmacao' => 'O e-mail digitado não confere. A exclusão não foi realizada.']);
+        }
 
-        ///return redirect()->to('/c');
+        $name = $user->name;
+
+        try {
+            $exclusao->excluir($user);
+            session()->flash('message', 'Usuário <strong>' . e($name) . '</strong> e todos os seus registros foram removidos.');
+        } catch (\Throwable $e) {
+            report($e);
+            session()->flash('danger', 'Usuário <strong>' . e($name) . '</strong> não foi removido. Nenhum dado foi apagado. Erro: ' . e($e->getMessage()));
+        }
+
+        return redirect()->route('admin.usuarios.index');
+    }
+
+    public function autenticar($userId)
+    {
+        // Funcionalidade desativada.
+    }
+
+    private function regras(?User $user = null): array
+    {
+        return [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => [
+                'required', 'string', 'email', 'max:255',
+                Rule::unique('users', 'email')->ignore($user->id ?? null),
+            ],
+            'password' => $user
+                ? ['nullable', 'string', new Password(), 'confirmed']
+                : ['required', 'string', new Password(), 'confirmed'],
+        ];
+    }
+
+    private function atributos(): array
+    {
+        return [
+            'name' => 'nome',
+            'email' => 'e-mail',
+            'password' => 'senha',
+        ];
     }
 }

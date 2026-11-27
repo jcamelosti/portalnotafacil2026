@@ -89,6 +89,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca']],
                 )->name('empresa-nbs.update');
             });
 
+        Route::get('usuarios/{usuario}/excluir', [UsuariosController::class, 'confirmarExclusao'])->name('usuarios.excluir');
         Route::resource('usuarios', UsuariosController::class);
         Route::resource('empresa-cnaes', EmpresaCnaeController::class);
         Route::resource('empresa-atividades', EmpresaAtividadeController::class);

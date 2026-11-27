@@ -117,7 +117,7 @@ class Dps implements DpsInterface
     public function render(stdClass $std = null)
     {
         if ($this->dom->hasChildNodes()) {
-            $this->dom = new Dom('1.0', 'UTF-8');
+            $this->dom = new DomImprovedSafe('1.0', 'UTF-8');
             $this->dom->preserveWhiteSpace = false;
             $this->dom->formatOutput = false;
         }
@@ -586,12 +586,14 @@ class Dps implements DpsInterface
                 true
             );
         }
+        
         $this->dom->addChild(
             $cserv_inner,
             'xDescServ',
             $this->std->infdps->serv->cserv->xdescserv,
             true
         );
+
         if (isset($this->std->infdps->serv->cserv->cnbs)) {
             $this->dom->addChild(
                 $cserv_inner,
@@ -1423,7 +1425,7 @@ class Dps implements DpsInterface
     public function renderEvento(stdClass $std = null)
     {
         if ($this->dom->hasChildNodes()) {
-            $this->dom = new Dom('1.0', 'UTF-8');
+            $this->dom = new DomImprovedSafe('1.0', 'UTF-8');
             $this->dom->preserveWhiteSpace = false;
             $this->dom->formatOutput = false;
         }

@@ -31,14 +31,14 @@ class SolicitarCreditoController extends Controller
         $planosValores = PlanoVariacao::where('plano_id', 4)->first();
 
         if(Auth::user()->percentual_desconto > 0){
-            $planosValores->valor = $planosValores->valor - ($planosValores->valor * (Auth::user()->percentual_desconto / 100));
+            $planosValores->valor = round($planosValores->valor - ($planosValores->valor * (Auth::user()->percentual_desconto / 100)), 2);
 
         }
         
         for($i = 5; $i <= 20; $i++){
-            //if( ($i % 2) == 0){
+            if( ($i % 5) == 0){
                 $valores[number_format($i * $planosValores->valor, 2, ',', '.')] = $i . ' licenças - R$ ' . number_format($i * $planosValores->valor, 2, ',', '.');
-            //}
+            }
         }
         
         return view('solicitarcredito.solicitarcredito', compact('valores'));

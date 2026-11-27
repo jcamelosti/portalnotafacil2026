@@ -23,28 +23,27 @@ class ControleAcessoMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        //return $next($request);
-        $response = $next($request);
-
-        if (!$this->auth->guest()) {
-            $chk1 = $request->user()->is_admin;
-            $chk2 = ($request->is('c/*') ? true : false);
-            $chk3 = $request->segment(1) =='c';
-
-            if($request->segment(2) === 'autenticar' && $request->is('a/*'))
-            {
-                return $response;
-            }
-
-            if ($chk1 == 0) {
-                if (!$chk2 && !$chk3) {
-                    return redirect()->guest('login');
-                }
-            }
-            
-            return $response;
-        } else {
+        // As verificações precisam acontecer ANTES de $next($request):
+        // caso contrário a ação (ex.: exclusão) é executada e só depois redirecionada.
+        if ($this->auth->guest()) {
             return redirect()->guest('login');
         }
+
+        $chk1 = $request->user()->is_admin;
+        $chk2 = ($request->is('c/*') ? true : false);
+        $chk3 = $request->segment(1) =='c';
+
+        if($request->segment(2) === 'autenticar' && $request->is('a/*'))
+        {
+            return $next($request);
+        }
+
+        if ($chk1 == 0) {
+            if (!$chk2 && !$chk3) {
+                return redirect()->guest('login');
+            }
+        }
+
+        return $next($request);
     }
 }

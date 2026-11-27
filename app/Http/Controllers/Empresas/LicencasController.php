@@ -83,13 +83,53 @@ class LicencasController extends Controller
 
         //calculo do desconto
         $desconto = Auth::user()->percentual_desconto ?? 0;
+        //$desconto = 0;
 
-        $variacaoPlanos->each(function ($variacao) use ($desconto) {
-            $variacao->valor = round(
-                $variacao->valor * (1 - ($desconto / 100)),
-                2
-            );
-        });
+        $valorBase = (float) $variacaoPlanos[0]->valor;
+        $valorReferencia = $valorBase * (1 - ($desconto / 100));
+
+        if ($valorReferencia != $valorBase) {
+
+            $variacaoPlanos->each(function ($variacao) use (
+                $valorBase,
+                $valorReferencia
+            ) {
+                // Mantém a proporção original entre os planos
+                $proporcao = (float) $variacao->valor / $valorBase;
+                
+                // Calcula o novo valor proporcional
+                $valorProporcional = $valorReferencia * $proporcao;
+                $variacao->valor = round($valorProporcional, 2);
+
+                // Meses inteiros da vigência (365 dias / 30 = 12,17 -> 12 meses)
+                $meses = max(1, (int) round($variacao->fator_vigencia / 30));
+                // Usa o mensal JÁ ARREDONDADO (o exibido ao cliente): 5,08131 -> 5,08
+                $mensalExibido = round($valorReferencia, 2);
+                $economia = round($mensalExibido * $meses - $variacao->valor, 2);
+
+                $variacao->texto = 'Economia de R$ ' . number_format($economia,2,',', '.') . ' em relação ao mensal.';
+                $variacao->economia = $economia;
+            });
+        }else{
+            $variacaoPlanos->each(function ($variacao) use (
+                $valorBase,
+                $valorReferencia
+            ) {
+                // Mantém a proporção original entre os planos
+                $proporcao = (float) $variacao->valor / $valorBase;
+                
+                // Calcula o novo valor proporcional
+                $valorProporcional = $valorReferencia * $proporcao;
+                $variacao->valor = round($valorProporcional, 2);
+
+                // Meses inteiros da vigência (365 dias / 30 = 12,17 -> 12 meses)
+                $meses = max(1, (int) round($variacao->fator_vigencia / 30));
+                $economia = round($valorReferencia * $meses - $variacao->valor, 2);
+
+                $variacao->texto = 'Economia de R$ ' . number_format($economia,2,',', '.') . ' em relação ao mensal.';
+                $variacao->economia = $economia;
+            });
+        }
 
         $cores = [
             0 => 'indigo',
@@ -121,11 +161,11 @@ class LicencasController extends Controller
             $valorPlano = $this->variacaoPlanoModel->find($planoId);
 
             //calculo desconto
-            $desconto = Auth::user()->percentual_desconto ?? 0;
+            /*$desconto = Auth::user()->percentual_desconto ?? 0;
             $valorPlano->valor = round(
                 $valorPlano->valor * (1 - ($desconto / 100)),
                 2
-            );
+            );*/
 
             $empresa = $this->empresaModel->find($empresaId);
             $l = $this->licenseModel

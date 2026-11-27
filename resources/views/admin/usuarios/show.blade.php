@@ -49,7 +49,20 @@
                     </div>
 
                     {{-- ESTATÍSTICAS --}}
-                    <div class="flex gap-6">
+                    <div class="flex items-center gap-6">
+
+                        <div class="flex gap-2">
+                            <a href="{{ route('admin.usuarios.edit', $user->id) }}"
+                               class="px-4 py-2 rounded-md bg-green-600 text-sm text-white hover:bg-green-500">
+                                Editar
+                            </a>
+                            @if($user->id !== auth()->id())
+                                <a href="{{ route('admin.usuarios.excluir', $user->id) }}"
+                                   class="px-4 py-2 rounded-md bg-red-600 text-sm text-white hover:bg-red-500">
+                                    Excluir
+                                </a>
+                            @endif
+                        </div>
 
                         <div class="text-center">
                             <div class="text-2xl font-bold text-blue-600">
