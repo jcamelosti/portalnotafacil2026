@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\CodTribMunCodTribNacController;
 use App\Http\Controllers\Admin\EmpresaAtividadeController;
 use App\Http\Controllers\Admin\EmpresaCnaeController;
@@ -28,6 +29,7 @@ Route::group(['middleware' => ['auth:sanctum', 'verified', 'controle.licenca']],
         Route::get('/', function () {
             return redirect()->route('admin.faturas.index');
         });
+        Route::get('dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('autenticar/usuario/{id}', [UsuariosController::class, 'autenticar'])->name('usuarios.autenticar');
         //Route::resource('photos', PhotoController::class);
         Route::resource('empresas', EmpresasController::class);
